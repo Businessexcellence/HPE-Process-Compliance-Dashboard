@@ -1847,10 +1847,9 @@ const DASHBOARD_DATA = {
     {Criticality: 'Non Critical', Opportunity_Count: 1467, Opportunity_Pass: 1433, Opportunity_Fail: 31, Opportunity_NA: 3, Accuracy: 97.89}
   ],
   capa_data: [
-    {id: 'CAPA-001', date: '2026-01-15', bot_action: 'Auto-reject duplicate application', undo_reason: 'False positive — same candidate different role', root_cause: 'Bot dedup logic too broad', corrective: 'Manual review of 47 affected candidates', preventive: 'Add role-level dedup flag to bot rules', owner: 'Jyoti Sarwan', target_date: '2026-02-05', close_date: '2026-01-28', status: 'Closed', aging: 13},
-    {id: 'CAPA-002', date: '2026-02-08', bot_action: 'Auto-populate target start date', undo_reason: 'Incorrect date format (MM/DD vs DD/MM)', root_cause: 'Date field format mismatch in source data', corrective: 'Manually corrected 53 records', preventive: 'Standardize date format in ATS integration', owner: 'Mahak Kaura', target_date: '2026-03-01', close_date: '2026-02-20', status: 'Closed', aging: 12},
-    {id: 'CAPA-003', date: '2026-03-12', bot_action: 'Auto-flag ERP Bonus eligibility', undo_reason: 'Incorrect rule applied for contract staff', root_cause: 'Bot rule not differentiated by employment type', corrective: 'Revert 6 flags, manual re-audit', preventive: 'Add employment type condition to ERP Bonus rule', owner: 'Mahak Kaura', target_date: '2026-04-01', close_date: null, status: 'Overdue', aging: 35},
-    {id: 'CAPA-004', date: '2026-04-02', bot_action: 'Auto-validate Source of Hire tagging', undo_reason: 'External agency incorrectly tagged as internal referral', root_cause: 'Source mapping table outdated', corrective: 'Re-audit 18 failed records', preventive: 'Quarterly refresh of source mapping table', owner: 'Guru Prasad Naik', target_date: '2026-05-15', close_date: null, status: 'In Progress', aging: 15}
+    {id: 'CAPA-001', date: '2026-05-06', bot_action: 'Offer revoked; hire reason updated; profile merged', undo_reason: 'Incorrect hire reason', root_cause: 'Resume screening gap', corrective: 'Merged candidate profile in WD; changed hire reason to Rehire from Contract Conversion.', preventive: 'Strengthen resume and pre-offer checks; cross-check prior records using phone/email before offer.', owner: 'Ranjana Rani', target_date: '2026-05-06', close_date: '2026-05-06', status: 'Closed', aging: 0},
+    {id: 'CAPA-1197539', date: '2026-05-12', bot_action: 'Relocation package updated as IET; revised offer released', undo_reason: 'Relocation package not updated', root_cause: 'Inadequate pre-offer checks', corrective: 'Updated relocation package as IET and released corrected offer in WD.', preventive: 'Use mandatory pre-offer checklist; add reviewer approval for internal moves; verify legal entity fields.', owner: 'Sunil Kumar Pooja', target_date: '2026-05-12', close_date: '2026-05-12', status: 'Closed', aging: 0},
+    {id: 'CAPA-1192202/1202869', date: '2026-05-10', bot_action: 'Start date updated in MIS', undo_reason: 'MIS SharePoint not updated', root_cause: 'MIS not updated with revised start date', corrective: 'Updated MIS start date and processed candidate to RFH.', preventive: 'Verify start date before RFH against latest addendum; update MIS immediately; run OBS refresher.', owner: 'Malvika and Ashwini Miniyar', target_date: '2026-05-10', close_date: '2026-05-10', status: 'Closed', aging: 0}
   ]
 };
 
@@ -2818,7 +2817,7 @@ function parseCSVToCapaRows(text) {
   const lines = text.split(CR).join('').split(LF).filter(l => l.trim());
   if (lines.length < 2) throw new Error('File needs at least 1 header row + 1 data row.');
 
-  // Full RFC-4180 parser handles quoted commas and escaped quotes
+  /* ── RFC-4180 parser (handles quoted fields with commas, doubled-quote escapes) ── */
   function splitCSVLine(line) {
     const result = [];
     let cur = '', inQ = false, i = 0;
@@ -2835,48 +2834,81 @@ function parseCSVToCapaRows(text) {
     return result;
   }
 
-  // Normalize: lowercase, trim, collapse spaces/dashes/slashes to underscore
+  /* ── Normalize header: lowercase, separators→underscore, strip noise ── */
   function normH(h) {
-    // Normalize header: lowercase, replace whitespace/separators with underscore, strip rest
     return h.replace(/^"|"$/g,'').trim().toLowerCase()
       .replace(/[ \t\-\/\(\)]+/g,'_').replace(/[^a-z0-9_]/g,'').replace(/_+/g,'_').replace(/^_|_$/g,'');
   }
 
-  const rawHdrs = splitCSVLine(lines[0]);
-  const hdrs = rawHdrs.map(normH);
+  /* ── Parse natural-language dates like "6 May 2026", "12 May 2026" ── */
+  function parseDate(raw) {
+    if (!raw) return '';
+    raw = raw.trim();
+    if (!raw) return '';
+    var D = '[0-9]';
+    // ISO YYYY-MM-DD pass through
+    if (new RegExp('^'+D+'{4}-'+D+'{2}-'+D+'{2}$').test(raw)) return raw;
+    // DD/MM/YYYY or MM/DD/YYYY  (use RegExp constructor to avoid / delimiter issues)
+    var slashM = raw.match(new RegExp('^('+D+'{1,2})\/('+D+'{1,2})\/('+D+'{4})$'));
+    if (slashM) {
+      var a=slashM[1], b=slashM[2], y=slashM[3];
+      if (parseInt(a) > 12) return y+'-'+b.padStart(2,'0')+'-'+a.padStart(2,'0');
+      return y+'-'+a.padStart(2,'0')+'-'+b.padStart(2,'0');
+    }
+    // "D Mon YYYY"  e.g. "6 May 2026" or "12 May 2026"
+    var MONTHS = {jan:'01',feb:'02',mar:'03',apr:'04',may:'05',jun:'06',
+                  jul:'07',aug:'08',sep:'09',oct:'10',nov:'11',dec:'12'};
+    var natM = raw.match(new RegExp('^('+D+'{1,2})[ \t]+([A-Za-z]+)[ \t]+('+D+'{4})$'));
+    if (natM) {
+      var mo = MONTHS[natM[2].toLowerCase().slice(0,3)];
+      if (mo) return natM[3]+'-'+mo+'-'+natM[1].padStart(2,'0');
+    }
+    // "Mon D, YYYY"
+    var natM2 = raw.match(new RegExp('^([A-Za-z]+)[ \t]+('+D+'{1,2}),?[ \t]+('+D+'{4})$'));
+    if (natM2) {
+      var mo2 = MONTHS[natM2[1].toLowerCase().slice(0,3)];
+      if (mo2) return natM2[3]+'-'+mo2+'-'+natM2[2].padStart(2,'0');
+    }
+    return raw;
+  }
 
-  // Find best matching column index using keywords — partial substring match
+  const rawHdrs = splitCSVLine(lines[0]);
+  const hdrs    = rawHdrs.map(normH);
+
+  /* ── Fuzzy column finder ── */
   function findCol(keywords) {
+    // exact match first
     for (const kw of keywords) {
-      let idx = hdrs.indexOf(kw);
+      const idx = hdrs.indexOf(kw);
       if (idx >= 0) return idx;
     }
-    // Partial match: header contains keyword OR keyword contains header
+    // substring match
     for (const kw of keywords) {
-      let idx = hdrs.findIndex(h => h.length > 2 && (h.includes(kw) || kw.includes(h)));
+      const idx = hdrs.findIndex(h => h.length > 1 && (h.includes(kw) || kw.includes(h)));
       if (idx >= 0) return idx;
     }
     return -1;
   }
 
   const ci = {
+    capa_id:     findCol(['capa_id','id','capa_id_number','capaid']),
     date:        findCol(['date','undo_date','event_date','open_date','capa_date','raised_date']),
     bot_action:  findCol(['bot_action','bot_action_taken','botaction','action','bot_move','bot']),
     undo_reason: findCol(['undo_reason','reason_for_undo','reason','undo_rationale','rationale','undo']),
-    root_cause:  findCol(['root_cause','root_cause_category','rootcause','cause','root','root_cause_analysis']),
+    root_cause:  findCol(['root_cause','root_cause_category','rootcause','cause','root']),
     corrective:  findCol(['corrective','corrective_action','corrective_measure','fix','correction']),
     preventive:  findCol(['preventive','preventive_action','preventive_measure','prevention','prevent']),
     owner:       findCol(['owner','responsible','assigned_to','assignee','capa_owner','raised_by','person']),
     target_date: findCol(['target_date','target_close_date','due_date','target','deadline','planned_close']),
-    close_date:  findCol(['close_date','actual_close_date','closed_date','actual_close','closed','completion_date']),
+    close_date:  findCol(['close_date','actual_close','actual_close_date','closed_date','actual_close_date','closed','completion_date']),
     status:      findCol(['status','capa_status','state','capa_state','resolution_status'])
   };
 
-  // Positional fallback if NO columns matched (bare CSV with no headers)
+  // Positional fallback if nothing matched
   const matched = Object.values(ci).filter(v => v >= 0).length;
   if (matched === 0 && rawHdrs.length >= 2) {
-    const order = ['date','bot_action','undo_reason','root_cause','corrective','preventive','owner','target_date','close_date','status'];
-    order.forEach((k,i) => { ci[k] = i < rawHdrs.length ? i : -1; });
+    ['date','bot_action','undo_reason','root_cause','corrective','preventive','owner','target_date','close_date','status']
+      .forEach((k, i) => { ci[k] = i < rawHdrs.length ? i : -1; });
   }
 
   function getVal(cols, key) {
@@ -2885,31 +2917,39 @@ function parseCSVToCapaRows(text) {
     return cols[idx].replace(/^"|"$/g,'').trim();
   }
 
-  const startId = 0; // IDs renumbered from 1 when committed
   return lines.slice(1)
     .map((line, i) => {
       if (!line.trim()) return null;
       const cols = splitCSVLine(line);
-      const status = normalizeCapaStatus(getVal(cols,'status'));
-      const aging  = computeAging(getVal(cols,'date'), getVal(cols,'close_date'), status);
+
+      // Preserve original CAPA ID if column exists, else auto-generate
+      const rawId = getVal(cols, 'capa_id');
+      const id = rawId ? rawId.replace(/[ \t]+/g, '') : ('CAPA-' + String(i+1).padStart(3,'0'));
+
+      const date        = parseDate(getVal(cols,'date'));
+      const target_date = parseDate(getVal(cols,'target_date'));
+      const close_raw   = getVal(cols,'close_date');
+      const close_date  = close_raw ? parseDate(close_raw) : null;
+
+      // Infer status: if no Status column but Actual Close is filled → Closed
+      const statusRaw = getVal(cols,'status');
+      const status = statusRaw ? normalizeCapaStatus(statusRaw)
+                               : (close_date ? 'Closed' : 'In Progress');
+      const aging = computeAging(date, close_date, status);
+
       return {
-        id:          'CAPA-' + String(startId + i + 1).padStart(3,'0'),
-        date:        getVal(cols,'date'),
+        id, date,
         bot_action:  getVal(cols,'bot_action'),
         undo_reason: getVal(cols,'undo_reason'),
         root_cause:  getVal(cols,'root_cause'),
         corrective:  getVal(cols,'corrective'),
         preventive:  getVal(cols,'preventive'),
         owner:       getVal(cols,'owner'),
-        target_date: getVal(cols,'target_date'),
-        close_date:  getVal(cols,'close_date') || null,
-        status,
-        aging
+        target_date, close_date, status, aging
       };
     })
-    .filter(r => r && (r.date || r.bot_action || r.undo_reason || r.owner || r.root_cause));
+    .filter(r => r && (r.date || r.bot_action || r.undo_reason || r.owner || r.root_cause || r.id));
 }
-
 function normalizeCapaStatus(s) {
   if (!s) return 'In Progress';
   const sl = s.toLowerCase();
