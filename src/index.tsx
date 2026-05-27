@@ -550,6 +550,125 @@ function getDashboardHTML(): string {
     .progress-bar.red { background: linear-gradient(90deg, #a03030, var(--hpe-red)); }
     
     /* ========== CAPA ========== */
+    /* ---- CAPA Upload Modal ---- */
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(26,37,50,0.65); z-index: 500;
+      align-items: center; justify-content: center;
+      padding: 16px; backdrop-filter: blur(3px);
+    }
+    .modal-overlay.open { display: flex; }
+    .modal-box {
+      background: white; border-radius: 16px;
+      box-shadow: 0 24px 60px rgba(0,0,0,0.22);
+      width: 100%; max-width: 820px; max-height: 92vh;
+      overflow-y: auto; animation: modalIn 0.25s ease;
+    }
+    @keyframes modalIn {
+      from { opacity:0; transform: translateY(-20px) scale(0.97); }
+      to   { opacity:1; transform: translateY(0) scale(1); }
+    }
+    .modal-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 24px 18px; border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; background: white;
+      border-radius: 16px 16px 0 0; z-index: 1;
+    }
+    .modal-title { font-size: 17px; font-weight: 700; color: var(--hpe-dark); display: flex; align-items: center; gap: 10px; }
+    .modal-close {
+      width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border);
+      background: white; cursor: pointer; display: flex; align-items: center;
+      justify-content: center; font-size: 16px; color: var(--text-muted); transition: all 0.15s;
+    }
+    .modal-close:hover { background: #fceaea; color: var(--hpe-red); border-color: var(--hpe-red); }
+    .modal-body { padding: 24px; }
+    .modal-tabs {
+      display: flex; gap: 4px; margin-bottom: 22px;
+      background: #f4f6f9; padding: 4px; border-radius: 10px;
+    }
+    .modal-tab {
+      flex: 1; padding: 8px 14px; border: none; border-radius: 7px;
+      background: transparent; font-size: 13px; font-weight: 500;
+      cursor: pointer; font-family: 'Inter', sans-serif; color: var(--text-muted);
+      transition: all 0.15s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .modal-tab.active { background: white; color: var(--hpe-green); font-weight: 600; box-shadow: 0 1px 6px rgba(0,0,0,0.1); }
+    .modal-panel { display: none; }
+    .modal-panel.active { display: block; }
+    .modal-drop {
+      border: 2px dashed var(--hpe-green); border-radius: 12px; padding: 36px 24px;
+      text-align: center; background: var(--hpe-green-light); cursor: pointer; transition: all 0.2s; margin-bottom: 16px;
+    }
+    .modal-drop:hover, .modal-drop.dragover { background: rgba(1,169,130,0.14); }
+    .modal-drop-icon { font-size: 40px; color: var(--hpe-green); margin-bottom: 12px; }
+    .modal-drop-title { font-size: 15px; font-weight: 700; color: var(--hpe-dark); margin-bottom: 6px; }
+    .modal-drop-sub { font-size: 12px; color: var(--text-muted); line-height: 1.7; }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+    .form-grid-full { grid-column: 1 / -1; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    .form-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.6px; color: var(--text-muted); }
+    .form-label .req { color: var(--hpe-red); }
+    .form-input, .form-select, .form-textarea {
+      padding: 9px 12px; border: 1px solid var(--border); border-radius: 8px;
+      font-size: 13px; font-family: 'Inter', sans-serif; color: var(--text-primary);
+      background: white; transition: border-color 0.15s, box-shadow 0.15s; outline: none;
+    }
+    .form-input:focus, .form-select:focus, .form-textarea:focus {
+      border-color: var(--hpe-green); box-shadow: 0 0 0 3px rgba(1,169,130,0.12);
+    }
+    .form-textarea { resize: vertical; min-height: 60px; }
+    .modal-footer {
+      padding: 16px 24px 20px; border-top: 1px solid var(--border);
+      display: flex; justify-content: flex-end; gap: 10px;
+    }
+    .btn-cancel {
+      padding: 9px 18px; border: 1px solid var(--border); background: white;
+      border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+      font-family: 'Inter', sans-serif; color: var(--text-secondary); transition: all 0.15s;
+    }
+    .btn-cancel:hover { background: #f4f6f9; }
+    .btn-primary {
+      padding: 9px 20px; border: none; background: var(--hpe-green); color: white;
+      border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'Inter', sans-serif; display: flex; align-items: center; gap: 7px; transition: all 0.15s;
+    }
+    .btn-primary:hover { background: var(--hpe-green-dark); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .parse-preview {
+      background: #f8fafc; border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 16px; margin-top: 12px; font-size: 12px; color: var(--text-secondary); display: none;
+    }
+    .parse-preview.show { display: block; }
+    .parse-row { display: flex; align-items: center; gap: 8px; padding: 4px 0; }
+    .parse-row i { width: 16px; text-align: center; }
+    .toast {
+      position: fixed; bottom: 28px; right: 28px; background: var(--hpe-dark); color: white;
+      padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500;
+      z-index: 9999; box-shadow: 0 6px 24px rgba(0,0,0,0.2); display: flex; align-items: center;
+      gap: 10px; transform: translateY(80px); opacity: 0;
+      transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); max-width: 380px;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { border-left: 4px solid var(--hpe-green); }
+    .toast.error   { border-left: 4px solid var(--hpe-red); }
+    .toast.info    { border-left: 4px solid var(--hpe-blue); }
+    .btn-upload-capa {
+      background: linear-gradient(135deg, var(--hpe-green), #00c49a); color: white;
+      border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      font-family: 'Inter', sans-serif; transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(1,169,130,0.3);
+    }
+    .btn-upload-capa:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(1,169,130,0.4); }
+    .btn-export-capa {
+      background: white; color: var(--hpe-slate); border: 1px solid var(--border);
+      padding: 9px 16px; border-radius: 8px; font-size: 13px; font-weight: 500;
+      cursor: pointer; display: flex; align-items: center; gap: 7px;
+      font-family: 'Inter', sans-serif; transition: all 0.15s;
+    }
+    .btn-export-capa:hover { background: #f4f6f9; }
+    .capa-action-bar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .capa-count-badge { background: var(--hpe-green-light); color: var(--hpe-green); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; }
     .status-pill {
       display: inline-flex;
       align-items: center;
@@ -1193,43 +1312,52 @@ function getDashboardHTML(): string {
         </div>
         <div class="section-subtitle">Complete audit trail for bot-reversed actions with resolution tracking</div>
       </div>
-      <div class="period-filter">
-        <button class="filter-btn" onclick="filterCapa('all', this)">All Status</button>
-        <button class="filter-btn" onclick="filterCapa('open', this)">🔴 Open</button>
-        <button class="filter-btn" onclick="filterCapa('inprogress', this)">🟡 In Progress</button>
-        <button class="filter-btn" onclick="filterCapa('closed', this)">🟢 Closed</button>
+      <div class="capa-action-bar">
+        <div class="period-filter">
+          <button class="filter-btn active" onclick="filterCapa('all',this)">All</button>
+          <button class="filter-btn" onclick="filterCapa('open',this)">🔴 Open/Overdue</button>
+          <button class="filter-btn" onclick="filterCapa('inprogress',this)">🟡 In Progress</button>
+          <button class="filter-btn" onclick="filterCapa('closed',this)">🟢 Closed</button>
+        </div>
+        <button class="btn-upload-capa" onclick="openCAPAModal()">
+          <i class="fas fa-cloud-upload-alt"></i> Upload Bot Undo Data
+        </button>
+        <button class="btn-export-capa" onclick="exportCAPACSV()">
+          <i class="fas fa-file-csv"></i> Export CSV
+        </button>
+        <span class="capa-count-badge" id="capaCountBadge">4 records</span>
       </div>
     </div>
 
-    <!-- CAPA KPIs -->
+    <!-- CAPA KPIs — dynamic -->
     <div class="kpi-grid-4">
       <div class="kpi-card green">
         <div class="kpi-icon green"><i class="fas fa-check-double"></i></div>
         <div class="kpi-label">CAPA Closure Rate</div>
-        <div class="kpi-value">50.0%</div>
-        <div class="kpi-delta delta-neutral"><i class="fas fa-minus"></i> 2 of 4 closed</div>
+        <div class="kpi-value" id="capaKpiClosureRate">50.0%</div>
+        <div class="kpi-delta delta-neutral" id="capaKpiClosureSub"><i class="fas fa-minus"></i> 2 of 4 closed</div>
         <div class="kpi-sub">Target: 80%</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-icon orange"><i class="fas fa-clock"></i></div>
         <div class="kpi-label">Avg Days to Close</div>
-        <div class="kpi-value">14</div>
-        <div class="kpi-delta delta-up"><i class="fas fa-arrow-down"></i> -3 days vs target</div>
+        <div class="kpi-value" id="capaKpiAvgDays">14</div>
+        <div class="kpi-delta delta-up" id="capaKpiAvgDaysSub"><i class="fas fa-arrow-down"></i> Within target</div>
         <div class="kpi-sub">Target: ≤17 days</div>
       </div>
       <div class="kpi-card red">
         <div class="kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
         <div class="kpi-label">Overdue CAPAs</div>
-        <div class="kpi-value">1</div>
-        <div class="kpi-delta delta-down"><i class="fas fa-arrow-up"></i> Needs attention</div>
-        <div class="kpi-sub">CAPA-003 overdue</div>
+        <div class="kpi-value" id="capaKpiOverdue">1</div>
+        <div class="kpi-delta delta-down" id="capaKpiOverdueSub"><i class="fas fa-arrow-up"></i> Needs attention</div>
+        <div class="kpi-sub" id="capaKpiOverdueDetail">CAPA-003 overdue</div>
       </div>
       <div class="kpi-card blue">
         <div class="kpi-icon blue"><i class="fas fa-robot"></i></div>
-        <div class="kpi-label">Bot Reliability Score</div>
-        <div class="kpi-value">96.2%</div>
-        <div class="kpi-delta delta-up"><i class="fas fa-arrow-up"></i> +0.8% vs last FY</div>
-        <div class="kpi-sub">4 undo moves tracked</div>
+        <div class="kpi-label">Total Undo Moves</div>
+        <div class="kpi-value" id="capaKpiTotal">4</div>
+        <div class="kpi-delta delta-neutral" id="capaKpiTotalSub"><i class="fas fa-list"></i> Loaded records</div>
+        <div class="kpi-sub" id="capaKpiTotalDetail">Live from uploaded data</div>
       </div>
     </div>
 
@@ -1253,8 +1381,16 @@ function getDashboardHTML(): string {
 
     <!-- CAPA Log Table -->
     <div class="card card-full">
-      <div class="card-title"><i class="fas fa-list-alt"></i> CAPA Log — Bot Undo Moves Register</div>
-      <div class="card-subtitle">Complete corrective and preventive action audit trail</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <div class="card-title" style="margin-bottom:0"><i class="fas fa-list-alt"></i> CAPA Log — Bot Undo Moves Register</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:12px;color:var(--text-muted)">Last updated: <strong id="capaLastUpdated">—</strong></span>
+          <button class="btn-upload-capa" style="padding:6px 13px;font-size:12px" onclick="openCAPAModal()">
+            <i class="fas fa-plus"></i> Add / Upload Records
+          </button>
+        </div>
+      </div>
+      <div class="card-subtitle">Live CAPA register — upload your own Bot Undo file to instantly refresh all data &amp; charts</div>
       <div class="table-container" style="margin-top:16px">
         <table>
           <thead>
@@ -1278,8 +1414,8 @@ function getDashboardHTML(): string {
       </div>
     </div>
 
-    <!-- AI CAPA Insights -->
-    <div class="ai-insights" style="margin-top:24px">
+    <!-- AI CAPA Insights (dynamic) -->
+    <div class="ai-insights" style="margin-top:24px" id="capaAIPanel">
       <div class="ai-insights-header">
         <div class="ai-badge"><i class="fas fa-robot"></i> AI CAPA ANALYSIS</div>
         <div class="ai-insights-title">Pattern Recognition — Bot Undo Root Causes</div>
@@ -1296,6 +1432,153 @@ function getDashboardHTML(): string {
       </div>
     </div>
   </div>
+
+  <!-- ============================================================ -->
+  <!-- CAPA UPLOAD MODAL                                            -->
+  <!-- ============================================================ -->
+  <div class="modal-overlay" id="capaModal" onclick="handleModalOverlayClick(event)">
+    <div class="modal-box" id="capaModalBox">
+      <div class="modal-header">
+        <div class="modal-title">
+          <div style="width:32px;height:32px;background:var(--hpe-green-light);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--hpe-green)">
+            <i class="fas fa-robot"></i>
+          </div>
+          Upload Bot Undo Moves &amp; CAPA Data
+        </div>
+        <button class="modal-close" onclick="closeCapaModal()"><i class="fas fa-times"></i></button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-tabs">
+          <button class="modal-tab active" id="mtab-file" onclick="switchModalTab('file')">
+            <i class="fas fa-file-upload"></i> Upload File (CSV)
+          </button>
+          <button class="modal-tab" id="mtab-manual" onclick="switchModalTab('manual')">
+            <i class="fas fa-keyboard"></i> Enter Manually
+          </button>
+          <button class="modal-tab" id="mtab-template" onclick="switchModalTab('template')">
+            <i class="fas fa-download"></i> Download Template
+          </button>
+        </div>
+
+        <!-- Panel: File Upload -->
+        <div class="modal-panel active" id="mpanel-file">
+          <div class="modal-drop" id="modalDropZone"
+               onclick="document.getElementById('capaFileInput').click()"
+               ondragover="event.preventDefault();this.classList.add('dragover')"
+               ondragleave="this.classList.remove('dragover')"
+               ondrop="handleCapaFileDrop(event)">
+            <input type="file" id="capaFileInput" accept=".csv" style="display:none" onchange="handleCapaFileSelect(event)">
+            <div class="modal-drop-icon"><i class="fas fa-cloud-upload-alt"></i></div>
+            <div class="modal-drop-title">Drop your CAPA / Bot Undo CSV file here</div>
+            <div class="modal-drop-sub">Supports .CSV format — Max 20 MB<br>
+              Required columns: <code style="background:#d8f5ee;padding:2px 5px;border-radius:3px;color:var(--hpe-green-dark)">Date, Bot Action, Undo Reason, Root Cause, Corrective Action, Preventive Action, Owner, Target Date, Close Date, Status</code>
+            </div>
+          </div>
+          <div class="parse-preview" id="capaParsePreview"></div>
+          <div id="capaPreviewTable" style="margin-top:12px"></div>
+          <div style="display:flex;gap:10px;margin-top:14px;justify-content:flex-end">
+            <button class="btn-cancel" onclick="clearCapaUpload()"><i class="fas fa-trash-alt"></i> Clear</button>
+            <button class="btn-primary" id="btnLoadCapaFile" onclick="commitCapaFileData()" disabled>
+              <i class="fas fa-sync-alt"></i> Load &amp; Refresh Dashboard
+            </button>
+          </div>
+        </div>
+
+        <!-- Panel: Manual Entry -->
+        <div class="modal-panel" id="mpanel-manual">
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px;background:#f8fafc;padding:10px 14px;border-radius:8px;border:1px solid var(--border)">
+            <i class="fas fa-info-circle" style="color:var(--hpe-blue);margin-right:6px"></i>
+            Fill in the fields below to add a single Bot Undo / CAPA record. <span style="color:var(--hpe-red)">*</span> fields are required.
+          </div>
+          <div class="form-grid">
+            <div class="form-group">
+              <label class="form-label">Date <span class="req">*</span></label>
+              <input type="date" class="form-input" id="mf_date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Owner <span class="req">*</span></label>
+              <input type="text" class="form-input" id="mf_owner" placeholder="e.g. Mahak Kaura">
+            </div>
+            <div class="form-group form-grid-full">
+              <label class="form-label">Bot Action <span class="req">*</span></label>
+              <input type="text" class="form-input" id="mf_bot_action" placeholder="e.g. Auto-populate target start date">
+            </div>
+            <div class="form-group form-grid-full">
+              <label class="form-label">Undo Reason <span class="req">*</span></label>
+              <textarea class="form-textarea" id="mf_undo_reason" placeholder="Why was the bot action reversed?"></textarea>
+            </div>
+            <div class="form-group form-grid-full">
+              <label class="form-label">Root Cause <span class="req">*</span></label>
+              <textarea class="form-textarea" id="mf_root_cause" placeholder="Underlying root cause of the bot error"></textarea>
+            </div>
+            <div class="form-group form-grid-full">
+              <label class="form-label">Corrective Action <span class="req">*</span></label>
+              <textarea class="form-textarea" id="mf_corrective" placeholder="Action taken to fix the immediate issue"></textarea>
+            </div>
+            <div class="form-group form-grid-full">
+              <label class="form-label">Preventive Action <span class="req">*</span></label>
+              <textarea class="form-textarea" id="mf_preventive" placeholder="Long-term action to prevent recurrence"></textarea>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Target Close Date <span class="req">*</span></label>
+              <input type="date" class="form-input" id="mf_target_date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Actual Close Date</label>
+              <input type="date" class="form-input" id="mf_close_date">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Status <span class="req">*</span></label>
+              <select class="form-select" id="mf_status">
+                <option value="">— Select —</option>
+                <option value="In Progress">🟡 In Progress</option>
+                <option value="Closed">🟢 Closed</option>
+                <option value="Overdue">🔴 Overdue</option>
+                <option value="Under Review">🔵 Under Review</option>
+              </select>
+            </div>
+          </div>
+          <div id="manualFormError" style="color:var(--hpe-red);font-size:12px;margin-top:4px;display:none"></div>
+        </div>
+
+        <!-- Panel: Download Template -->
+        <div class="modal-panel" id="mpanel-template">
+          <div style="text-align:center;padding:24px 0">
+            <div style="font-size:48px;color:var(--hpe-green);margin-bottom:16px"><i class="fas fa-file-csv"></i></div>
+            <div style="font-size:16px;font-weight:700;color:var(--hpe-dark);margin-bottom:8px">CAPA / Bot Undo CSV Template</div>
+            <div style="font-size:13px;color:var(--text-muted);margin-bottom:24px">Download the template, fill it in, then re-upload via the <em>Upload File</em> tab to refresh the entire dashboard live.</div>
+            <button class="btn-primary" style="margin:0 auto" onclick="downloadCapaTemplate()">
+              <i class="fas fa-download"></i> Download CSV Template
+            </button>
+            <div style="margin-top:28px;text-align:left;background:#f8fafc;border-radius:10px;padding:16px 20px;border:1px solid var(--border)">
+              <div style="font-size:13px;font-weight:600;color:var(--hpe-dark);margin-bottom:12px"><i class="fas fa-columns" style="color:var(--hpe-green);margin-right:6px"></i>Required Column Reference</div>
+              <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:12px;color:var(--text-secondary)">
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Date</strong> — Bot undo event date (YYYY-MM-DD)</div>
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Bot Action</strong> — What the bot did</div>
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Undo Reason</strong> — Why it was reversed</div>
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Root Cause</strong> — Underlying cause</div>
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Corrective Action</strong></div>
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Preventive Action</strong></div>
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Owner</strong> — Responsible person</div>
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Target Date</strong> (YYYY-MM-DD)</div>
+                <div><span style="color:var(--hpe-slate)">○</span> <strong>Close Date</strong> (optional)</div>
+                <div><span style="color:var(--hpe-green)">✓</span> <strong>Status</strong> — Closed / In Progress / Overdue / Under Review</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-cancel" onclick="closeCapaModal()">Cancel</button>
+        <button class="btn-primary" id="btnModalSubmit" onclick="submitManualCapaRecord()">
+          <i class="fas fa-sync-alt"></i> <span id="btnModalSubmitLabel">Add Record &amp; Refresh</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div class="toast" id="toastEl"></div>
 
   <!-- TAB 5: AI INSIGHTS -->
   <div class="tab-content" id="tab-insights">
@@ -2219,79 +2502,522 @@ function buildDeltaTable() {
 }
 
 // ==================== CAPA CHARTS ====================
+let capaFilterState = 'all';
+
 function initCAPACharts() {
-  // Status donut
-  destroyChart('capaStatusChart');
-  const csCtx = document.getElementById('capaStatusChart').getContext('2d');
-  charts['capaStatusChart'] = new Chart(csCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ['🟢 Closed', '🟡 In Progress', '🔴 Overdue'],
-      datasets: [{
-        data: [2, 1, 1],
-        backgroundColor: ['#01A982', '#FFC627', '#C54E4B'],
-        borderWidth: 3,
-        borderColor: 'white'
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: {font:{size:12}, padding:14, boxWidth:14} } },
-      cutout: '60%'
-    }
-  });
-  
-  // Root cause bar
-  destroyChart('capaRootCauseChart');
-  const crCtx = document.getElementById('capaRootCauseChart').getContext('2d');
-  charts['capaRootCauseChart'] = new Chart(crCtx, {
-    type: 'bar',
-    data: {
-      labels: ['Bot logic too broad', 'Date format mismatch', 'Employment type rule', 'Source mapping outdated'],
-      datasets: [{
-        label: 'CAPA Count',
-        data: [1, 1, 1, 1],
-        backgroundColor: ['#C54E4B', '#FF8300', '#FFC627', '#0D5DBF'],
-        borderRadius: 6
-      }]
-    },
-    options: {
-      indexAxis: 'y',
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: {display:false} },
-      scales: {
-        x: { ticks: {stepSize:1, font:{size:11}} },
-        y: { ticks: {font:{size:11}} }
-      }
-    }
-  });
-  
-  // CAPA log table
-  buildCAPATable();
+  refreshCAPADashboard();
 }
 
-function buildCAPATable() {
+function refreshCAPADashboard() {
+  const data = DASHBOARD_DATA.capa_data;
+  recomputeCAPAKPIs(data);
+  rebuildCAPACharts(data);
+  buildCAPATable(capaFilterState);
+  rebuildCAPAAIInsights(data);
+  // Update nav badge
+  const badge = document.querySelector('.nav-tab .tab-badge');
+  if (badge) badge.textContent = data.length;
+  const countBadge = document.getElementById('capaCountBadge');
+  if (countBadge) countBadge.textContent = data.length + ' records';
+  const ts = document.getElementById('capaLastUpdated');
+  if (ts) ts.textContent = new Date().toLocaleString();
+}
+
+function recomputeCAPAKPIs(data) {
+  const total   = data.length;
+  const closed  = data.filter(c => c.status === 'Closed').length;
+  const overdue = data.filter(c => c.status === 'Overdue').length;
+  const inprog  = data.filter(c => c.status === 'In Progress').length;
+  const review  = data.filter(c => c.status === 'Under Review').length;
+  const closureRate = total > 0 ? ((closed / total) * 100).toFixed(1) : '0.0';
+  const closedAging = data.filter(c => c.status === 'Closed' && c.aging > 0).map(c => c.aging);
+  const avgDays = closedAging.length > 0
+    ? Math.round(closedAging.reduce((s,v) => s+v, 0) / closedAging.length) : null;
+
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  const setHTML = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+
+  set('capaKpiClosureRate', closureRate + '%');
+  const crClass = parseFloat(closureRate) >= 80 ? 'kpi-delta delta-up' : 'kpi-delta delta-down';
+  const crIcon  = parseFloat(closureRate) >= 80 ? 'fa-check' : 'fa-minus';
+  const crEl = document.getElementById('capaKpiClosureSub');
+  if (crEl) { crEl.className = crClass; crEl.innerHTML = \`<i class="fas \${crIcon}"></i> \${closed} of \${total} closed\`; }
+
+  set('capaKpiAvgDays', avgDays !== null ? avgDays : '—');
+  const adOk = avgDays !== null && avgDays <= 17;
+  const adEl = document.getElementById('capaKpiAvgDaysSub');
+  if (adEl) {
+    adEl.className = 'kpi-delta ' + (adOk ? 'delta-up' : avgDays === null ? 'delta-neutral' : 'delta-down');
+    adEl.innerHTML = avgDays !== null
+      ? \`<i class="fas \${adOk ? 'fa-arrow-down' : 'fa-arrow-up'}"></i> \${adOk ? 'Within' : 'Exceeds'} 17-day target\`
+      : '<i class="fas fa-minus"></i> No closed records yet';
+  }
+
+  set('capaKpiOverdue', overdue);
+  const odEl = document.getElementById('capaKpiOverdueSub');
+  if (odEl) {
+    odEl.className = 'kpi-delta ' + (overdue > 0 ? 'delta-down' : 'delta-up');
+    odEl.innerHTML = overdue > 0
+      ? \`<i class="fas fa-arrow-up"></i> \${overdue} overdue — action needed\`
+      : '<i class="fas fa-check"></i> No overdue items';
+  }
+  const overdueIds = data.filter(c => c.status === 'Overdue').map(c => c.id).join(', ');
+  set('capaKpiOverdueDetail', overdueIds || 'All items on track');
+
+  set('capaKpiTotal', total);
+  const totEl = document.getElementById('capaKpiTotalSub');
+  if (totEl) totEl.innerHTML = \`<i class="fas fa-list"></i> \${closed} closed · \${inprog} in progress · \${overdue + review} open\`;
+  set('capaKpiTotalDetail', 'Live from uploaded data');
+}
+
+function rebuildCAPACharts(data) {
+  const closed  = data.filter(c => c.status === 'Closed').length;
+  const inprog  = data.filter(c => c.status === 'In Progress').length;
+  const overdue = data.filter(c => c.status === 'Overdue').length;
+  const review  = data.filter(c => c.status === 'Under Review').length;
+
+  destroyChart('capaStatusChart');
+  const csEl = document.getElementById('capaStatusChart');
+  if (csEl) {
+    charts['capaStatusChart'] = new Chart(csEl.getContext('2d'), {
+      type: 'doughnut',
+      data: {
+        labels: ['🟢 Closed', '🟡 In Progress', '🔴 Overdue', '🔵 Under Review'],
+        datasets: [{
+          data: [closed, inprog, overdue, review],
+          backgroundColor: ['#01A982', '#FFC627', '#C54E4B', '#0D5DBF'],
+          borderWidth: 3, borderColor: 'white'
+        }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {
+          legend: { position: 'bottom', labels: {font:{size:12}, padding:14, boxWidth:14} },
+          tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw } }
+        },
+        cutout: '60%'
+      }
+    });
+  }
+
+  const rcMap = {};
+  data.forEach(c => {
+    if (!c.root_cause) return;
+    const key = c.root_cause.length > 38 ? c.root_cause.slice(0,38) + '…' : c.root_cause;
+    rcMap[key] = (rcMap[key] || 0) + 1;
+  });
+  const rcLabels = Object.keys(rcMap);
+  const rcValues = rcLabels.map(k => rcMap[k]);
+  const rcColors = ['#C54E4B','#FF8300','#FFC627','#0D5DBF','#01A982','#6b7d8c','#4fc3a1','#9b59b6'];
+
+  destroyChart('capaRootCauseChart');
+  const crEl = document.getElementById('capaRootCauseChart');
+  if (crEl) {
+    charts['capaRootCauseChart'] = new Chart(crEl.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: rcLabels.length ? rcLabels : ['No data'],
+        datasets: [{
+          label: 'CAPA Count',
+          data: rcValues.length ? rcValues : [0],
+          backgroundColor: rcLabels.map((_, i) => rcColors[i % rcColors.length]),
+          borderRadius: 6
+        }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: {display:false} },
+        scales: {
+          x: { ticks: {stepSize:1, font:{size:11}}, title:{display:true, text:'Count', font:{size:10}} },
+          y: { ticks: {font:{size:11}} }
+        }
+      }
+    });
+  }
+}
+
+function buildCAPATable(filterStatus) {
+  capaFilterState = filterStatus || 'all';
   const tbody = document.getElementById('capaTableBody');
   if (!tbody) return;
-  tbody.innerHTML = DASHBOARD_DATA.capa_data.map(c => {
-    const statusClass = c.status === 'Closed' ? 'status-closed' : c.status === 'In Progress' ? 'status-inprogress' : 'status-open';
-    const statusIcon = c.status === 'Closed' ? '🟢' : c.status === 'In Progress' ? '🟡' : '🔴';
-    const agingColor = c.aging > 20 ? 'color:var(--hpe-red);font-weight:700' : c.aging > 10 ? 'color:var(--hpe-orange)' : 'color:var(--hpe-green)';
+  let rows = DASHBOARD_DATA.capa_data;
+  if (filterStatus === 'open')       rows = rows.filter(c => c.status === 'Overdue' || c.status === 'Under Review');
+  else if (filterStatus === 'inprogress') rows = rows.filter(c => c.status === 'In Progress');
+  else if (filterStatus === 'closed')     rows = rows.filter(c => c.status === 'Closed');
+
+  if (rows.length === 0) {
+    tbody.innerHTML = \`<tr><td colspan="12" style="text-align:center;padding:32px;color:var(--text-muted)">
+      <i class="fas fa-inbox" style="font-size:24px;display:block;margin-bottom:8px"></i>
+      No records match this filter</td></tr>\`;
+    return;
+  }
+  tbody.innerHTML = rows.map((c, idx) => {
+    const sClass = c.status === 'Closed' ? 'status-closed'
+      : c.status === 'In Progress' ? 'status-inprogress'
+      : c.status === 'Under Review' ? 'status-review' : 'status-open';
+    const sIcon = c.status === 'Closed' ? '🟢' : c.status === 'In Progress' ? '🟡' : c.status === 'Under Review' ? '🔵' : '🔴';
+    const aging = c.aging !== undefined && c.aging !== null ? c.aging : '—';
+    const agingStyle = typeof aging === 'number'
+      ? (aging > 20 ? 'color:var(--hpe-red);font-weight:700' : aging > 10 ? 'color:var(--hpe-orange)' : 'color:var(--hpe-green)') : '';
     return \`<tr>
-      <td><strong>\${c.id}</strong></td>
-      <td>\${c.date}</td>
-      <td style="max-width:140px;white-space:normal">\${c.bot_action}</td>
-      <td style="max-width:140px;white-space:normal">\${c.undo_reason}</td>
-      <td>\${c.root_cause}</td>
-      <td style="max-width:140px;white-space:normal">\${c.corrective}</td>
-      <td style="max-width:140px;white-space:normal">\${c.preventive}</td>
-      <td><strong>\${c.owner}</strong></td>
-      <td>\${c.target_date}</td>
-      <td>\${c.close_date || '<span style="color:var(--text-muted)">Pending</span>'}</td>
-      <td><span class="status-pill \${statusClass}">\${statusIcon} \${c.status}</span></td>
-      <td><span style="\${agingColor}">\${c.aging}d</span></td>
+      <td><strong>\${c.id || 'CAPA-' + String(idx+1).padStart(3,'0')}</strong></td>
+      <td style="white-space:nowrap">\${c.date || '—'}</td>
+      <td style="max-width:150px;white-space:normal">\${c.bot_action || '—'}</td>
+      <td style="max-width:150px;white-space:normal">\${c.undo_reason || '—'}</td>
+      <td style="max-width:150px;white-space:normal">\${c.root_cause || '—'}</td>
+      <td style="max-width:140px;white-space:normal">\${c.corrective || '—'}</td>
+      <td style="max-width:140px;white-space:normal">\${c.preventive || '—'}</td>
+      <td style="white-space:nowrap"><strong>\${c.owner || '—'}</strong></td>
+      <td style="white-space:nowrap">\${c.target_date || '—'}</td>
+      <td style="white-space:nowrap">\${c.close_date || '<span style="color:var(--text-muted)">Pending</span>'}</td>
+      <td><span class="status-pill \${sClass}">\${sIcon} \${c.status || '—'}</span></td>
+      <td><span style="\${agingStyle}">\${typeof aging === 'number' ? aging + 'd' : aging}</span></td>
     </tr>\`;
   }).join('');
+}
+
+function rebuildCAPAAIInsights(data) {
+  const panel = document.getElementById('capaAIPanel');
+  if (!panel) return;
+  const total   = data.length;
+  const overdue = data.filter(c => c.status === 'Overdue');
+  const closed  = data.filter(c => c.status === 'Closed').length;
+  const rcMap = {};
+  data.forEach(c => { if (c.root_cause) rcMap[c.root_cause] = (rcMap[c.root_cause] || 0) + 1; });
+  const topRC = Object.entries(rcMap).sort((a,b) => b[1]-a[1]);
+
+  let insights = '';
+  const recurring = topRC.filter(([,v]) => v > 1);
+  if (recurring.length > 0) {
+    const [rc, cnt] = recurring[0];
+    insights += \`<div class="insight-item alert">
+      <div class="insight-icon alert"><i class="fas fa-repeat"></i></div>
+      <div class="insight-text"><strong>Recurring Root Cause:</strong> "<em>\${rc}</em>" appears in <strong>\${cnt}</strong> CAPAs (\${Math.round(cnt/total*100)}% of total). Systemic bot-rules review recommended.</div>
+    </div>\`;
+  }
+  overdue.forEach(c => {
+    insights += \`<div class="insight-item warning">
+      <div class="insight-icon warning"><i class="fas fa-calendar-times"></i></div>
+      <div class="insight-text"><strong>Overdue — \${c.id}:</strong> Target was <strong>\${c.target_date}</strong>. Owner: <strong>\${c.owner}</strong>. Issue: <em>\${c.undo_reason}</em>. Recommend escalation within 48 hours.</div>
+    </div>\`;
+  });
+  if (closed === total && total > 0) {
+    insights += \`<div class="insight-item">
+      <div class="insight-icon green"><i class="fas fa-trophy"></i></div>
+      <div class="insight-text"><strong>All CAPAs Closed!</strong> 100% closure rate. Document lessons learned for future bot deployments.</div>
+    </div>\`;
+  }
+  if (total === 0) {
+    insights += \`<div class="insight-item info">
+      <div class="insight-icon info"><i class="fas fa-info-circle"></i></div>
+      <div class="insight-text"><strong>No CAPA data loaded.</strong> Upload your Bot Undo Moves file using the button above to see AI-generated insights.</div>
+    </div>\`;
+  }
+  if (!insights) {
+    insights = \`<div class="insight-item">
+      <div class="insight-icon green"><i class="fas fa-check-circle"></i></div>
+      <div class="insight-text"><strong>No Recurring Issues Detected.</strong> All \${total} CAPA root causes are unique. Continue monitoring for emerging patterns.</div>
+    </div>\`;
+  }
+
+  // Rebuild the panel HTML fully
+  panel.innerHTML = \`
+    <div class="ai-insights-header">
+      <div class="ai-badge"><i class="fas fa-robot"></i> AI CAPA ANALYSIS</div>
+      <div class="ai-insights-title">Pattern Recognition — Bot Undo Root Causes</div>
+    </div>
+    <div class="insight-list">\${insights}</div>\`;
+}
+
+// ==================== CAPA MODAL ====================
+let capaFileParsedData = null;
+let currentModalTab = 'file';
+
+function openCAPAModal() {
+  document.getElementById('capaModal').classList.add('open');
+  switchModalTab('file');
+  clearCapaUpload();
+  resetManualForm();
+}
+
+function closeCapaModal() {
+  document.getElementById('capaModal').classList.remove('open');
+}
+
+function handleModalOverlayClick(e) {
+  if (e.target.id === 'capaModal') closeCapaModal();
+}
+
+function switchModalTab(tab) {
+  currentModalTab = tab;
+  ['file','manual','template'].forEach(t => {
+    document.getElementById('mtab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('mpanel-' + t).classList.toggle('active', t === tab);
+  });
+  const lbl = document.getElementById('btnModalSubmitLabel');
+  const btn = document.getElementById('btnModalSubmit');
+  if (tab === 'template') {
+    if (btn) btn.style.display = 'none'; return;
+  }
+  if (btn) btn.style.display = '';
+  if (tab === 'file') {
+    if (lbl) lbl.innerHTML = 'Load &amp; Refresh Dashboard';
+    if (btn) { btn.onclick = commitCapaFileData; }
+  } else {
+    if (lbl) lbl.innerHTML = 'Add Record &amp; Refresh';
+    if (btn) { btn.onclick = submitManualCapaRecord; }
+  }
+}
+
+// ---- File Upload ----
+function handleCapaFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('modalDropZone').classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) processCapaFile(file);
+}
+function handleCapaFileSelect(e) {
+  const file = e.target.files[0];
+  if (file) processCapaFile(file);
+}
+
+function processCapaFile(file) {
+  const preview = document.getElementById('capaParsePreview');
+  const pTable  = document.getElementById('capaPreviewTable');
+  const loadBtn = document.getElementById('btnLoadCapaFile');
+  preview.classList.remove('show'); preview.innerHTML = '';
+  pTable.innerHTML = ''; capaFileParsedData = null;
+  if (loadBtn) loadBtn.disabled = true;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if (ext !== 'csv') {
+    showParseError('Only CSV files supported. Please save your Excel file as CSV (.csv) and re-upload.');
+    return;
+  }
+  const reader = new FileReader();
+  reader.onload = ev => {
+    try {
+      const rows = parseCSVToCapaRows(ev.target.result);
+      capaFileParsedData = rows;
+      showCapaFilePreview(rows, file.name, DASHBOARD_DATA.capa_data.length);
+      if (loadBtn) loadBtn.disabled = rows.length === 0;
+    } catch(err) { showParseError(err.message); }
+  };
+  reader.readAsText(file);
+}
+
+function parseCSVToCapaRows(text) {
+  const lines = text.replace(/\r/g,'').split('\n').filter(l => l.trim());
+  if (lines.length < 2) throw new Error('File needs at least 1 header row + 1 data row.');
+
+  function splitLine(line) {
+    const result = []; let cur = '', inQ = false;
+    for (let i = 0; i < line.length; i++) {
+      const ch = line[i];
+      if (ch === '"') { inQ = !inQ; }
+      else if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
+      else cur += ch;
+    }
+    result.push(cur.trim()); return result;
+  }
+
+  const headers = splitLine(lines[0]).map(h => h.replace(/^"|"$/g,'').trim().toLowerCase().replace(/[\s/]+/g,'_').replace(/[^a-z0-9_]/g,''));
+
+  const ALIASES = {
+    date:        ['date','undo_date','event_date','open_date','capa_date'],
+    bot_action:  ['bot_action','bot_action_taken','action','bot_move'],
+    undo_reason: ['undo_reason','reason_for_undo','reason','undo_rationale'],
+    root_cause:  ['root_cause','root_cause_category','cause','root_cause_category'],
+    corrective:  ['corrective','corrective_action','fix','corrective_measure'],
+    preventive:  ['preventive','preventive_action','prevention','preventive_measure'],
+    owner:       ['owner','responsible','assigned_to','assignee','capa_owner'],
+    target_date: ['target_date','target_close_date','due_date','target'],
+    close_date:  ['close_date','actual_close_date','closed_date','actual_close'],
+    status:      ['status','capa_status','state','capa_state']
+  };
+
+  const colIdx = {};
+  for (const [key, aliases] of Object.entries(ALIASES)) {
+    colIdx[key] = -1;
+    for (const a of aliases) { const i = headers.indexOf(a); if (i >= 0) { colIdx[key] = i; break; } }
+  }
+
+  const startId = DASHBOARD_DATA.capa_data.length;
+  return lines.slice(1).map((line, i) => {
+    if (!line.trim()) return null;
+    const cols = splitLine(line);
+    const g = key => { const ci = colIdx[key]; return ci >= 0 && cols[ci] ? cols[ci].replace(/^"|"$/g,'').trim() : ''; };
+    const status = normalizeCapaStatus(g('status'));
+    const aging  = computeAging(g('date'), g('close_date'), status);
+    return {
+      id:          'CAPA-' + String(startId + i + 1).padStart(3,'0'),
+      date:        g('date'),        bot_action:  g('bot_action'),
+      undo_reason: g('undo_reason'), root_cause:  g('root_cause'),
+      corrective:  g('corrective'),  preventive:  g('preventive'),
+      owner:       g('owner'),       target_date: g('target_date'),
+      close_date:  g('close_date') || null,
+      status, aging
+    };
+  }).filter(r => r && (r.date || r.bot_action || r.undo_reason));
+}
+
+function normalizeCapaStatus(s) {
+  if (!s) return 'In Progress';
+  const sl = s.toLowerCase();
+  if (sl.includes('close') || sl.includes('done') || sl.includes('complete') || sl === 'c') return 'Closed';
+  if (sl.includes('overdue') || sl.includes('late') || sl.includes('breach')) return 'Overdue';
+  if (sl.includes('review') || sl.includes('hold')) return 'Under Review';
+  return 'In Progress';
+}
+
+function computeAging(openDate, closeDate, status) {
+  try {
+    const open = new Date(openDate);
+    if (isNaN(open)) return 0;
+    const end = (status === 'Closed' && closeDate) ? new Date(closeDate) : new Date();
+    return Math.max(0, Math.round((end - open) / 86400000));
+  } catch { return 0; }
+}
+
+function showCapaFilePreview(rows, fileName, startCount) {
+  const preview = document.getElementById('capaParsePreview');
+  preview.classList.add('show');
+  preview.style.borderColor = '';
+  preview.innerHTML = \`
+    <div class="parse-row"><i class="fas fa-file-csv" style="color:var(--hpe-green)"></i> <strong>\${fileName}</strong></div>
+    <div class="parse-row"><i class="fas fa-check-circle" style="color:var(--hpe-green)"></i> \${rows.length} valid records parsed (IDs: CAPA-\${String(startCount+1).padStart(3,'0')} to CAPA-\${String(startCount+rows.length).padStart(3,'0')})</div>
+    <div class="parse-row"><i class="fas fa-info-circle" style="color:var(--hpe-blue)"></i> Click "Load &amp; Refresh Dashboard" — existing data will be <strong>replaced</strong> with this file</div>\`;
+  const pTable = document.getElementById('capaPreviewTable');
+  if (rows.length > 0) {
+    const sample = rows.slice(0,5);
+    pTable.innerHTML = \`
+      <div style="font-size:12px;font-weight:600;color:var(--text-muted);margin-bottom:6px">Preview — first \${sample.length} of \${rows.length} rows:</div>
+      <div class="table-container" style="max-height:180px;overflow-y:auto">
+        <table><thead><tr>
+          <th>Date</th><th>Bot Action</th><th>Undo Reason</th><th>Owner</th><th>Status</th><th>Aging</th>
+        </tr></thead>
+        <tbody>\${sample.map(r => \`<tr>
+          <td>\${r.date||'—'}</td>
+          <td style="max-width:130px;white-space:normal">\${r.bot_action||'—'}</td>
+          <td style="max-width:130px;white-space:normal">\${r.undo_reason||'—'}</td>
+          <td>\${r.owner||'—'}</td>
+          <td><span class="status-pill \${r.status==='Closed'?'status-closed':r.status==='Overdue'?'status-open':'status-inprogress'}">\${r.status}</span></td>
+          <td>\${r.aging}d</td>
+        </tr>\`).join('')}</tbody></table>
+      </div>\`;
+  }
+}
+
+function showParseError(msg) {
+  const preview = document.getElementById('capaParsePreview');
+  preview.classList.add('show');
+  preview.style.borderColor = 'var(--hpe-red)';
+  preview.innerHTML = \`<div class="parse-row"><i class="fas fa-exclamation-circle" style="color:var(--hpe-red)"></i> <strong>Error:</strong> \${msg}</div>\`;
+}
+
+function commitCapaFileData() {
+  if (!capaFileParsedData || capaFileParsedData.length === 0) {
+    showToast('No parsed data. Upload a valid CSV file first.', 'error'); return;
+  }
+  DASHBOARD_DATA.capa_data = capaFileParsedData;
+  closeCapaModal();
+  capaFilterState = 'all';
+  document.querySelectorAll('#tab-capa .filter-btn').forEach((b,i) => b.classList.toggle('active', i===0));
+  refreshCAPADashboard();
+  showToast('✅ ' + capaFileParsedData.length + ' records loaded. Dashboard refreshed live!', 'success');
+  capaFileParsedData = null;
+}
+
+function clearCapaUpload() {
+  capaFileParsedData = null;
+  const p = document.getElementById('capaParsePreview');
+  const t = document.getElementById('capaPreviewTable');
+  const b = document.getElementById('btnLoadCapaFile');
+  const f = document.getElementById('capaFileInput');
+  if (p) { p.classList.remove('show'); p.innerHTML=''; p.style.borderColor=''; }
+  if (t) t.innerHTML = '';
+  if (b) b.disabled = true;
+  if (f) f.value = '';
+}
+
+// ---- Manual Entry ----
+function submitManualCapaRecord() {
+  const errEl = document.getElementById('manualFormError');
+  errEl.style.display = 'none';
+  const fields = {
+    date: document.getElementById('mf_date').value,
+    owner: document.getElementById('mf_owner').value.trim(),
+    bot_action: document.getElementById('mf_bot_action').value.trim(),
+    undo_reason: document.getElementById('mf_undo_reason').value.trim(),
+    root_cause: document.getElementById('mf_root_cause').value.trim(),
+    corrective: document.getElementById('mf_corrective').value.trim(),
+    preventive: document.getElementById('mf_preventive').value.trim(),
+    target_date: document.getElementById('mf_target_date').value,
+    close_date: document.getElementById('mf_close_date').value || null,
+    status: document.getElementById('mf_status').value
+  };
+  const missing = Object.entries(fields).filter(([k,v]) => k !== 'close_date' && !v).map(([k]) => k.replace(/_/g,' '));
+  if (missing.length > 0) {
+    errEl.textContent = '⚠ Required: ' + missing.join(', ');
+    errEl.style.display = 'block'; return;
+  }
+  const newId = 'CAPA-' + String(DASHBOARD_DATA.capa_data.length + 1).padStart(3,'0');
+  const aging = computeAging(fields.date, fields.close_date, fields.status);
+  DASHBOARD_DATA.capa_data.push({ id: newId, ...fields, aging });
+  closeCapaModal();
+  refreshCAPADashboard();
+  showToast('✅ Record ' + newId + ' added successfully!', 'success');
+}
+
+function resetManualForm() {
+  ['mf_date','mf_owner','mf_bot_action','mf_undo_reason','mf_root_cause','mf_corrective','mf_preventive','mf_target_date','mf_close_date'].forEach(id => {
+    const el = document.getElementById(id); if (el) el.value = '';
+  });
+  const sel = document.getElementById('mf_status'); if (sel) sel.value = '';
+  const err = document.getElementById('manualFormError'); if (err) { err.style.display='none'; err.textContent=''; }
+}
+
+// ---- Template Download ----
+function downloadCapaTemplate() {
+  const header = 'Date,Bot Action,Undo Reason,Root Cause,Corrective Action,Preventive Action,Owner,Target Date,Close Date,Status';
+  const rows = [
+    '2026-01-15,"Auto-reject duplicate application","False positive — same candidate different role","Bot dedup logic too broad","Manual review of affected candidates","Add role-level dedup flag to bot rules","Jyoti Sarwan",2026-02-05,2026-01-28,Closed',
+    '2026-02-08,"Auto-populate target start date","Incorrect date format MM/DD vs DD/MM","Date field format mismatch in source","Manually corrected 53 records","Standardize date format in ATS integration","Mahak Kaura",2026-03-01,,In Progress'
+  ];
+  const csv = [header, ...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'CAPA_BotUndo_Template.csv';
+  a.click();
+  showToast('Template downloaded!', 'info');
+}
+
+// ---- CAPA CSV Export ----
+function exportCAPACSV() {
+  const data = DASHBOARD_DATA.capa_data;
+  if (data.length === 0) { showToast('No CAPA data to export.', 'error'); return; }
+  const esc = v => '"' + String(v||'').replace(/"/g,"'") + '"';
+  const header = 'CAPA ID,Date,Bot Action,Undo Reason,Root Cause,Corrective Action,Preventive Action,Owner,Target Date,Close Date,Status,Aging (days)';
+  const rows = data.map(c => [c.id,c.date,esc(c.bot_action),esc(c.undo_reason),esc(c.root_cause),esc(c.corrective),esc(c.preventive),c.owner,c.target_date,c.close_date||'',c.status,c.aging||0].join(','));
+  const csv = [header,...rows].join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'HPE_CAPA_BotUndo_' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click();
+  showToast('CAPA data exported!', 'success');
+}
+
+// ---- Toast ----
+function showToast(msg, type) {
+  const t = document.getElementById('toastEl');
+  if (!t) return;
+  t.className = 'toast ' + (type || 'info');
+  const icon = type==='success' ? '✅' : type==='error' ? '❌' : 'ℹ️';
+  t.innerHTML = '<span>' + icon + '</span><span>' + msg + '</span>';
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3800);
 }
 
 // ==================== INSIGHTS CHARTS ====================
