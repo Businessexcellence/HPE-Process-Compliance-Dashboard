@@ -34,8 +34,17 @@
 - Process stage error distribution donut
 - AI Recommendations panel (ranked by impact)
 
-### Tab 4: CAPA — Bot Undo Moves
-- 4 KPI cards: Closure Rate, Avg Days to Close, Overdue CAPAs, Bot Reliability Score
+### Tab 4: CAPA — Bot Undo Moves *(Live Upload Enabled)*
+- **Upload Bot Undo Data** button — opens 3-tab modal for live data ingestion
+  - **Tab 1 — Upload File**: Drag-and-drop or browse CSV upload with instant preview table; smart column alias mapping (10 fields); "Load N Records" button commits to dashboard and refreshes everything live
+  - **Tab 2 — Enter Manually**: 10-field form (Date, Owner, Bot Action, Undo Reason, Root Cause, Corrective Action, Preventive Action, Target Date, Close Date, Status) with validation; adds record live on submit
+  - **Tab 3 — Download Template**: Pre-formatted CSV template download + column reference guide
+- **Live Refresh Engine**: every data change triggers `refreshCAPADashboard()` → recomputes KPIs, rebuilds charts, redraws table, regenerates AI insights
+- 4 dynamic KPI cards: Closure Rate, Avg Days to Close, Overdue Count, Total Records
+- Filter bar: All | 🔴 Open/Overdue | 🟡 In Progress | 🟢 Closed
+- Export CSV button — exports full CAPA data at any time
+- Count badge + "Last updated" timestamp auto-refresh on every change
+- Toast notifications (✅ success / ❌ error / ℹ info) on all actions
 - CAPA Status donut chart
 - Root Cause bar chart
 - Complete CAPA log table (4 entries with full audit trail)
