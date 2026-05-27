@@ -644,11 +644,11 @@ function getDashboardHTML(): string {
     .toast {
       position: fixed; bottom: 28px; right: 28px; background: var(--hpe-dark); color: white;
       padding: 12px 20px; border-radius: 10px; font-size: 13px; font-weight: 500;
-      z-index: 9999; box-shadow: 0 6px 24px rgba(0,0,0,0.2); display: flex; align-items: center;
+      z-index: 9999; box-shadow: 0 6px 24px rgba(0,0,0,0.2); display: none; align-items: center;
       gap: 10px; transform: translateY(80px); opacity: 0;
       transition: all 0.35s cubic-bezier(0.34,1.56,0.64,1); max-width: 380px;
     }
-    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.show { display: flex; transform: translateY(0); opacity: 1; }
     .toast.success { border-left: 4px solid var(--hpe-green); }
     .toast.error   { border-left: 4px solid var(--hpe-red); }
     .toast.info    { border-left: 4px solid var(--hpe-blue); }
@@ -2807,7 +2807,9 @@ function processCapaFile(file) {
 }
 
 function parseCSVToCapaRows(text) {
-  const lines = text.replace(/\r/g,'').split('\n').filter(l => l.trim());
+  const LF = String.fromCharCode(10);
+  const CR = String.fromCharCode(13);
+  const lines = text.split(CR).join('').split(LF).filter(l => l.trim());
   if (lines.length < 2) throw new Error('File needs at least 1 header row + 1 data row.');
 
   function splitLine(line) {
@@ -2984,7 +2986,7 @@ function downloadCapaTemplate() {
     '2026-01-15,"Auto-reject duplicate application","False positive — same candidate different role","Bot dedup logic too broad","Manual review of affected candidates","Add role-level dedup flag to bot rules","Jyoti Sarwan",2026-02-05,2026-01-28,Closed',
     '2026-02-08,"Auto-populate target start date","Incorrect date format MM/DD vs DD/MM","Date field format mismatch in source","Manually corrected 53 records","Standardize date format in ATS integration","Mahak Kaura",2026-03-01,,In Progress'
   ];
-  const csv = [header, ...rows].join('\n');
+  const csv = [header, ...rows].join(String.fromCharCode(10));
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
@@ -3000,7 +3002,7 @@ function exportCAPACSV() {
   const esc = v => '"' + String(v||'').replace(/"/g,"'") + '"';
   const header = 'CAPA ID,Date,Bot Action,Undo Reason,Root Cause,Corrective Action,Preventive Action,Owner,Target Date,Close Date,Status,Aging (days)';
   const rows = data.map(c => [c.id,c.date,esc(c.bot_action),esc(c.undo_reason),esc(c.root_cause),esc(c.corrective),esc(c.preventive),c.owner,c.target_date,c.close_date||'',c.status,c.aging||0].join(','));
-  const csv = [header,...rows].join('\n');
+  const csv = [header,...rows].join(String.fromCharCode(10));
   const blob = new Blob([csv], {type:'text/csv'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
