@@ -2505,16 +2505,22 @@ function buildDeltaTable() {
 let capaFilterState = 'all';
 
 function initCAPACharts() {
-  refreshCAPADashboard();
+  // Always rebuild from current data when tab is activated
+  buildCAPATable('all');
+  recomputeCAPAKPIs(DASHBOARD_DATA.capa_data);
+  rebuildCAPACharts(DASHBOARD_DATA.capa_data);
+  rebuildCAPAAIInsights(DASHBOARD_DATA.capa_data);
+  const countBadge = document.getElementById('capaCountBadge');
+  if (countBadge) countBadge.textContent = DASHBOARD_DATA.capa_data.length + ' records';
 }
 
 function refreshCAPADashboard() {
   const data = DASHBOARD_DATA.capa_data;
   recomputeCAPAKPIs(data);
-  rebuildCAPACharts(data);
+  // Destroy and re-create charts with small delay to let DOM settle
+  setTimeout(() => { rebuildCAPACharts(data); }, 30);
   buildCAPATable(capaFilterState);
   rebuildCAPAAIInsights(data);
-  // Update nav badge
   const badge = document.querySelector('.nav-tab .tab-badge');
   if (badge) badge.textContent = data.length;
   const countBadge = document.getElementById('capaCountBadge');
@@ -2812,55 +2818,96 @@ function parseCSVToCapaRows(text) {
   const lines = text.split(CR).join('').split(LF).filter(l => l.trim());
   if (lines.length < 2) throw new Error('File needs at least 1 header row + 1 data row.');
 
-  function splitLine(line) {
-    const result = []; let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
+  // Full RFC-4180 parser handles quoted commas and escaped quotes
+  function splitCSVLine(line) {
+    const result = [];
+    let cur = '', inQ = false, i = 0;
+    while (i < line.length) {
       const ch = line[i];
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; }
-      else cur += ch;
+      if (ch === '"') {
+        if (inQ && line[i+1] === '"') { cur += '"'; i += 2; continue; }
+        inQ = !inQ; i++; continue;
+      }
+      if (ch === ',' && !inQ) { result.push(cur.trim()); cur = ''; i++; continue; }
+      cur += ch; i++;
     }
-    result.push(cur.trim()); return result;
+    result.push(cur.trim());
+    return result;
   }
 
-  const headers = splitLine(lines[0]).map(h => h.replace(/^"|"$/g,'').trim().toLowerCase().replace(/[\s/]+/g,'_').replace(/[^a-z0-9_]/g,''));
+  // Normalize: lowercase, trim, collapse spaces/dashes/slashes to underscore
+  function normH(h) {
+    // Normalize header: lowercase, replace whitespace/separators with underscore, strip rest
+    return h.replace(/^"|"$/g,'').trim().toLowerCase()
+      .replace(/[ \t\-\/\(\)]+/g,'_').replace(/[^a-z0-9_]/g,'').replace(/_+/g,'_').replace(/^_|_$/g,'');
+  }
 
-  const ALIASES = {
-    date:        ['date','undo_date','event_date','open_date','capa_date'],
-    bot_action:  ['bot_action','bot_action_taken','action','bot_move'],
-    undo_reason: ['undo_reason','reason_for_undo','reason','undo_rationale'],
-    root_cause:  ['root_cause','root_cause_category','cause','root_cause_category'],
-    corrective:  ['corrective','corrective_action','fix','corrective_measure'],
-    preventive:  ['preventive','preventive_action','prevention','preventive_measure'],
-    owner:       ['owner','responsible','assigned_to','assignee','capa_owner'],
-    target_date: ['target_date','target_close_date','due_date','target'],
-    close_date:  ['close_date','actual_close_date','closed_date','actual_close'],
-    status:      ['status','capa_status','state','capa_state']
+  const rawHdrs = splitCSVLine(lines[0]);
+  const hdrs = rawHdrs.map(normH);
+
+  // Find best matching column index using keywords — partial substring match
+  function findCol(keywords) {
+    for (const kw of keywords) {
+      let idx = hdrs.indexOf(kw);
+      if (idx >= 0) return idx;
+    }
+    // Partial match: header contains keyword OR keyword contains header
+    for (const kw of keywords) {
+      let idx = hdrs.findIndex(h => h.length > 2 && (h.includes(kw) || kw.includes(h)));
+      if (idx >= 0) return idx;
+    }
+    return -1;
+  }
+
+  const ci = {
+    date:        findCol(['date','undo_date','event_date','open_date','capa_date','raised_date']),
+    bot_action:  findCol(['bot_action','bot_action_taken','botaction','action','bot_move','bot']),
+    undo_reason: findCol(['undo_reason','reason_for_undo','reason','undo_rationale','rationale','undo']),
+    root_cause:  findCol(['root_cause','root_cause_category','rootcause','cause','root','root_cause_analysis']),
+    corrective:  findCol(['corrective','corrective_action','corrective_measure','fix','correction']),
+    preventive:  findCol(['preventive','preventive_action','preventive_measure','prevention','prevent']),
+    owner:       findCol(['owner','responsible','assigned_to','assignee','capa_owner','raised_by','person']),
+    target_date: findCol(['target_date','target_close_date','due_date','target','deadline','planned_close']),
+    close_date:  findCol(['close_date','actual_close_date','closed_date','actual_close','closed','completion_date']),
+    status:      findCol(['status','capa_status','state','capa_state','resolution_status'])
   };
 
-  const colIdx = {};
-  for (const [key, aliases] of Object.entries(ALIASES)) {
-    colIdx[key] = -1;
-    for (const a of aliases) { const i = headers.indexOf(a); if (i >= 0) { colIdx[key] = i; break; } }
+  // Positional fallback if NO columns matched (bare CSV with no headers)
+  const matched = Object.values(ci).filter(v => v >= 0).length;
+  if (matched === 0 && rawHdrs.length >= 2) {
+    const order = ['date','bot_action','undo_reason','root_cause','corrective','preventive','owner','target_date','close_date','status'];
+    order.forEach((k,i) => { ci[k] = i < rawHdrs.length ? i : -1; });
   }
 
-  const startId = DASHBOARD_DATA.capa_data.length;
-  return lines.slice(1).map((line, i) => {
-    if (!line.trim()) return null;
-    const cols = splitLine(line);
-    const g = key => { const ci = colIdx[key]; return ci >= 0 && cols[ci] ? cols[ci].replace(/^"|"$/g,'').trim() : ''; };
-    const status = normalizeCapaStatus(g('status'));
-    const aging  = computeAging(g('date'), g('close_date'), status);
-    return {
-      id:          'CAPA-' + String(startId + i + 1).padStart(3,'0'),
-      date:        g('date'),        bot_action:  g('bot_action'),
-      undo_reason: g('undo_reason'), root_cause:  g('root_cause'),
-      corrective:  g('corrective'),  preventive:  g('preventive'),
-      owner:       g('owner'),       target_date: g('target_date'),
-      close_date:  g('close_date') || null,
-      status, aging
-    };
-  }).filter(r => r && (r.date || r.bot_action || r.undo_reason));
+  function getVal(cols, key) {
+    const idx = ci[key];
+    if (idx < 0 || idx >= cols.length) return '';
+    return cols[idx].replace(/^"|"$/g,'').trim();
+  }
+
+  const startId = 0; // IDs renumbered from 1 when committed
+  return lines.slice(1)
+    .map((line, i) => {
+      if (!line.trim()) return null;
+      const cols = splitCSVLine(line);
+      const status = normalizeCapaStatus(getVal(cols,'status'));
+      const aging  = computeAging(getVal(cols,'date'), getVal(cols,'close_date'), status);
+      return {
+        id:          'CAPA-' + String(startId + i + 1).padStart(3,'0'),
+        date:        getVal(cols,'date'),
+        bot_action:  getVal(cols,'bot_action'),
+        undo_reason: getVal(cols,'undo_reason'),
+        root_cause:  getVal(cols,'root_cause'),
+        corrective:  getVal(cols,'corrective'),
+        preventive:  getVal(cols,'preventive'),
+        owner:       getVal(cols,'owner'),
+        target_date: getVal(cols,'target_date'),
+        close_date:  getVal(cols,'close_date') || null,
+        status,
+        aging
+      };
+    })
+    .filter(r => r && (r.date || r.bot_action || r.undo_reason || r.owner || r.root_cause));
 }
 
 function normalizeCapaStatus(s) {
@@ -2921,12 +2968,15 @@ function commitCapaFileData() {
   if (!capaFileParsedData || capaFileParsedData.length === 0) {
     showToast('No parsed data. Upload a valid CSV file first.', 'error'); return;
   }
-  DASHBOARD_DATA.capa_data = capaFileParsedData;
+  // Re-number IDs from 1 since we're replacing all data
+  capaFileParsedData.forEach((r, i) => { r.id = 'CAPA-' + String(i+1).padStart(3,'0'); });
+  DASHBOARD_DATA.capa_data = capaFileParsedData.slice(); // fresh array
+  const count = DASHBOARD_DATA.capa_data.length;
   closeCapaModal();
   capaFilterState = 'all';
   document.querySelectorAll('#tab-capa .filter-btn').forEach((b,i) => b.classList.toggle('active', i===0));
   refreshCAPADashboard();
-  showToast('✅ ' + capaFileParsedData.length + ' records loaded. Dashboard refreshed live!', 'success');
+  showToast('✅ ' + count + ' records loaded — dashboard refreshed!', 'success');
   capaFileParsedData = null;
 }
 
@@ -3137,6 +3187,8 @@ function filterTrend(type, el) {
 function filterCapa(type, el) {
   document.querySelectorAll('#tab-capa .filter-btn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
+  capaFilterState = type;
+  buildCAPATable(type);
 }
 
 function filterByMonth(month) { /* Filter handler — refreshes view */ }
@@ -3232,6 +3284,11 @@ function showExportStatus(msg) {
 document.addEventListener('DOMContentLoaded', () => {
   initExecutiveCharts();
   refreshDashboard();
+  // Pre-populate CAPA table with seed data so it shows on first load
+  buildCAPATable('all');
+  recomputeCAPAKPIs(DASHBOARD_DATA.capa_data);
+  rebuildCAPAAIInsights(DASHBOARD_DATA.capa_data);
+  // Charts rendered when tab is first activated (need canvas to be visible)
 });
 </script>
 
