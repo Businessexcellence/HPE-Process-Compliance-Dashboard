@@ -1158,7 +1158,7 @@ function getDashboardHTML(): string {
         <div class="gauge-value-display" id="gaugeNonCriticalVal">97.89%</div>
         <div class="gauge-target">Target: 97.00%</div>
         
-        <div class="gauge-status good">✓ Above Target</div>
+        <div class="gauge-status good" id="gaugeNonCriticalStatus">✓ Above Target</div>
       </div>
     </div>
 
@@ -2804,41 +2804,8 @@ function initTrendCharts() {
     \`).join('');
   }
   
-  // Critical bar chart
-  destroyChart('criticalBarChart');
-  const cbCtx = document.getElementById('criticalBarChart').getContext('2d');
-  charts['criticalBarChart'] = new Chart(cbCtx, {
-    type: 'bar',
-    data: {
-      labels: ['Critical', 'Non Critical'],
-      datasets: [
-        {
-          label: 'Accuracy %',
-          data: [98.62, 97.89],
-          backgroundColor: ['rgba(1,169,130,0.8)', 'rgba(13,93,191,0.8)'],
-          borderRadius: 6
-        },
-        {
-          label: 'Target (95%)',
-          type: 'line',
-          data: [95, 95],
-          borderColor: '#C54E4B',
-          borderDash: [5,5],
-          borderWidth: 2,
-          pointRadius: 0,
-          fill: false
-        }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'top', labels: {font:{size:11},boxWidth:12} } },
-      scales: {
-        y: { min: 96, max: 100, ticks: { callback: v => v + '%', font:{size:11} } },
-        x: { grid: {display:false} }
-      }
-    }
-  });
+  // Critical vs Non-Critical bar chart — delegated to reusable helper (also called from updateTrendCharts)
+  rebuildCriticalBarChart();
   
   // Weekly error chart (filter-aware — uses weeks from getFilteredWeeks())
   destroyChart('weeklyErrorChart');
@@ -4264,11 +4231,31 @@ function updateExecutiveKPIs() {
   setClass('kpi-wow-delta', 'kpi-delta ' + wowClass);
   setText('kpi-wow-sub', 'Weekly performance');
 
-  // Gauges
+  // Gauges — Overall driven by filtered accuracy; Critical/Non-Critical scaled proportionally
   drawGauge('gaugeOverall', accuracy, '#01A982');
   setText('gaugeOverallVal', accuracy + '%');
   var gOS = document.getElementById('gaugeOverallStatus');
   if (gOS) { gOS.className = 'gauge-status ' + (accuracy >= 95 ? 'good' : 'bad'); gOS.textContent = accuracy >= 95 ? '\u2713 Above Target' : '\u2717 Below Target'; }
+
+  // Critical / Non-Critical: derive from crit_stats scaled by filter delta vs FY baseline
+  var fyBaseline = 98.50; // FY overall accuracy
+  var critFY     = DASHBOARD_DATA.crit_stats.find(function(c){ return c.Criticality === 'Critical'; });
+  var nonCritFY  = DASHBOARD_DATA.crit_stats.find(function(c){ return c.Criticality === 'Non Critical'; });
+  var critFYAcc    = critFY    ? critFY.Accuracy    : 98.62;
+  var nonCritFYAcc = nonCritFY ? nonCritFY.Accuracy : 97.89;
+  var delta = accuracy - fyBaseline; // how much the filtered period differs from FY
+  var critAcc    = Math.min(100, Math.max(85, +(critFYAcc    + delta).toFixed(2)));
+  var nonCritAcc = Math.min(100, Math.max(85, +(nonCritFYAcc + delta).toFixed(2)));
+
+  drawGauge('gaugeCritical',    critAcc,    '#0D5DBF');
+  setText('gaugeCriticalVal',    critAcc + '%');
+  var gCS = document.getElementById('gaugeCriticalStatus');
+  if (gCS) { gCS.className = 'gauge-status ' + (critAcc >= 99 ? 'good' : 'warning'); gCS.textContent = critAcc >= 99 ? '\u2713 Above Target' : '\u26a0 Below Target'; }
+
+  drawGauge('gaugeNonCritical', nonCritAcc, '#FF8300');
+  setText('gaugeNonCriticalVal', nonCritAcc + '%');
+  var gNCS = document.getElementById('gaugeNonCriticalStatus');
+  if (gNCS) { gNCS.className = 'gauge-status ' + (nonCritAcc >= 97 ? 'good' : 'warning'); gNCS.textContent = nonCritAcc >= 97 ? '\u2713 Above Target' : '\u26a0 Below Target'; }
 
   // Section subtitle
   var subEl = document.querySelector('#tab-executive .section-subtitle');
@@ -4388,9 +4375,60 @@ function updateTrendCharts() {
 
   // Rebuild drill table with filter
   buildWeeklyTable();
+  // Rebuild critical bar chart with current filter delta
+  rebuildCriticalBarChart();
 }
 
-// ---- UPDATE IMPROVEMENT CHARTS ----
+// Standalone helper — build/rebuild Critical vs Non-Critical bar chart
+// Called from initTrendCharts, updateTrendCharts, and switchTab revisit
+function rebuildCriticalBarChart() {
+  var cbEl = document.getElementById('criticalBarChart');
+  if (!cbEl) return;
+  var fyBaseline2 = 98.50;
+  var fw = getFilteredWeeks();
+  var tc = fw.reduce(function(s,w){ return s + w.Opportunity_Count; }, 0);
+  var tp = fw.reduce(function(s,w){ return s + w.Opportunity_Pass;  }, 0);
+  var filtAcc = tc > 0 ? +((tp / tc) * 100).toFixed(2) : fyBaseline2;
+  var delta2  = filtAcc - fyBaseline2;
+  var cs      = DASHBOARD_DATA.crit_stats;
+  var adjAcc  = cs.map(function(c){ return Math.min(100, Math.max(85, +(c.Accuracy + delta2).toFixed(2))); });
+  var targets = cs.map(function(c){ return c.Criticality === 'Critical' ? 99 : 97; });
+  var colors  = adjAcc.map(function(a, i){ return a >= targets[i] ? 'rgba(1,169,130,0.85)' : 'rgba(197,78,75,0.85)'; });
+  var yMin2   = Math.min(88, Math.floor(Math.min.apply(null, adjAcc)) - 2);
+  destroyChart('criticalBarChart');
+  charts['criticalBarChart'] = new Chart(cbEl.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: cs.map(function(c){ return c.Criticality; }),
+      datasets: [
+        { label: 'Accuracy %', data: adjAcc, backgroundColor: colors, borderRadius: 6, yAxisID: 'y' },
+        { label: 'Target %', type: 'line', data: targets,
+          borderColor: '#FF8300', borderDash: [6,3], borderWidth: 2,
+          pointRadius: 5, pointBackgroundColor: '#FF8300', fill: false, yAxisID: 'y' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: {
+        legend: { position: 'top', labels: {font:{size:11}, boxWidth:12} },
+        tooltip: {
+          callbacks: {
+            label: function(ctx) { return ctx.dataset.type === 'line' ? 'Target: ' + ctx.raw + '%' : 'Accuracy: ' + ctx.raw + '%'; },
+            afterLabel: function(ctx) {
+              if (ctx.dataset.type === 'line') return '';
+              var c = cs[ctx.dataIndex];
+              return 'Total: ' + c.Opportunity_Count.toLocaleString() + ' | Pass: ' + c.Opportunity_Pass.toLocaleString() + ' | Fail: ' + c.Opportunity_Fail;
+            }
+          }
+        }
+      },
+      scales: {
+        y: { min: yMin2, max: 101, ticks: {callback:function(v){ return v+'%'; }, font:{size:11}}, grid:{color:'rgba(0,0,0,0.06)'} },
+        x: { grid:{display:false}, ticks:{font:{size:12}} }
+      }
+    }
+  });
+}
 function updateImprovementCharts() {
   if (!_improveDone) return;
   buildForecastChart();
