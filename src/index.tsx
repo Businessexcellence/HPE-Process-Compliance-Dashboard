@@ -5447,8 +5447,7 @@ function buildPMPanel() {
       var diff = +(pm.Avg_Accuracy - teamAvg).toFixed(2);
       var diffStr = (diff >= 0 ? '+' : '') + diff + '%';
       var col = diff >= 0 ? 'var(--hpe-green)' : 'var(--hpe-red)';
-      var safePM = pm.PM.replace(/'/g, "\\'");
-      return '<div class="kpi-card" style="cursor:pointer" onclick="drillPM(\'' + safePM + '\')" title="Click to see recruiter breakdown">'
+      return '<div class="kpi-card" style="cursor:pointer" data-pm="' + pm.PM + '" title="Click to see recruiter breakdown">'
         + '<div class="kpi-label"><i class="fas fa-user-tie"></i> ' + pm.PM + ' <i class="fas fa-chevron-right" style="float:right;font-size:10px;color:var(--text-muted);margin-top:2px"></i></div>'
         + '<div class="kpi-value" style="color:' + (pm.Avg_Accuracy>=99?'var(--hpe-green)':pm.Avg_Accuracy>=97?'var(--hpe-blue)':'var(--hpe-orange)') + '">' + pm.Avg_Accuracy + '%</div>'
         + '<div class="kpi-delta" style="color:'+col+'"><i class="fas fa-arrow-'+(diff>=0?'up':'down')+'"></i> ' + diffStr + ' vs avg</div>'
@@ -5514,8 +5513,7 @@ function buildPMPanel() {
       var status = base >= 99 ? '<span class="status-pill status-closed">\u2713 Excellent</span>'
                  : base >= 97 ? '<span class="status-pill" style="background:#e3f2fd;color:#0D5DBF">\u2192 On Track</span>'
                  : '<span class="status-pill status-open">\u26a0 Watch</span>';
-      var safePM2 = pm.PM.replace(/'/g, "\\'");
-      return '<tr style="cursor:pointer" onclick="drillPM(\'' + safePM2 + '\')" title="Click to see recruiter breakdown">'
+      return '<tr style="cursor:pointer" data-pm="' + pm.PM + '" title="Click to see recruiter breakdown">'  
         + '<td><strong>' + pm.PM + '</strong></td>'
         + '<td>' + recs + '</td>'
         + mAccs.map(function(a){ return '<td>' + getAccBadge(a) + '</td>'; }).join('')
@@ -5524,6 +5522,25 @@ function buildPMPanel() {
         + '<td>' + status + '</td>'
         + '</tr>';
     }).join('');
+
+    // Delegated click: MoM table rows
+    if (pmBody) {
+      pmBody.addEventListener('click', function(e) {
+        var tr = e.target.closest ? e.target.closest('tr[data-pm]') : null;
+        if (!tr) { var t = e.target; while(t && t.tagName!=='TR') t=t.parentElement; tr=t; }
+        if (tr && tr.getAttribute('data-pm')) drillPM(tr.getAttribute('data-pm'));
+      });
+    }
+  }
+
+  // Delegated click: PM KPI cards
+  var kpiRowEl = document.getElementById('pmKpiRow');
+  if (kpiRowEl) {
+    kpiRowEl.addEventListener('click', function(e) {
+      var card = e.target.closest ? e.target.closest('[data-pm]') : null;
+      if (!card) { var t = e.target; while(t && !t.getAttribute('data-pm')) t=t.parentElement; card=t; }
+      if (card && card.getAttribute('data-pm')) drillPM(card.getAttribute('data-pm'));
+    });
   }
 }
 
