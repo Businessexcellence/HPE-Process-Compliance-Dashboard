@@ -966,7 +966,7 @@ function getDashboardHTML(): string {
         <div class="kpi-label">Overall Accuracy</div>
         <div class="kpi-value big" id="kpi-accuracy">98.50%</div>
         <div class="kpi-delta delta-up"><i class="fas fa-arrow-up"></i> +1.18% vs Jan</div>
-        <div class="kpi-sub">Target: 98.00%</div>
+        <div class="kpi-sub">Target: 95.00%</div>
       </div>
       <div class="kpi-card blue">
         <div class="kpi-icon blue"><i class="fas fa-clipboard-list"></i></div>
@@ -1011,7 +1011,7 @@ function getDashboardHTML(): string {
         <div class="gauge-title"><i class="fas fa-circle-dot" style="color:var(--hpe-green);margin-right:6px"></i>Overall FY Accuracy</div>
         <canvas id="gaugeOverall" width="200" height="110"></canvas>
         <div class="gauge-value-display" id="gaugeOverallVal">98.50%</div>
-        <div class="gauge-target">Target: 98.00%</div>
+        <div class="gauge-target">Target: 95.00%</div>
         <div class="gauge-status good">✓ Above Target</div>
       </div>
       <div class="gauge-card">
@@ -1039,7 +1039,7 @@ function getDashboardHTML(): string {
       <div class="insight-list">
         <div class="insight-item">
           <div class="insight-icon green"><i class="fas fa-trending-up"></i></div>
-          <div class="insight-text"><strong>Consistent Improvement Trajectory:</strong> Accuracy has improved from 97.25% in April to 99.43% in February (+2.18%), demonstrating a strong positive trend. March shows a slight softening to 98.49%, warranting continued monitoring.</div>
+          <div class="insight-text"><strong>Accuracy Dip in April — Action Required:</strong> Accuracy declined from 99.43% in February to 97.25% in April (−2.18%), marking the lowest point in FY2026. This downward trajectory from Feb → Mar (98.49%) → Apr (97.25%) signals a worsening trend. Root cause analysis and corrective action are recommended to reverse the decline before it breaches the 95% target.</div>
         </div>
         <div class="insight-item alert">
           <div class="insight-icon alert"><i class="fas fa-exclamation-circle"></i></div>
@@ -1060,7 +1060,7 @@ function getDashboardHTML(): string {
     <div class="row-2">
       <div class="card">
         <div class="card-title"><i class="fas fa-chart-line"></i> 16-Week Accuracy Trend</div>
-        <div class="card-subtitle">Weekly accuracy performance FY2026 with 98% target line</div>
+        <div class="card-subtitle">Weekly accuracy performance FY2026 with 95% target line</div>
         <div class="chart-container" style="height:180px">
           <canvas id="sparklineChart"></canvas>
         </div>
@@ -1119,7 +1119,7 @@ function getDashboardHTML(): string {
     <!-- Month-wise line chart -->
     <div class="card card-full mb-20">
       <div class="card-title"><i class="fas fa-chart-line"></i> Monthly Accuracy Trend with Target Line</div>
-      <div class="card-subtitle">Month-over-month accuracy with 98% target benchmark and error rate overlay</div>
+      <div class="card-subtitle">Month-over-month accuracy with 95% target benchmark and error rate overlay</div>
       <div class="chart-container" style="height:300px">
         <canvas id="monthlyTrendChart"></canvas>
       </div>
@@ -1228,7 +1228,7 @@ function getDashboardHTML(): string {
             <div style="width:20px;height:3px;background:var(--hpe-orange);border-radius:2px;border:1px dashed var(--hpe-orange)"></div> AI Forecast
           </div>
           <div style="display:flex;align-items:center;gap:6px;color:var(--text-muted)">
-            <div style="width:20px;height:3px;background:var(--hpe-red);border-radius:2px"></div> 98% Target
+            <div style="width:20px;height:3px;background:var(--hpe-red);border-radius:2px"></div> 95% Target
           </div>
         </div>
       </div>
@@ -1599,7 +1599,7 @@ function getDashboardHTML(): string {
         Auto-Generated Narrative Summary — FY2026 YTD
       </div>
       <div class="narr-text" id="narrativeText">
-        <p>HPE South 1 Region has processed <strong class="highlight">8,599 audit checkpoints</strong> across FY2026 (January through April), achieving an overall accuracy of <strong class="highlight">98.50%</strong> — <strong class="highlight">0.50 percentage points above</strong> the 98% organizational target.</p>
+        <p>HPE South 1 Region has processed <strong class="highlight">8,599 audit checkpoints</strong> across FY2026 (January through April), achieving an overall accuracy of <strong class="highlight">98.50%</strong> — <strong class="highlight">3.50 percentage points above</strong> the 95% organizational target.</p>
         <br>
         <p>The <strong>accuracy trajectory has been predominantly positive</strong>: starting at 97.25% in January (HPE FY Month 10), improving sharply to 99.33% in January (Mon 10), sustaining at 99.43% in February, before a slight moderation to 98.49% in March. The March softening was largely attributable to a <strong class="warn-text">spike in "Target start date" failures</strong> (20 errors in March W2 alone), which has been flagged for CAPA action.</p>
         <br>
@@ -1863,14 +1863,14 @@ function destroyChart(id) {
 // ==================== COLOR HELPERS ====================
 function getAccBadge(acc) {
   if (acc >= 99) return '<span class="acc-badge excellent">⬤ ' + acc + '%</span>';
-  if (acc >= 98) return '<span class="acc-badge good">⬤ ' + acc + '%</span>';
+  if (acc >= 95) return '<span class="acc-badge good">⬤ ' + acc + '%</span>';
   if (acc >= 95) return '<span class="acc-badge warning">⬤ ' + acc + '%</span>';
   return '<span class="acc-badge bad">⬤ ' + acc + '%</span>';
 }
 
 function getHeatmapColor(acc) {
   if (acc >= 99) return {bg: '#01A982', text: 'white'};
-  if (acc >= 98) return {bg: '#4fc3a1', text: 'white'};
+  if (acc >= 95) return {bg: '#4fc3a1', text: 'white'};
   if (acc >= 95) return {bg: '#FF8300', text: 'white'};
   return {bg: '#C54E4B', text: 'white'};
 }
@@ -1924,8 +1924,8 @@ function initExecutiveCharts() {
           pointHoverRadius: 7
         },
         {
-          label: '98% Target',
-          data: weekLabels.map(() => 98),
+          label: '95% Target',
+          data: weekLabels.map(() => 95),
           borderColor: '#C54E4B',
           borderDash: [5,5],
           borderWidth: 1.5,
@@ -2004,8 +2004,8 @@ function drawGauge(canvasId, value, color) {
   ctx.lineCap = 'round';
   ctx.stroke();
   
-  // Target line at 98%
-  const targetProgress = (98 - 90) / 10;
+  // Target line at 95%
+  const targetProgress = (95 - 90) / 10;
   const targetAngle = startAngle + targetProgress * (endAngle - startAngle);
   const tx1 = cx + (r - 18) * Math.cos(targetAngle);
   const ty1 = cy + (r - 18) * Math.sin(targetAngle);
@@ -2034,7 +2034,7 @@ function buildMonthTable() {
           : '<span style="color:var(--text-muted)">— 0%</span>')
       : '<span style="color:var(--text-muted)">—</span>';
     prevAcc = m.Accuracy;
-    const status = m.Accuracy >= 98 
+    const status = m.Accuracy >= 95 
       ? '<span class="status-pill status-closed">✓ On Target</span>'
       : '<span class="status-pill status-open">✗ Below Target</span>';
     return \`<tr>
@@ -2092,8 +2092,8 @@ function initTrendCharts() {
           type: 'bar'
         },
         {
-          label: '98% Target',
-          data: months.map(() => 98),
+          label: '95% Target',
+          data: months.map(() => 95),
           borderColor: '#FF8300',
           borderDash: [8,4],
           borderWidth: 2,
@@ -2175,9 +2175,9 @@ function initTrendCharts() {
           borderRadius: 6
         },
         {
-          label: 'Target (98%)',
+          label: 'Target (95%)',
           type: 'line',
-          data: [98, 98],
+          data: [95, 95],
           borderColor: '#C54E4B',
           borderDash: [5,5],
           borderWidth: 2,
@@ -2331,8 +2331,8 @@ function initImprovementCharts() {
           fill: false
         },
         {
-          label: '98% Target',
-          data: [...actualLabels, ...forecastLabels].map(()=>98),
+          label: '95% Target',
+          data: [...actualLabels, ...forecastLabels].map(()=>95),
           borderColor: '#C54E4B',
           borderDash: [4,4],
           borderWidth: 1.5,
@@ -3192,8 +3192,8 @@ function initInsightsCharts() {
           fill: false
         },
         {
-          label: '98% Target',
-          data: allLabels.map(()=>98),
+          label: '95% Target',
+          data: allLabels.map(()=>95),
           borderColor: '#C54E4B',
           borderDash: [8,4],
           borderWidth: 1.5,
