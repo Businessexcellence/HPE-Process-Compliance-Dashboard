@@ -23,6 +23,10 @@ function getDashboardHTML(): string {
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2301A982'/><text x='16' y='22' font-size='14' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>H</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <!-- Export libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pptxgenjs@3.12.0/dist/pptxgen.bundle.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
   <style>
@@ -653,6 +657,108 @@ function getDashboardHTML(): string {
     .toast.success { border-left: 4px solid var(--hpe-green); }
     .toast.error   { border-left: 4px solid var(--hpe-red); }
     .toast.info    { border-left: 4px solid var(--hpe-blue); }
+
+    /* ── Export Report Styles ─────────────────────────────────────── */
+    .export-btn-group { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    .btn-export-pdf {
+      background: linear-gradient(135deg,#C54E4B,#e05555); color:white; border:none;
+      padding:8px 16px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; gap:7px; font-family:'Inter',sans-serif;
+      box-shadow:0 2px 8px rgba(197,78,75,0.35); transition:all 0.2s; white-space:nowrap;
+    }
+    .btn-export-pdf:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(197,78,75,0.5); }
+    .btn-export-ppt {
+      background: linear-gradient(135deg,#D04424,#e8541e); color:white; border:none;
+      padding:8px 16px; border-radius:8px; font-size:12px; font-weight:700; cursor:pointer;
+      display:flex; align-items:center; gap:7px; font-family:'Inter',sans-serif;
+      box-shadow:0 2px 8px rgba(208,68,36,0.35); transition:all 0.2s; white-space:nowrap;
+    }
+    .btn-export-ppt:hover { transform:translateY(-2px); box-shadow:0 4px 16px rgba(208,68,36,0.5); }
+    .btn-export-pdf:disabled, .btn-export-ppt:disabled { opacity:0.55; cursor:not-allowed; transform:none; }
+
+    /* Export modal overrides */
+    .export-modal-box {
+      background:#fff; border-radius:16px; width:820px; max-width:96vw;
+      max-height:90vh; overflow:hidden; display:flex; flex-direction:column;
+      box-shadow:0 24px 80px rgba(0,0,0,0.22);
+    }
+    .export-modal-header {
+      background: linear-gradient(135deg,var(--hpe-dark) 0%,#1a2e42 100%);
+      padding:20px 26px; display:flex; align-items:center; justify-content:space-between; flex-shrink:0;
+    }
+    .export-modal-title { color:white; font-size:17px; font-weight:700; display:flex; align-items:center; gap:10px; }
+    .export-modal-close {
+      background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.2); color:white;
+      width:32px; height:32px; border-radius:8px; cursor:pointer; font-size:14px;
+      display:flex; align-items:center; justify-content:center; transition:all 0.15s;
+    }
+    .export-modal-close:hover { background:rgba(255,255,255,0.22); }
+    .export-tab-bar {
+      display:flex; border-bottom:2px solid var(--border); background:#f8fafc; flex-shrink:0; padding:0 24px;
+    }
+    .export-tab {
+      padding:12px 20px; font-size:13px; font-weight:600; cursor:pointer; border:none;
+      background:none; color:var(--text-muted); border-bottom:3px solid transparent;
+      margin-bottom:-2px; display:flex; align-items:center; gap:8px; transition:all 0.15s;
+    }
+    .export-tab.active { color:var(--hpe-green); border-bottom-color:var(--hpe-green); }
+    .export-tab-panel { display:none; }
+    .export-tab-panel.active { display:block; }
+    .export-modal-body { padding:24px; overflow-y:auto; flex:1; }
+
+    /* PDF preview card */
+    .pdf-preview-card {
+      border:2px solid var(--border); border-radius:12px; padding:20px;
+      background:#fafbfc; margin-bottom:16px; position:relative; overflow:hidden;
+    }
+    .pdf-preview-card::before {
+      content:''; position:absolute; top:0; left:0; width:4px; height:100%;
+      background:linear-gradient(to bottom,var(--hpe-green),#01c49a);
+    }
+    .pdf-section-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+    .pdf-section-chip {
+      display:flex; align-items:center; gap:6px; padding:5px 12px;
+      border-radius:20px; font-size:11px; font-weight:600;
+      background:#e6f9f5; color:var(--hpe-green); border:1px solid rgba(1,169,130,0.2);
+    }
+    .pdf-section-chip.disabled { background:#f4f6f9; color:var(--text-muted); border-color:var(--border); }
+
+    /* PPT slide grid */
+    .slide-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin-bottom:20px; }
+    .slide-thumb {
+      border:2px solid var(--border); border-radius:10px; overflow:hidden; cursor:pointer;
+      transition:all 0.2s; position:relative; aspect-ratio:16/9; background:#f0f4ff;
+    }
+    .slide-thumb:hover { border-color:var(--hpe-green); transform:translateY(-2px); box-shadow:0 6px 20px rgba(1,169,130,0.15); }
+    .slide-thumb.selected { border-color:var(--hpe-green); box-shadow:0 0 0 3px rgba(1,169,130,0.2); }
+    .slide-thumb canvas { width:100%; height:100%; display:block; }
+    .slide-thumb-label {
+      position:absolute; bottom:0; left:0; right:0; background:rgba(15,22,36,0.82);
+      color:white; font-size:10px; font-weight:600; padding:4px 8px; text-align:center;
+    }
+    .slide-check {
+      position:absolute; top:6px; right:6px; width:18px; height:18px; border-radius:50%;
+      background:var(--hpe-green); color:white; font-size:9px; display:none;
+      align-items:center; justify-content:center;
+    }
+    .slide-thumb.selected .slide-check { display:flex; }
+
+    /* Progress overlay */
+    .export-progress-wrap {
+      display:none; position:fixed; inset:0; z-index:99999; background:rgba(15,22,36,0.7);
+      align-items:center; justify-content:center; backdrop-filter:blur(3px);
+    }
+    .export-progress-wrap.active { display:flex; }
+    .export-progress-box {
+      background:white; border-radius:16px; padding:36px 44px; text-align:center;
+      min-width:340px; box-shadow:0 20px 60px rgba(0,0,0,0.3);
+    }
+    .export-progress-icon { font-size:42px; margin-bottom:14px; display:block; }
+    .export-progress-title { font-size:16px; font-weight:700; color:var(--hpe-dark); margin-bottom:6px; }
+    .export-progress-sub { font-size:12px; color:var(--text-muted); margin-bottom:20px; }
+    .export-progress-bar-wrap { background:#eef1f5; border-radius:20px; height:8px; overflow:hidden; }
+    .export-progress-bar { height:100%; background:linear-gradient(90deg,var(--hpe-green),#00c49a); border-radius:20px; transition:width 0.3s ease; width:0%; }
+    .export-progress-pct { font-size:12px; font-weight:700; color:var(--hpe-green); margin-top:8px; }
     .btn-upload-capa {
       background: linear-gradient(135deg, var(--hpe-green), #00c49a); color: white;
       border: none; padding: 9px 18px; border-radius: 8px; font-size: 13px; font-weight: 600;
@@ -1133,6 +1239,15 @@ function getDashboardHTML(): string {
         <select class="filter-select" id="execWeekSelect" onchange="applyGlobalFilter('week',this.value,null,'exec')" style="display:none">
           <option value="all">All Weeks</option>
         </select>
+        <div style="width:1px;height:24px;background:var(--border);margin:0 4px"></div>
+        <div class="export-btn-group">
+          <button class="btn-export-pdf" id="btnExportPDF" onclick="openExportModal('pdf')" title="Export as PDF report">
+            <i class="fas fa-file-pdf"></i> Export PDF
+          </button>
+          <button class="btn-export-ppt" id="btnExportPPT" onclick="openExportModal('ppt')" title="Export as PowerPoint slides">
+            <i class="fas fa-file-powerpoint"></i> Export Slides
+          </button>
+        </div>
       </div>
     </div>
 
@@ -2691,6 +2806,201 @@ function getDashboardHTML(): string {
 
   </div><!-- end tab-performance -->
 
+</div><!-- end dashboard wrapper -->
+
+<!-- ══════════════════════════════════════════════════════════════
+     EXPORT MODAL
+══════════════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="exportModal" onclick="if(event.target===this)closeExportModal()">
+  <div class="export-modal-box">
+    <!-- Header -->
+    <div class="export-modal-header">
+      <div class="export-modal-title">
+        <i class="fas fa-file-export"></i>
+        Export Executive Report
+        <span style="background:rgba(1,169,130,0.25);color:#6ee8c8;font-size:10px;font-weight:700;padding:2px 8px;border-radius:12px;margin-left:4px">FY2026</span>
+      </div>
+      <button class="export-modal-close" onclick="closeExportModal()"><i class="fas fa-times"></i></button>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="export-tab-bar">
+      <button class="export-tab active" id="exportTabPDF" onclick="switchExportTab('pdf',this)">
+        <i class="fas fa-file-pdf" style="color:#C54E4B"></i> PDF Report
+      </button>
+      <button class="export-tab" id="exportTabPPT" onclick="switchExportTab('ppt',this)">
+        <i class="fas fa-file-powerpoint" style="color:#D04424"></i> PowerPoint Slides
+      </button>
+    </div>
+
+    <div class="export-modal-body">
+
+      <!-- ── PDF PANEL ───────────────────────────────────────── -->
+      <div class="export-tab-panel active" id="exportPanelPDF">
+        <div class="pdf-preview-card">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="width:52px;height:66px;background:linear-gradient(135deg,#C54E4B,#e05555);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+              <i class="fas fa-file-pdf" style="color:white;font-size:22px"></i>
+            </div>
+            <div>
+              <div style="font-size:15px;font-weight:700;color:var(--hpe-dark)">HPE Audit Performance Report</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:3px">FY2026 · South 1 Region · Auto-generated</div>
+              <div style="font-size:11px;color:var(--hpe-green);margin-top:5px;font-weight:600"><i class="fas fa-check-circle"></i> A4 Portrait · Multi-page · Print-ready</div>
+            </div>
+          </div>
+          <div style="margin-top:16px;font-size:12px;font-weight:600;color:var(--text-secondary)">SECTIONS INCLUDED:</div>
+          <div class="pdf-section-list" id="pdfSectionList">
+            <label class="pdf-section-chip" style="cursor:pointer">
+              <input type="checkbox" id="pdfSec-cover" checked style="display:none" onchange="updatePDFSections()">
+              <i class="fas fa-id-card"></i> Cover Page
+            </label>
+            <label class="pdf-section-chip" style="cursor:pointer">
+              <input type="checkbox" id="pdfSec-kpi" checked style="display:none" onchange="updatePDFSections()">
+              <i class="fas fa-tachometer-alt"></i> KPI Dashboard
+            </label>
+            <label class="pdf-section-chip" style="cursor:pointer">
+              <input type="checkbox" id="pdfSec-gauge" checked style="display:none" onchange="updatePDFSections()">
+              <i class="fas fa-circle-dot"></i> Accuracy Gauges
+            </label>
+            <label class="pdf-section-chip" style="cursor:pointer">
+              <input type="checkbox" id="pdfSec-insights" checked style="display:none" onchange="updatePDFSections()">
+              <i class="fas fa-robot"></i> AI Insights
+            </label>
+            <label class="pdf-section-chip" style="cursor:pointer">
+              <input type="checkbox" id="pdfSec-trend" checked style="display:none" onchange="updatePDFSections()">
+              <i class="fas fa-chart-line"></i> Trend Chart
+            </label>
+            <label class="pdf-section-chip" style="cursor:pointer">
+              <input type="checkbox" id="pdfSec-errors" checked style="display:none" onchange="updatePDFSections()">
+              <i class="fas fa-exclamation-circle"></i> Top Errors
+            </label>
+            <label class="pdf-section-chip" style="cursor:pointer">
+              <input type="checkbox" id="pdfSec-recruiters" checked style="display:none" onchange="updatePDFSections()">
+              <i class="fas fa-users"></i> Recruiter Table
+            </label>
+            <label class="pdf-section-chip" style="cursor:pointer">
+              <input type="checkbox" id="pdfSec-monthly" checked style="display:none" onchange="updatePDFSections()">
+              <i class="fas fa-calendar-alt"></i> Monthly Summary
+            </label>
+          </div>
+        </div>
+
+        <!-- Settings row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px">FILENAME</div>
+            <input type="text" id="pdfFilename" value="HPE_Audit_FY2026_Report" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'Inter',sans-serif;box-sizing:border-box">
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px">QUALITY</div>
+            <select id="pdfQuality" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'Inter',sans-serif">
+              <option value="2">High (2x — recommended)</option>
+              <option value="1.5">Medium (1.5x)</option>
+              <option value="1">Standard (1x — fastest)</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="background:#f0fff8;border:1px solid rgba(1,169,130,0.25);border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:11px;color:var(--text-secondary)">
+          <i class="fas fa-info-circle" style="color:var(--hpe-green)"></i>
+          <strong> How it works:</strong> Charts and gauges are captured via html2canvas, then composed into a multi-page PDF with HPE branding, data tables, and AI insights. All live filter selections are reflected.
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn-cancel" onclick="closeExportModal()">Cancel</button>
+          <button class="btn-primary" id="btnRunPDF" onclick="runExportPDF()">
+            <i class="fas fa-download"></i> Generate &amp; Download PDF
+          </button>
+        </div>
+      </div>
+
+      <!-- ── PPT PANEL ──────────────────────────────────────── -->
+      <div class="export-tab-panel" id="exportPanelPPT">
+        <div style="margin-bottom:16px">
+          <div style="font-size:13px;font-weight:700;color:var(--hpe-dark);margin-bottom:4px">
+            <i class="fas fa-layer-group" style="color:#D04424"></i> 5-Slide Executive Deck
+          </div>
+          <div style="font-size:11px;color:var(--text-muted)">Select slides to include. Each slide renders data directly — no manual editing required.</div>
+        </div>
+
+        <!-- Slide thumbnails -->
+        <div class="slide-grid" id="slideGrid">
+          <!-- Slide 1 -->
+          <div class="slide-thumb selected" id="slideThumb-1" onclick="toggleSlide(1)">
+            <canvas id="slideCanvas-1" width="320" height="180"></canvas>
+            <div class="slide-check"><i class="fas fa-check"></i></div>
+            <div class="slide-thumb-label">Slide 1 · Cover</div>
+          </div>
+          <!-- Slide 2 -->
+          <div class="slide-thumb selected" id="slideThumb-2" onclick="toggleSlide(2)">
+            <canvas id="slideCanvas-2" width="320" height="180"></canvas>
+            <div class="slide-check"><i class="fas fa-check"></i></div>
+            <div class="slide-thumb-label">Slide 2 · KPI Overview</div>
+          </div>
+          <!-- Slide 3 -->
+          <div class="slide-thumb selected" id="slideThumb-3" onclick="toggleSlide(3)">
+            <canvas id="slideCanvas-3" width="320" height="180"></canvas>
+            <div class="slide-check"><i class="fas fa-check"></i></div>
+            <div class="slide-thumb-label">Slide 3 · Accuracy Trend</div>
+          </div>
+          <!-- Slide 4 -->
+          <div class="slide-thumb selected" id="slideThumb-4" onclick="toggleSlide(4)">
+            <canvas id="slideCanvas-4" width="320" height="180"></canvas>
+            <div class="slide-check"><i class="fas fa-check"></i></div>
+            <div class="slide-thumb-label">Slide 4 · Risk &amp; Errors</div>
+          </div>
+          <!-- Slide 5 -->
+          <div class="slide-thumb selected" id="slideThumb-5" onclick="toggleSlide(5)">
+            <canvas id="slideCanvas-5" width="320" height="180"></canvas>
+            <div class="slide-check"><i class="fas fa-check"></i></div>
+            <div class="slide-thumb-label">Slide 5 · AI Insights</div>
+          </div>
+        </div>
+
+        <!-- PPT settings -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px">
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px">FILENAME</div>
+            <input type="text" id="pptFilename" value="HPE_Audit_FY2026_Deck" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'Inter',sans-serif;box-sizing:border-box">
+          </div>
+          <div>
+            <div style="font-size:11px;font-weight:700;color:var(--text-secondary);margin-bottom:6px">THEME</div>
+            <select id="pptTheme" style="width:100%;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:12px;font-family:'Inter',sans-serif" onchange="renderSlidePreviews()">
+              <option value="dark">HPE Dark (recommended)</option>
+              <option value="light">HPE Light</option>
+              <option value="minimal">Minimal White</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="background:#fff8f0;border:1px solid rgba(208,68,36,0.2);border-radius:8px;padding:10px 14px;margin-bottom:20px;font-size:11px;color:var(--text-secondary)">
+          <i class="fas fa-info-circle" style="color:#D04424"></i>
+          <strong> How it works:</strong> PptxGenJS generates a native .pptx file with HPE-branded slides. Each slide contains live chart images, KPI values, and formatted data tables from your current dashboard state.
+        </div>
+
+        <div style="display:flex;gap:10px;justify-content:flex-end">
+          <button class="btn-cancel" onclick="closeExportModal()">Cancel</button>
+          <button class="btn-primary" id="btnRunPPT" onclick="runExportPPT()" style="background:linear-gradient(135deg,#D04424,#e8541e)">
+            <i class="fas fa-download"></i> Generate &amp; Download .pptx
+          </button>
+        </div>
+      </div>
+
+    </div><!-- end modal-body -->
+  </div><!-- end export-modal-box -->
+</div><!-- end exportModal -->
+
+<!-- Progress overlay -->
+<div class="export-progress-wrap" id="exportProgressWrap">
+  <div class="export-progress-box">
+    <span class="export-progress-icon" id="exportProgressIcon">📄</span>
+    <div class="export-progress-title" id="exportProgressTitle">Generating Report…</div>
+    <div class="export-progress-sub" id="exportProgressSub">Capturing charts and KPIs…</div>
+    <div class="export-progress-bar-wrap">
+      <div class="export-progress-bar" id="exportProgressBar"></div>
+    </div>
+    <div class="export-progress-pct" id="exportProgressPct">0%</div>
+  </div>
 </div>
 
 <script>
@@ -5781,6 +6091,996 @@ function buildAlerts() {
     banner.style.display = 'flex';
     bannerText.textContent = redAlerts + ' critical alert(s) detected — see Goal Tracker panel';
   }
+}
+
+// ==================== EXPORT REPORT ====================
+
+// ── Modal open/close ──────────────────────────────────────────────────────
+function openExportModal(tab) {
+  var modal = document.getElementById('exportModal');
+  if (!modal) return;
+  modal.classList.add('open');
+  switchExportTab(tab || 'pdf', document.getElementById('exportTab' + (tab === 'ppt' ? 'PPT' : 'PDF')));
+  setTimeout(renderSlidePreviews, 200);
+}
+function closeExportModal() {
+  var modal = document.getElementById('exportModal');
+  if (modal) modal.classList.remove('open');
+}
+function switchExportTab(tab, btn) {
+  document.querySelectorAll('.export-tab').forEach(function(b){ b.classList.remove('active'); });
+  document.querySelectorAll('.export-tab-panel').forEach(function(p){ p.classList.remove('active'); });
+  var panel = document.getElementById('exportPanel' + (tab === 'ppt' ? 'PPT' : 'PDF'));
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+// ── PDF section chip toggle ───────────────────────────────────────────────
+function updatePDFSections() {
+  document.querySelectorAll('#pdfSectionList label').forEach(function(lbl){
+    var cb = lbl.querySelector('input[type=checkbox]');
+    if (cb && cb.checked) {
+      lbl.style.background = '#e6f9f5'; lbl.style.color = 'var(--hpe-green)';
+      lbl.style.borderColor = 'rgba(1,169,130,0.25)';
+    } else {
+      lbl.style.background = '#f4f6f9'; lbl.style.color = 'var(--text-muted)';
+      lbl.style.borderColor = 'var(--border)';
+    }
+  });
+}
+
+// ── Slide toggle ─────────────────────────────────────────────────────────
+function toggleSlide(n) {
+  var thumb = document.getElementById('slideThumb-' + n);
+  if (thumb) thumb.classList.toggle('selected');
+}
+
+// ── Progress helpers ──────────────────────────────────────────────────────
+function showProgress(icon, title, sub) {
+  var w = document.getElementById('exportProgressWrap');
+  if (w) w.classList.add('active');
+  setExportProgress(icon, title, sub, 0);
+}
+function setExportProgress(icon, title, sub, pct) {
+  var ic = document.getElementById('exportProgressIcon');
+  var ti = document.getElementById('exportProgressTitle');
+  var su = document.getElementById('exportProgressSub');
+  var br = document.getElementById('exportProgressBar');
+  var pc = document.getElementById('exportProgressPct');
+  if (ic) ic.textContent = icon;
+  if (ti) ti.textContent = title;
+  if (su) su.textContent = sub;
+  if (br) br.style.width = pct + '%';
+  if (pc) pc.textContent = Math.round(pct) + '%';
+}
+function hideProgress() {
+  var w = document.getElementById('exportProgressWrap');
+  if (w) w.classList.remove('active');
+}
+
+// ── Slide preview renderer ────────────────────────────────────────────────
+var _SLIDE_SELECTED = [1,2,3,4,5];
+
+function renderSlidePreviews() {
+  var theme = (document.getElementById('pptTheme') || {}).value || 'dark';
+  var T = _getTheme(theme);
+  [1,2,3,4,5].forEach(function(n){
+    var c = document.getElementById('slideCanvas-' + n);
+    if (!c) return;
+    var ctx = c.getContext('2d');
+    ctx.clearRect(0,0,320,180);
+    _drawSlidePreview(ctx, n, T, 320, 180);
+  });
+}
+
+function _getTheme(name) {
+  if (name === 'light') return { bg:'#f8fafc', bg2:'#eef1f5', accent:'#01A982', accent2:'#0D5DBF', text:'#1a2332', sub:'#6b7280', line:'#d1d5db', headerBg:'#01A982', headerText:'#fff' };
+  if (name === 'minimal') return { bg:'#ffffff', bg2:'#f4f6f9', accent:'#374151', accent2:'#6b7280', text:'#111827', sub:'#6b7280', line:'#e5e7eb', headerBg:'#374151', headerText:'#fff' };
+  // default: dark
+  return { bg:'#0f1624', bg2:'#1a2332', accent:'#01A982', accent2:'#4fc3f7', text:'#f1f5f9', sub:'#94a3b8', line:'#2d3748', headerBg:'#01A982', headerText:'#fff' };
+}
+
+function _drawSlidePreview(ctx, n, T, W, H) {
+  var D = DASHBOARD_DATA;
+  var overall = D.overall;
+  var months  = D.month_stats.slice().sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+
+  // Background
+  ctx.fillStyle = T.bg;
+  ctx.fillRect(0, 0, W, H);
+
+  // HPE green left bar
+  ctx.fillStyle = T.accent;
+  ctx.fillRect(0, 0, 4, H);
+
+  // Helper text draws
+  function txt(s, x, y, size, col, align, bold) {
+    ctx.font = (bold?'bold ':'')+size+'px Inter,Arial,sans-serif';
+    ctx.fillStyle = col;
+    ctx.textAlign = align || 'left';
+    ctx.fillText(s, x, y);
+  }
+
+  if (n === 1) {
+    // ── COVER ────────────────────────────────────────────────────
+    // Big gradient bar top
+    var grd = ctx.createLinearGradient(0, 0, W, 0);
+    grd.addColorStop(0, T.accent);
+    grd.addColorStop(1, T.accent2);
+    ctx.fillStyle = grd;
+    ctx.fillRect(0, 0, W, 54);
+
+    txt('HPE', 16, 30, 18, '#fff', 'left', true);
+    txt('Talent Acquisition Audit', 16, 46, 9, 'rgba(255,255,255,0.8)', 'left', false);
+
+    ctx.fillStyle = T.bg2;
+    ctx.fillRect(0, 54, W, H - 54);
+
+    txt('Executive Performance Report', 16, 82, 12, T.text, 'left', true);
+    txt('FY2026 · South 1 Region · Jan–Apr 2026', 16, 98, 8, T.sub, 'left', false);
+
+    // Big accuracy
+    ctx.fillStyle = T.accent;
+    ctx.font = 'bold 36px Inter,Arial,sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(overall.overall_accuracy + '%', W - 18, 88);
+    txt('Overall Accuracy', W - 18, 100, 8, T.sub, 'right', false);
+
+    // Divider
+    ctx.strokeStyle = T.line; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(16, 110); ctx.lineTo(W - 16, 110); ctx.stroke();
+
+    // 3 bottom stats
+    var stats = [
+      [overall.total_audits.toLocaleString(), 'Total Audits'],
+      [overall.total_pass.toLocaleString(), 'Passed'],
+      [overall.error_rate + '%', 'Error Rate']
+    ];
+    stats.forEach(function(s, i) {
+      var x = 30 + i * (W / 3);
+      txt(s[0], x, 138, 13, T.accent, 'left', true);
+      txt(s[1], x, 152, 7, T.sub, 'left', false);
+    });
+
+    txt('Generated ' + new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), W/2, H-8, 7, T.sub, 'center', false);
+
+  } else if (n === 2) {
+    // ── KPI OVERVIEW ─────────────────────────────────────────────
+    // Header bar
+    ctx.fillStyle = T.headerBg;
+    ctx.fillRect(4, 0, W-4, 26);
+    txt('KPI OVERVIEW — FY2026', 14, 17, 9, T.headerText, 'left', true);
+
+    var kpis = [
+      { label:'Overall Accuracy', val:overall.overall_accuracy + '%', col:T.accent },
+      { label:'Total Audits', val:overall.total_audits.toLocaleString(), col:T.accent2 },
+      { label:'Total Errors', val:overall.total_fail.toString(), col:'#e74c3c' },
+      { label:'Error Rate', val:overall.error_rate + '%', col:'#FF8300' }
+    ];
+    var cardW = (W - 10 - 8*3) / 4;
+    kpis.forEach(function(k, i) {
+      var cx = 10 + i * (cardW + 8);
+      ctx.fillStyle = T.bg2;
+      _roundRect(ctx, cx, 32, cardW, 38, 4);
+      ctx.fillStyle = k.col;
+      ctx.fillRect(cx, 32, cardW, 3);
+      txt(k.val, cx + cardW/2, 57, 12, k.col, 'center', true);
+      txt(k.label, cx + cardW/2, 68, 7, T.sub, 'center', false);
+    });
+
+    // Mini bar chart — monthly accuracy
+    txt('Monthly Accuracy Trend', 10, 90, 8, T.text, 'left', true);
+    var chartTop = 96, chartH = 56, chartLeft = 10, chartW2 = W - 20;
+    var minAcc = Math.min.apply(null, months.map(function(m){ return m.Accuracy; })) - 2;
+    var maxAcc = 100.5;
+    months.forEach(function(m, i) {
+      var barW2 = (chartW2 / months.length) - 6;
+      var bx = chartLeft + i * (chartW2 / months.length) + 2;
+      var barH2 = ((m.Accuracy - minAcc) / (maxAcc - minAcc)) * chartH;
+      ctx.fillStyle = m.Accuracy >= 99 ? T.accent : m.Accuracy >= 97 ? T.accent2 : '#FF8300';
+      ctx.beginPath();
+      ctx.roundRect(bx, chartTop + chartH - barH2, barW2, barH2, 2);
+      ctx.fill();
+      txt(m.Month, bx + barW2/2, chartTop + chartH + 10, 7, T.sub, 'center', false);
+      txt(m.Accuracy + '%', bx + barW2/2, chartTop + chartH - barH2 - 3, 6, T.text, 'center', false);
+    });
+
+    // Target line
+    var tY = chartTop + chartH - ((95 - minAcc) / (maxAcc - minAcc)) * chartH;
+    ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(chartLeft, tY); ctx.lineTo(chartLeft + chartW2, tY); ctx.stroke();
+    ctx.setLineDash([]);
+    txt('95% target', chartLeft + chartW2 - 40, tY - 3, 6, '#e74c3c', 'left', false);
+
+  } else if (n === 3) {
+    // ── ACCURACY TREND ────────────────────────────────────────────
+    ctx.fillStyle = T.headerBg;
+    ctx.fillRect(4, 0, W-4, 26);
+    txt('ACCURACY TREND — JAN TO APR 2026', 14, 17, 9, T.headerText, 'left', true);
+
+    // Line chart
+    var lTop = 38, lH = 100, lLeft = 36, lW = W - 46;
+    var allAccs = months.map(function(m){ return m.Accuracy; });
+    var minA = Math.min.apply(null, allAccs) - 1.5;
+    var maxA = 101;
+
+    // Grid lines
+    ctx.strokeStyle = T.line; ctx.lineWidth = 0.5;
+    [95,97,99,100].forEach(function(v) {
+      var y = lTop + lH - ((v - minA) / (maxA - minA)) * lH;
+      ctx.beginPath(); ctx.moveTo(lLeft, y); ctx.lineTo(lLeft + lW, y); ctx.stroke();
+      txt(v + '%', lLeft - 4, y + 3, 6, T.sub, 'right', false);
+    });
+
+    // Area fill
+    ctx.beginPath();
+    allAccs.forEach(function(a, i) {
+      var x = lLeft + (i / (allAccs.length - 1)) * lW;
+      var y = lTop + lH - ((a - minA) / (maxA - minA)) * lH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.lineTo(lLeft + lW, lTop + lH);
+    ctx.lineTo(lLeft, lTop + lH);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(1,169,130,0.12)';
+    ctx.fill();
+
+    // Line
+    ctx.strokeStyle = T.accent; ctx.lineWidth = 2; ctx.setLineDash([]);
+    ctx.beginPath();
+    allAccs.forEach(function(a, i) {
+      var x = lLeft + (i / (allAccs.length - 1)) * lW;
+      var y = lTop + lH - ((a - minA) / (maxA - minA)) * lH;
+      i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+
+    // Points + labels
+    allAccs.forEach(function(a, i) {
+      var x = lLeft + (i / (allAccs.length - 1)) * lW;
+      var y = lTop + lH - ((a - minA) / (maxA - minA)) * lH;
+      ctx.fillStyle = T.accent;
+      ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
+      txt(months[i].Month, x, lTop + lH + 11, 7, T.sub, 'center', false);
+    });
+
+    // 95% target dashed line
+    var tY2 = lTop + lH - ((95 - minA) / (maxA - minA)) * lH;
+    ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+    ctx.beginPath(); ctx.moveTo(lLeft, tY2); ctx.lineTo(lLeft + lW, tY2); ctx.stroke();
+    ctx.setLineDash([]);
+
+    // Trend label
+    var slope = allAccs[allAccs.length-1] - allAccs[0];
+    txt((slope >= 0 ? '\u25b2 Improving' : '\u25bc Declining') + '  Slope: ' + slope.toFixed(2) + '% over period',
+        lLeft + lW/2, lTop + lH + 24, 7, slope >= 0 ? T.accent : '#e74c3c', 'center', true);
+
+  } else if (n === 4) {
+    // ── RISK & ERRORS ─────────────────────────────────────────────
+    ctx.fillStyle = T.headerBg;
+    ctx.fillRect(4, 0, W-4, 26);
+    txt('TOP ERRORS & RISK SIGNALS', 14, 17, 9, T.headerText, 'left', true);
+
+    var topErrors = DASHBOARD_DATA.top_errors.filter(function(e){ return e.Opportunity_Fail > 0; }).slice(0, 5);
+
+    // Horizontal bar chart
+    var bTop = 34, bH = 18, bGap = 8, bLeft = 130, bW = W - bLeft - 12;
+    var maxFail = Math.max.apply(null, topErrors.map(function(e){ return e.Fail_Pct; }));
+
+    topErrors.forEach(function(e, i) {
+      var y = bTop + i * (bH + bGap);
+      var barLen = (e.Fail_Pct / maxFail) * bW;
+      var col = e.Fail_Pct >= 20 ? '#e74c3c' : e.Fail_Pct >= 5 ? '#FF8300' : T.accent;
+
+      // param label
+      var label = e.Parameter.length > 20 ? e.Parameter.substring(0, 20) + '\u2026' : e.Parameter;
+      txt(label, bLeft - 4, y + 13, 7, T.text, 'right', false);
+
+      // bar
+      ctx.fillStyle = T.bg2;
+      _roundRect(ctx, bLeft, y + 2, bW, bH - 4, 3);
+      ctx.fillStyle = col;
+      if (barLen > 3) {
+        _roundRect(ctx, bLeft, y + 2, barLen, bH - 4, 3);
+      }
+      txt(e.Fail_Pct + '%', bLeft + barLen + 4, y + 13, 7, col, 'left', true);
+    });
+
+    // Risk summary bottom
+    var recs = PERF_DATA.recruiter_monthly;
+    var atRisk = recs.filter(function(r){ return computeRiskScore(r).score >= 45; }).length;
+    var y2 = bTop + topErrors.length * (bH + bGap) + 10;
+    ctx.strokeStyle = T.line; ctx.lineWidth = 0.5; ctx.beginPath();
+    ctx.moveTo(10, y2); ctx.lineTo(W-10, y2); ctx.stroke();
+    y2 += 12;
+
+    [[atRisk + ' at risk', T.accent === '#01A982' ? '#e74c3c' : T.accent],
+     [DASHBOARD_DATA.top_errors.filter(function(e){ return e.Fail_Pct >= 3; }).length + ' high-param', '#FF8300'],
+     [DASHBOARD_DATA.overall.error_rate + '% error rate', T.sub]].forEach(function(item, i) {
+      txt(item[0], 14 + i * 100, y2 + 10, 8, item[1], 'left', true);
+    });
+
+  } else if (n === 5) {
+    // ── AI INSIGHTS ───────────────────────────────────────────────
+    ctx.fillStyle = T.headerBg;
+    ctx.fillRect(4, 0, W-4, 26);
+    txt('AI INSIGHTS & RECOMMENDATIONS', 14, 17, 9, T.headerText, 'left', true);
+
+    var insights = [
+      { icon:'\u26a0', col:'#e74c3c', title:'April Accuracy Dip', body:'Accuracy declined to 97.25% in Apr (from 99.43% in Feb). Downward trajectory requires corrective action.' },
+      { icon:'\ud83d\udd34', col:'#FF8300', title:'Target Start Date — 89.8% Fail', body:'Single parameter accounts for 41.4% of all errors. Immediate review required.' },
+      { icon:'\ud83d\udcca', col:T.accent, title:'Recruiter Performance Gap', body:'Kusuma K at 88.04% — 3 recruiters significantly below 95% team benchmark.' },
+      { icon:'\u2714', col:T.accent, title:'Apr W4 Recovery', body:'Accuracy recovered to 97.87% in W4 after W3 spike to 93.62% — isolated incident confirmed.' }
+    ];
+
+    insights.forEach(function(ins, i) {
+      var y3 = 34 + i * 35;
+      ctx.fillStyle = ins.col + '22';
+      ctx.beginPath(); ctx.roundRect(10, y3, W-20, 30, 5); ctx.fill();
+      ctx.fillStyle = ins.col;
+      ctx.beginPath(); ctx.roundRect(10, y3, 3, 30, [5,0,0,5]); ctx.fill();
+      txt(ins.title, 20, y3 + 13, 8, T.text, 'left', true);
+      txt(ins.body, 20, y3 + 24, 7, T.sub, 'left', false);
+    });
+  }
+}
+
+function _roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fill();
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PDF GENERATOR
+// ══════════════════════════════════════════════════════════════════
+function runExportPDF() {
+  var btn = document.getElementById('btnRunPDF');
+  if (btn) btn.disabled = true;
+  closeExportModal();
+
+  var quality = parseFloat((document.getElementById('pdfQuality') || {}).value || '2');
+  var filename = ((document.getElementById('pdfFilename') || {}).value || 'HPE_Audit_FY2026_Report').replace(/\s+/g,'_') + '.pdf';
+
+  var sec = {
+    cover:      !document.getElementById('pdfSec-cover')      || document.getElementById('pdfSec-cover').checked,
+    kpi:        !document.getElementById('pdfSec-kpi')        || document.getElementById('pdfSec-kpi').checked,
+    gauge:      !document.getElementById('pdfSec-gauge')      || document.getElementById('pdfSec-gauge').checked,
+    insights:   !document.getElementById('pdfSec-insights')   || document.getElementById('pdfSec-insights').checked,
+    trend:      !document.getElementById('pdfSec-trend')      || document.getElementById('pdfSec-trend').checked,
+    errors:     !document.getElementById('pdfSec-errors')     || document.getElementById('pdfSec-errors').checked,
+    recruiters: !document.getElementById('pdfSec-recruiters') || document.getElementById('pdfSec-recruiters').checked,
+    monthly:    !document.getElementById('pdfSec-monthly')    || document.getElementById('pdfSec-monthly').checked
+  };
+
+  showProgress('\ud83d\udcc4', 'Generating PDF Report\u2026', 'Initialising\u2026');
+
+  setTimeout(async function() {
+    try {
+      if (!jsPDF) { alert('jsPDF not loaded yet — please wait a moment and try again.'); hideProgress(); if (btn) btn.disabled = false; return; }
+
+      var doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+      var PW = 210, PH = 297;
+      var margin = 16, contentW = PW - margin*2;
+      var D = DASHBOARD_DATA;
+      var months = D.month_stats.slice().sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+
+      // ── helpers ────────────────────────────────────────────────
+      function addPage() { doc.addPage(); return margin; }
+      function hline(y, col) {
+        doc.setDrawColor(col||'#e5e7eb'); doc.setLineWidth(0.3);
+        doc.line(margin, y, PW - margin, y);
+        return y + 4;
+      }
+      function badge(x, y, text, bgHex, textHex) {
+        var tw = doc.getTextWidth(text);
+        doc.setFillColor(bgHex); doc.roundedRect(x, y-3.5, tw+8, 5.5, 1.5, 1.5, 'F');
+        doc.setTextColor(textHex); doc.setFontSize(7); doc.setFont('helvetica','bold');
+        doc.text(text, x+4, y); doc.setTextColor('#1a2332');
+      }
+      function secHeader(doc2, title, icon, y) {
+        doc2.setFillColor('#f0fff8'); doc2.roundedRect(margin, y, contentW, 8, 2, 2, 'F');
+        doc2.setFillColor('#01A982'); doc2.roundedRect(margin, y, 3, 8, 1, 1, 'F');
+        doc2.setFontSize(9); doc2.setFont('helvetica','bold'); doc2.setTextColor('#01A982');
+        doc2.text(icon + '  ' + title, margin + 6, y + 5.5);
+        doc2.setTextColor('#1a2332'); return y + 12;
+      }
+
+      var cy = margin; // current Y
+      var step = 0, totalSteps = Object.keys(sec).filter(function(k){ return sec[k]; }).length + 1;
+
+      function progress(msg) {
+        step++;
+        setExportProgress('\ud83d\udcc4', 'Generating PDF\u2026', msg, (step/totalSteps)*90);
+      }
+
+      // ── PAGE 1: COVER ──────────────────────────────────────────
+      if (sec.cover) {
+        progress('Building cover page\u2026');
+        // Full-width green header band
+        doc.setFillColor('#01A982');
+        doc.rect(0, 0, PW, 56, 'F');
+        // HPE branding
+        doc.setFontSize(28); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+        doc.text('HPE', margin, 26);
+        doc.setFontSize(10); doc.setFont('helvetica','normal');
+        doc.text('Hewlett Packard Enterprise', margin, 34);
+        doc.setFontSize(8); doc.setTextColor('rgba(255,255,255,0.7)');
+        doc.text('Talent Acquisition — Audit Quality Programme', margin, 42);
+
+        // Report title block
+        doc.setFillColor('#f8fafc'); doc.rect(0, 56, PW, PH - 56, 'F');
+        doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.setTextColor('#0f1624');
+        doc.text('Audit Performance Report', margin, 80);
+        doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.setTextColor('#6b7280');
+        doc.text('FY2026  ·  South 1 Region  ·  Jan – Apr 2026', margin, 90);
+
+        hline(96, '#e5e7eb');
+
+        // Big KPI block
+        var kpiBoxes = [
+          { label:'Overall Accuracy', value: D.overall.overall_accuracy + '%', col:'#01A982' },
+          { label:'Total Audits', value: D.overall.total_audits.toLocaleString(), col:'#0D5DBF' },
+          { label:'Error Rate', value: D.overall.error_rate + '%', col:'#e74c3c' },
+          { label:'Total Errors', value: D.overall.total_fail.toString(), col:'#FF8300' }
+        ];
+        var boxW = (contentW - 9) / 4;
+        kpiBoxes.forEach(function(k, i) {
+          var bx = margin + i*(boxW+3);
+          doc.setFillColor('#ffffff'); doc.roundedRect(bx, 104, boxW, 24, 2, 2, 'F');
+          doc.setDrawColor(k.col); doc.setLineWidth(0.5); doc.roundedRect(bx, 104, boxW, 24, 2, 2, 'S');
+          doc.setFillColor(k.col); doc.roundedRect(bx, 104, boxW, 2, 1, 1, 'F');
+          doc.setFontSize(14); doc.setFont('helvetica','bold'); doc.setTextColor(k.col);
+          doc.text(k.value, bx + boxW/2, 118, {align:'center'});
+          doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor('#6b7280');
+          doc.text(k.label, bx + boxW/2, 124, {align:'center'});
+        });
+
+        // Monthly mini-table
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor('#1a2332');
+        doc.text('Monthly Performance Snapshot', margin, 144);
+        var tY3 = 148;
+        var cols = ['Month','Audits','Pass','Fail','Accuracy','Error Rate','Status'];
+        var colWs = [22,26,22,18,26,26,30];
+        // Header row
+        doc.setFillColor('#0f1624');
+        doc.rect(margin, tY3, contentW, 7, 'F');
+        var tx = margin + 2;
+        cols.forEach(function(c, i) {
+          doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+          doc.text(c, tx, tY3+5);
+          tx += colWs[i];
+        });
+        tY3 += 7;
+        months.forEach(function(m, mi) {
+          var rowBg = mi % 2 === 0 ? '#f8fafc' : '#ffffff';
+          doc.setFillColor(rowBg); doc.rect(margin, tY3, contentW, 7, 'F');
+          var prev = mi > 0 ? months[mi-1].Accuracy : null;
+          var momStr = prev ? (m.Accuracy >= prev ? '+' : '') + (m.Accuracy - prev).toFixed(2) + '%' : '—';
+          var status = m.Accuracy >= 99 ? 'Excellent' : m.Accuracy >= 97 ? 'On Track' : 'Watch';
+          var vals = [m.Month+' 2026', m.Opportunity_Count.toLocaleString(), m.Opportunity_Pass.toLocaleString(),
+                      m.Opportunity_Fail.toString(), m.Accuracy+'%', m.Error_Rate+'%', status];
+          var vx = margin + 2;
+          vals.forEach(function(v, vi) {
+            var col2 = '#1a2332';
+            if (vi === 4) col2 = m.Accuracy >= 99 ? '#01A982' : m.Accuracy >= 97 ? '#0D5DBF' : '#e74c3c';
+            if (vi === 6) col2 = status === 'Excellent' ? '#01A982' : status === 'On Track' ? '#0D5DBF' : '#e74c3c';
+            doc.setFontSize(7); doc.setFont('helvetica', vi===0?'bold':'normal'); doc.setTextColor(col2);
+            doc.text(v, vx, tY3+5);
+            vx += colWs[vi];
+          });
+          tY3 += 7;
+        });
+
+        // Footer
+        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor('#94a3b8');
+        doc.text('Generated: ' + new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric',hour:'2-digit',minute:'2-digit'}), margin, PH-10);
+        doc.text('HPE Talent Acquisition · Confidential', PW-margin, PH-10, {align:'right'});
+        doc.setDrawColor('#e5e7eb'); doc.setLineWidth(0.3); doc.line(margin, PH-14, PW-margin, PH-14);
+      }
+
+      // ── PAGE 2: KPI + GAUGES ───────────────────────────────────
+      if (sec.kpi || sec.gauge) {
+        progress('Capturing KPI dashboard\u2026');
+        doc.addPage(); cy = margin;
+
+        // Page header
+        doc.setFillColor('#0f1624'); doc.rect(0, 0, PW, 14, 'F');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+        doc.text('KPI DASHBOARD', margin, 9.5);
+        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor('#94a3b8');
+        doc.text('FY2026 · ' + new Date().toLocaleDateString(), PW - margin, 9.5, {align:'right'});
+        cy = 20;
+
+        if (sec.kpi) {
+          cy = secHeader(doc, 'Key Performance Indicators', '\u25cb', cy);
+          var kpiAll = [
+            { label:'Overall Accuracy', value:D.overall.overall_accuracy+'%', sub:'Target: 95.00%', col:'#01A982' },
+            { label:'Total Audits', value:D.overall.total_audits.toLocaleString(), sub:'FY2026 cumulative', col:'#0D5DBF' },
+            { label:'Passed Audits', value:D.overall.total_pass.toLocaleString(), sub:'97.69% pass rate', col:'#01A982' },
+            { label:'Total Errors', value:D.overall.total_fail.toString(), sub:'Across 12 params', col:'#e74c3c' },
+            { label:'Error Rate', value:D.overall.error_rate+'%', sub:'vs 5% target', col:'#FF8300' },
+            { label:'Months Tracked', value:'4', sub:'Jan–Apr 2026', col:'#6b7280' }
+          ];
+          var kW = (contentW-10)/3;
+          kpiAll.forEach(function(k, i) {
+            var bx = margin + (i%3)*(kW+5);
+            var by = cy + Math.floor(i/3)*24;
+            doc.setFillColor('#f8fafc'); doc.roundedRect(bx, by, kW, 18, 2, 2, 'F');
+            doc.setFillColor(k.col); doc.roundedRect(bx, by, kW, 2, 1, 1, 'F');
+            doc.setFontSize(13); doc.setFont('helvetica','bold'); doc.setTextColor(k.col);
+            doc.text(k.value, bx+kW/2, by+12, {align:'center'});
+            doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor('#6b7280');
+            doc.text(k.label, bx+kW/2, by+16.5, {align:'center'});
+          });
+          cy += Math.ceil(kpiAll.length/3)*24 + 8;
+        }
+
+        if (sec.gauge) {
+          cy = secHeader(doc, 'Accuracy Gauges', '\u25cb', cy);
+          // Capture gauges via html2canvas
+          var gaugeEl = document.querySelector('.gauge-grid');
+          if (gaugeEl) {
+            try {
+              var gaugeCanvas = await html2canvas(gaugeEl, { scale: quality, backgroundColor: '#ffffff', useCORS: true, logging: false });
+              var gaugeImg = gaugeCanvas.toDataURL('image/jpeg', 0.92);
+              var gh = (gaugeEl.offsetHeight / gaugeEl.offsetWidth) * contentW;
+              doc.addImage(gaugeImg, 'JPEG', margin, cy, contentW, Math.min(gh, 50));
+              cy += Math.min(gh, 50) + 8;
+            } catch(e) { /* skip if capture fails */ }
+          }
+        }
+      }
+
+      // ── PAGE 3: AI INSIGHTS ────────────────────────────────────
+      if (sec.insights) {
+        progress('Writing AI insights\u2026');
+        doc.addPage(); cy = margin;
+        doc.setFillColor('#0f1624'); doc.rect(0,0,PW,14,'F');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+        doc.text('AI INSIGHTS', margin, 9.5);
+        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor('#94a3b8');
+        doc.text('Auto-generated intelligence · FY2026', PW-margin, 9.5, {align:'right'});
+        cy = 20;
+
+        cy = secHeader(doc, 'Auto-Generated Intelligence — FY2026 Snapshot', '\ud83e\udd16', cy);
+
+        var insightData = [
+          { type:'alert', icon:'\u26a0', title:'Accuracy Dip in April — Action Required',
+            body:'Accuracy declined from 99.43% in February to 97.25% in April (−2.18%), marking the lowest point in FY2026. This downward trajectory from Feb→Mar (98.49%)→Apr (97.25%) signals a worsening trend.',
+            rec:'Recommendation: Root cause analysis and corrective action to reverse the decline before it breaches the 95% target.', col:'#e74c3c', bg:'#fff5f5' },
+          { type:'critical', icon:'\ud83d\udd34', title:'Target Start Date — Critical Anomaly (89.83% Fail Rate)',
+            body:'The "Target start date" parameter has an alarming 89.83% failure rate (53 failures out of 59 audits). This single parameter accounts for 41.4% of all FY2026 errors.',
+            rec:'Recommendation: Immediate process review and targeted training for all recruiters on this parameter.', col:'#FF8300', bg:'#fff8f0' },
+          { type:'warning', icon:'\u26a0', title:'Recruiter Performance Gap — 3 Below 88–92%',
+            body:'Kusuma K (88.04%), Noor Mohammed M (90.91%), and Divya S (91.67%) significantly underperform vs team average of ~98.5%. These recruiters handle 800+ audits cumulatively.',
+            rec:'Recommendation: Structured 30-day coaching programme with bi-weekly checkpoint reviews.', col:'#0D5DBF', bg:'#f0f4ff' },
+          { type:'info', icon:'\ud83d\udcca', title:'Apr W3 Spike Detected — Isolated Incident',
+            body:'Week 3 of April saw accuracy drop to 93.62% — the lowest weekly point in FY. "Target start date" errors (43 failures that week) drove this anomaly. W4 recovered to 97.87%.',
+            rec:'Recommendation: Monitor W1/W2 May closely. Assign a dedicated QA checker for target start date audits.', col:'#01A982', bg:'#f0fff8' }
+        ];
+
+        insightData.forEach(function(ins) {
+          if (cy > PH - 60) { doc.addPage(); cy = margin; }
+          doc.setFillColor(ins.bg); doc.roundedRect(margin, cy, contentW, 32, 3, 3, 'F');
+          doc.setFillColor(ins.col); doc.roundedRect(margin, cy, 3, 32, 2, 2, 'F');
+          doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(ins.col);
+          doc.text(ins.icon + '  ' + ins.title, margin+7, cy+7);
+          doc.setFont('helvetica','normal'); doc.setTextColor('#374151'); doc.setFontSize(7);
+          var bodyLines = doc.splitTextToSize(ins.body, contentW-14);
+          doc.text(bodyLines.slice(0,2), margin+7, cy+14);
+          doc.setTextColor(ins.col); doc.setFont('helvetica','italic');
+          var recLines = doc.splitTextToSize(ins.rec, contentW-14);
+          doc.text(recLines[0], margin+7, cy+26);
+          cy += 36;
+        });
+      }
+
+      // ── PAGE 4: TREND CHART (html2canvas) ─────────────────────
+      if (sec.trend) {
+        progress('Capturing trend charts\u2026');
+        var sparkEl = document.getElementById('sparklineChart');
+        if (sparkEl && sparkEl.parentElement) {
+          try {
+            var sparkCanvas2 = await html2canvas(sparkEl.parentElement, { scale: quality, backgroundColor: '#ffffff', useCORS: true, logging: false });
+            doc.addPage(); cy = margin;
+            doc.setFillColor('#0f1624'); doc.rect(0,0,PW,14,'F');
+            doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+            doc.text('ACCURACY TRENDS', margin, 9.5);
+            cy = 20;
+            cy = secHeader(doc, '16-Week Accuracy Trend — FY2026', '\ud83d\udcc8', cy);
+            var sparkH = (sparkEl.parentElement.offsetHeight / sparkEl.parentElement.offsetWidth) * contentW;
+            doc.addImage(sparkCanvas2.toDataURL('image/jpeg',0.92), 'JPEG', margin, cy, contentW, Math.min(sparkH, 80));
+            cy += Math.min(sparkH, 80) + 8;
+          } catch(e) { /* skip */ }
+        }
+      }
+
+      // ── PAGE 4/5: TOP ERRORS TABLE ─────────────────────────────
+      if (sec.errors) {
+        progress('Writing error analysis\u2026');
+        if (cy > PH - 80) { doc.addPage(); cy = margin; }
+        else if (!sec.trend) { doc.addPage(); cy = margin; }
+        doc.setFillColor('#0f1624'); doc.rect(0,0,PW,14,'F');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+        doc.text('ERROR ANALYSIS', margin, 9.5);
+        cy = cy < 20 ? 20 : cy;
+        cy = secHeader(doc, 'Top Error Parameters — FY2026', '\u26a0', cy);
+
+        var errCols = ['Parameter','Failures','Total Audits','Fail Rate %','Severity'];
+        var errWidths = [72,22,28,26,30];
+        doc.setFillColor('#1a2332'); doc.rect(margin, cy, contentW, 7, 'F');
+        var ex2 = margin + 2;
+        errCols.forEach(function(c, ci) {
+          doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+          doc.text(c, ex2, cy+5); ex2 += errWidths[ci];
+        });
+        cy += 7;
+        DASHBOARD_DATA.top_errors.filter(function(e){ return e.Opportunity_Fail > 0; }).forEach(function(e, ei) {
+          var sev = e.Fail_Pct >= 20 ? 'Critical' : e.Fail_Pct >= 5 ? 'High' : e.Fail_Pct >= 2 ? 'Medium' : 'Low';
+          var sevCol = e.Fail_Pct >= 20 ? '#e74c3c' : e.Fail_Pct >= 5 ? '#FF8300' : e.Fail_Pct >= 2 ? '#f59e0b' : '#01A982';
+          doc.setFillColor(ei%2===0?'#f8fafc':'#ffffff'); doc.rect(margin, cy, contentW, 7, 'F');
+          var vx2 = margin+2;
+          [e.Parameter, e.Opportunity_Fail.toString(), e.Opportunity_Count.toString(), e.Fail_Pct+'%', sev].forEach(function(v, vi) {
+            var vc = vi===3||vi===4 ? sevCol : '#1a2332';
+            doc.setFontSize(7); doc.setFont('helvetica', vi===0?'bold':'normal'); doc.setTextColor(vc);
+            doc.text(vi===0 ? (v.length>32?v.substring(0,32)+'\u2026':v) : v, vx2, cy+5);
+            vx2 += errWidths[vi];
+          });
+          cy += 7;
+        });
+        cy += 6;
+      }
+
+      // ── PAGE 5: RECRUITER TABLE ────────────────────────────────
+      if (sec.recruiters) {
+        progress('Writing recruiter table\u2026');
+        doc.addPage(); cy = margin;
+        doc.setFillColor('#0f1624'); doc.rect(0,0,PW,14,'F');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+        doc.text('RECRUITER PERFORMANCE', margin, 9.5);
+        cy = 20;
+        cy = secHeader(doc, 'Recruiter Performance — Bottom Performers', '\ud83d\udc65', cy);
+
+        var recCols = ['Recruiter','PM','Audits','Errors','Accuracy %','Trend','Status'];
+        var recWidths = [44,36,18,16,26,20,18];
+        doc.setFillColor('#1a2332'); doc.rect(margin, cy, contentW, 7, 'F');
+        var rx = margin+2;
+        recCols.forEach(function(c, ci) {
+          doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+          doc.text(c, rx, cy+5); rx += recWidths[ci];
+        });
+        cy += 7;
+
+        PERF_DATA.recruiter_monthly.slice().sort(function(a,b){
+          return (a.apr||a.mar||a.feb||a.jan||0) - (b.apr||b.mar||b.feb||b.jan||0);
+        }).forEach(function(r, ri) {
+          var acc = r.apr||r.mar||r.feb||r.jan||0;
+          var reg2 = linearRegression([r.jan,r.feb,r.mar,r.apr].filter(function(v){return v!==null;}));
+          var trendStr = reg2.slope > 0.15 ? '\u25b2 Up' : reg2.slope < -0.15 ? '\u25bc Down' : '\u2192 Stable';
+          var status2 = acc >= 99 ? 'Excellent' : acc >= 97 ? 'On Track' : acc >= 95 ? 'Watch' : 'Critical';
+          var acCol = acc >= 99 ? '#01A982' : acc >= 97 ? '#0D5DBF' : acc >= 95 ? '#FF8300' : '#e74c3c';
+
+          // Find PM
+          var pmName = 'Unknown';
+          Object.keys(PERF_DATA.pm_recruiters).forEach(function(pm) {
+            if (PERF_DATA.pm_recruiters[pm].indexOf(r.name) !== -1) pmName = pm.split(' ')[0];
+          });
+
+          if (cy > PH - 20) { doc.addPage(); cy = margin + 14; }
+          doc.setFillColor(ri%2===0?'#f8fafc':'#ffffff'); doc.rect(margin, cy, contentW, 7, 'F');
+          var rvx = margin+2;
+          [r.name, pmName, r.audits.toString(), r.errors.toString(), acc+'%', trendStr, status2].forEach(function(v, vi) {
+            var vc = vi===4 ? acCol : vi===6 ? acCol : '#1a2332';
+            doc.setFontSize(7); doc.setFont('helvetica', vi===0?'bold':'normal'); doc.setTextColor(vc);
+            doc.text(v.length>12&&vi<2 ? v.substring(0,12)+'\u2026':v, rvx, cy+5);
+            rvx += recWidths[vi];
+          });
+          cy += 7;
+        });
+      }
+
+      // ── FINAL PAGE: FOOTER / SIGN-OFF ──────────────────────────
+      progress('Finalising PDF\u2026');
+      doc.addPage(); cy = PH / 2 - 20;
+      doc.setFillColor('#01A982'); doc.rect(0, 0, PW, 8, 'F');
+      doc.setFillColor('#f8fafc'); doc.rect(0, 8, PW, PH-8, 'F');
+      doc.setFontSize(16); doc.setFont('helvetica','bold'); doc.setTextColor('#0f1624');
+      doc.text('End of Report', PW/2, cy, {align:'center'});
+      doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor('#6b7280');
+      doc.text('HPE Talent Acquisition Quality Programme — FY2026', PW/2, cy+10, {align:'center'});
+      doc.text('South 1 Region · Confidential · For Internal Use Only', PW/2, cy+18, {align:'center'});
+
+      setExportProgress('\ud83d\udcc4', 'Download Ready!', 'Saving file\u2026', 100);
+      setTimeout(function() {
+        doc.save(filename);
+        hideProgress();
+        if (btn) btn.disabled = false;
+        showToast('success', '\u2713 PDF exported: ' + filename);
+      }, 400);
+
+    } catch(err) {
+      console.error('PDF export error:', err);
+      hideProgress();
+      if (btn) btn.disabled = false;
+      showToast('error', 'PDF export failed: ' + (err.message || err));
+    }
+  }, 50);
+}
+
+// ══════════════════════════════════════════════════════════════════
+// PPT GENERATOR
+// ══════════════════════════════════════════════════════════════════
+function runExportPPT() {
+  var btn = document.getElementById('btnRunPPT');
+  if (btn) btn.disabled = true;
+  closeExportModal();
+
+  var filename = ((document.getElementById('pptFilename') || {}).value || 'HPE_Audit_FY2026_Deck').replace(/\s+/g,'_') + '.pptx';
+  var theme = (document.getElementById('pptTheme') || {}).value || 'dark';
+  var selected = [];
+  [1,2,3,4,5].forEach(function(n){
+    var t = document.getElementById('slideThumb-' + n);
+    if (t && t.classList.contains('selected')) selected.push(n);
+  });
+  if (!selected.length) { showToast('error','No slides selected'); if(btn)btn.disabled=false; return; }
+
+  if (!window.PptxGenJS) { showToast('error','PptxGenJS not loaded yet — please wait a moment'); if(btn)btn.disabled=false; return; }
+
+  showProgress('\ud83d\udcca', 'Generating PowerPoint\u2026', 'Initialising slides\u2026');
+
+  setTimeout(function(){
+    try {
+      var pptx = new PptxGenJS();
+      pptx.layout  = 'LAYOUT_WIDE'; // 13.33 x 7.5 in
+      pptx.author  = 'HPE TA Quality Programme';
+      pptx.company = 'Hewlett Packard Enterprise';
+      pptx.subject = 'Audit Performance Report FY2026';
+      pptx.title   = 'HPE Audit Performance Report FY2026';
+
+      var T = _getTheme(theme);
+      var D = DASHBOARD_DATA;
+      var months = D.month_stats.slice().sort(function(a,b){ return a.Month_Number-b.Month_Number; });
+      var total = selected.length;
+      var done = 0;
+
+      selected.forEach(function(n) {
+        done++;
+        setExportProgress('\ud83d\udcca','Building slides\u2026','Slide '+n+' of '+total+'\u2026', 10+(done/total)*75);
+
+        var slide = pptx.addSlide();
+
+        // ── Slide background ──────────────────────────────────────
+        slide.background = { color: T.bg.replace('#','') };
+
+        // ── Left accent bar ───────────────────────────────────────
+        slide.addShape(pptx.ShapeType.rect, {
+          x:0, y:0, w:0.05, h:'100%',
+          fill:{ color: T.accent.replace('#','') }, line:{ type:'none' }
+        });
+
+        // ── Slide-number badge (bottom right) ─────────────────────
+        slide.addText(n + '/' + total, {
+          x:'92%', y:'92%', w:'7%', h:'5%',
+          fontSize:8, color:'6b7280', align:'right', fontFace:'Calibri'
+        });
+
+        // Footer line
+        slide.addShape(pptx.ShapeType.rect, {
+          x:0.1, y:7.2, w:13.13, h:0.02,
+          fill:{ color: T.line.replace('#','') }, line:{ type:'none' }
+        });
+        slide.addText('HPE Talent Acquisition · Audit Performance FY2026 · Confidential', {
+          x:0.1, y:7.25, w:13.13, h:0.2,
+          fontSize:7, color:'94a3b8', align:'center', fontFace:'Calibri'
+        });
+
+        if (n === 1) {
+          // ── COVER ──────────────────────────────────────────────
+          // Green header block
+          slide.addShape(pptx.ShapeType.rect, {
+            x:0, y:0, w:'100%', h:2.8,
+            fill:{ type:'gradient', stops:[
+              { position:0, color: T.accent.replace('#','') },
+              { position:100, color: T.accent2.replace('#','').replace('#','') }
+            ]}, line:{ type:'none' }
+          });
+          slide.addText('HPE', { x:0.4, y:0.3, w:3, h:0.9, fontSize:54, bold:true, color:'FFFFFF', fontFace:'Calibri' });
+          slide.addText('Hewlett Packard Enterprise · Talent Acquisition', { x:0.4, y:1.2, w:7, h:0.4, fontSize:14, color:'FFFFFF', fontFace:'Calibri', transparency:20 });
+          slide.addText('Audit Quality Programme', { x:0.4, y:1.65, w:7, h:0.4, fontSize:11, color:'FFFFFF', fontFace:'Calibri', transparency:35 });
+
+          // Report title
+          slide.addText('Audit Performance Report', { x:0.4, y:3.1, w:9, h:0.65, fontSize:28, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
+          slide.addText('FY2026  ·  South 1 Region  ·  Jan – Apr 2026', { x:0.4, y:3.78, w:9, h:0.4, fontSize:13, color:T.sub.replace('#',''), fontFace:'Calibri' });
+
+          // Divider
+          slide.addShape(pptx.ShapeType.rect, { x:0.4, y:4.25, w:12.5, h:0.02, fill:{color:T.line.replace('#','')}, line:{type:'none'} });
+
+          // 4 KPI boxes
+          var ks = [
+            { v:D.overall.overall_accuracy+'%', l:'Overall Accuracy', c:T.accent.replace('#','') },
+            { v:D.overall.total_audits.toLocaleString(), l:'Total Audits', c:'0D5DBF' },
+            { v:D.overall.total_fail.toString(), l:'Total Errors', c:'e74c3c' },
+            { v:D.overall.error_rate+'%', l:'Error Rate', c:'FF8300' }
+          ];
+          ks.forEach(function(k, i) {
+            var bx = 0.4 + i * 3.2;
+            slide.addShape(pptx.ShapeType.rect, { x:bx, y:4.4, w:2.9, h:1.3, fill:{color:'1a2332'}, line:{type:'none'}, rounding:'0.08' });
+            slide.addShape(pptx.ShapeType.rect, { x:bx, y:4.4, w:2.9, h:0.08, fill:{color:k.c}, line:{type:'none'} });
+            slide.addText(k.v, { x:bx, y:4.52, w:2.9, h:0.55, fontSize:24, bold:true, color:k.c, align:'center', fontFace:'Calibri' });
+            slide.addText(k.l, { x:bx, y:5.08, w:2.9, h:0.25, fontSize:9, color:'94a3b8', align:'center', fontFace:'Calibri' });
+          });
+
+          slide.addText('Generated: ' + new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}), {
+            x:0.4, y:6.0, w:12.5, h:0.3, fontSize:8, color:'6b7280', align:'center', fontFace:'Calibri'
+          });
+
+        } else if (n === 2) {
+          // ── KPI OVERVIEW ────────────────────────────────────────
+          slide.addText('KPI Overview', { x:0.15, y:0.15, w:9, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
+          slide.addText('FY2026 · HPE Talent Acquisition · South 1 Region', { x:0.15, y:0.65, w:9, h:0.3, fontSize:10, color:T.sub.replace('#',''), fontFace:'Calibri' });
+
+          // 6 KPI tiles
+          var kpi6 = [
+            { v:D.overall.overall_accuracy+'%', l:'Overall Accuracy', sub:'Target 95%', c:T.accent.replace('#','') },
+            { v:D.overall.total_audits.toLocaleString(), l:'Total Audits', sub:'FY2026', c:'0D5DBF' },
+            { v:D.overall.total_pass.toLocaleString(), l:'Passed Audits', sub:'97.69% rate', c:T.accent.replace('#','') },
+            { v:D.overall.total_fail.toString(), l:'Total Errors', sub:'12 parameters', c:'e74c3c' },
+            { v:D.overall.error_rate+'%', l:'Error Rate', sub:'vs 5% target', c:'FF8300' },
+            { v:'4', l:'Months Tracked', sub:'Jan–Apr 2026', c:'6b7280' }
+          ];
+          kpi6.forEach(function(k, i) {
+            var col2 = i % 3, row2 = Math.floor(i/3);
+            var bx = 0.15 + col2 * 4.4, by = 1.05 + row2 * 2.3;
+            slide.addShape(pptx.ShapeType.rect, { x:bx, y:by, w:4.1, h:2.0, fill:{color:T.bg2.replace('#','')}, line:{type:'none'}, rounding:'0.1' });
+            slide.addShape(pptx.ShapeType.rect, { x:bx, y:by, w:4.1, h:0.1, fill:{color:k.c}, line:{type:'none'} });
+            slide.addText(k.v, { x:bx, y:by+0.3, w:4.1, h:0.9, fontSize:30, bold:true, color:k.c, align:'center', fontFace:'Calibri' });
+            slide.addText(k.l, { x:bx, y:by+1.22, w:4.1, h:0.3, fontSize:11, bold:true, color:T.text.replace('#',''), align:'center', fontFace:'Calibri' });
+            slide.addText(k.sub, { x:bx, y:by+1.55, w:4.1, h:0.25, fontSize:9, color:T.sub.replace('#',''), align:'center', fontFace:'Calibri' });
+          });
+
+        } else if (n === 3) {
+          // ── ACCURACY TREND ──────────────────────────────────────
+          slide.addText('Accuracy Trend', { x:0.15, y:0.15, w:10, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
+          slide.addText('Month-over-month accuracy · FY2026 · Jan–Apr 2026', { x:0.15, y:0.65, w:10, h:0.3, fontSize:10, color:T.sub.replace('#',''), fontFace:'Calibri' });
+
+          // Month table
+          var mCols = ['Month','Audits','Pass','Fail','Accuracy','Error Rate','MoM','Status'];
+          var mWidths = [1.4,1.2,1.0,0.8,1.3,1.2,1.1,1.3];
+          var tStartY = 1.05;
+          // Header
+          mCols.forEach(function(c, ci) {
+            var bx3 = 0.15 + mWidths.slice(0,ci).reduce(function(a,b){return a+b;},0);
+            slide.addShape(pptx.ShapeType.rect, { x:bx3, y:tStartY, w:mWidths[ci]-0.05, h:0.38, fill:{color:'1a2332'}, line:{type:'none'} });
+            slide.addText(c, { x:bx3+0.05, y:tStartY, w:mWidths[ci]-0.1, h:0.38, fontSize:9, bold:true, color:'FFFFFF', fontFace:'Calibri', valign:'middle' });
+          });
+          months.forEach(function(m, mi) {
+            var ry = tStartY + 0.38 + mi * 0.55;
+            var prev3 = mi > 0 ? months[mi-1].Accuracy : null;
+            var mom3 = prev3 ? (m.Accuracy >= prev3 ? '+':'')+((m.Accuracy-prev3).toFixed(2))+'%' : '—';
+            var st3 = m.Accuracy >= 99 ? 'Excellent' : m.Accuracy >= 97 ? 'On Track' : 'Watch';
+            var stC = m.Accuracy >= 99 ? T.accent.replace('#','') : m.Accuracy >= 97 ? '0D5DBF' : 'FF8300';
+            var rowVals = [m.Month+' 2026', m.Opportunity_Count.toLocaleString(), m.Opportunity_Pass.toLocaleString(), m.Opportunity_Fail.toString(), m.Accuracy+'%', m.Error_Rate+'%', mom3, st3];
+            var rowBg = mi%2===0 ? T.bg2.replace('#','') : T.bg.replace('#','');
+            mCols.forEach(function(c4, ci4) {
+              var bx4 = 0.15 + mWidths.slice(0,ci4).reduce(function(a,b){return a+b;},0);
+              slide.addShape(pptx.ShapeType.rect, { x:bx4, y:ry, w:mWidths[ci4]-0.05, h:0.5, fill:{color:rowBg}, line:{type:'none'} });
+              var vc4 = (ci4===4||ci4===7) ? stC : T.text.replace('#','');
+              slide.addText(rowVals[ci4], { x:bx4+0.05, y:ry, w:mWidths[ci4]-0.1, h:0.5, fontSize:10, color:vc4, fontFace:'Calibri', valign:'middle', bold:(ci4===4) });
+            });
+          });
+
+          // Trend summary box
+          var slope3 = months[months.length-1].Accuracy - months[0].Accuracy;
+          slide.addShape(pptx.ShapeType.rect, { x:0.15, y:6.0, w:13.0, h:0.8, fill:{color:T.bg2.replace('#','')}, line:{type:'none'}, rounding:'0.1' });
+          slide.addText((slope3 >= 0 ? '\u25b2' : '\u25bc') + ' Trend: ' + (slope3 >= 0 ? 'Improving' : 'Declining') + ' (' + (slope3 >= 0 ? '+' : '') + slope3.toFixed(2) + '% Jan→Apr)  ·  Lowest: Apr ' + months.find(function(m){return m.Accuracy===Math.min.apply(null,months.map(function(m2){return m2.Accuracy;}));}).Accuracy + '%  ·  Highest: ' + Math.max.apply(null,months.map(function(m){return m.Accuracy;})) + '%', {
+            x:0.35, y:6.05, w:12.6, h:0.7, fontSize:10, color:slope3>=0?T.accent.replace('#',''):'e74c3c', fontFace:'Calibri', valign:'middle', bold:true
+          });
+
+        } else if (n === 4) {
+          // ── RISK & ERRORS ────────────────────────────────────────
+          slide.addText('Risk Signals & Error Analysis', { x:0.15, y:0.15, w:10, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
+          slide.addText('Top error parameters and predictive risk scoring · FY2026', { x:0.15, y:0.65, w:10, h:0.3, fontSize:10, color:T.sub.replace('#',''), fontFace:'Calibri' });
+
+          // Top errors table (left)
+          var topE = DASHBOARD_DATA.top_errors.filter(function(e){return e.Opportunity_Fail>0;}).slice(0,7);
+          var eCols = ['Parameter','Failures','Fail %','Severity'];
+          var eWs = [3.2,1.1,1.0,1.1];
+          var eStartY = 1.1;
+          eCols.forEach(function(c5, ci5) {
+            var bx5 = 0.15 + eWs.slice(0,ci5).reduce(function(a,b){return a+b;},0);
+            slide.addShape(pptx.ShapeType.rect, { x:bx5, y:eStartY, w:eWs[ci5]-0.05, h:0.35, fill:{color:'1a2332'}, line:{type:'none'} });
+            slide.addText(c5, { x:bx5+0.05, y:eStartY, w:eWs[ci5]-0.1, h:0.35, fontSize:9, bold:true, color:'FFFFFF', fontFace:'Calibri', valign:'middle' });
+          });
+          topE.forEach(function(e5, ei5) {
+            var ey = eStartY + 0.35 + ei5*0.62;
+            var sev5 = e5.Fail_Pct>=20?'Critical':e5.Fail_Pct>=5?'High':e5.Fail_Pct>=2?'Medium':'Low';
+            var sC5 = e5.Fail_Pct>=20?'e74c3c':e5.Fail_Pct>=5?'FF8300':e5.Fail_Pct>=2?'f59e0b':T.accent.replace('#','');
+            var eVals = [e5.Parameter, e5.Opportunity_Fail.toString(), e5.Fail_Pct+'%', sev5];
+            var eBg = ei5%2===0?T.bg2.replace('#',''):T.bg.replace('#','');
+            eWs.forEach(function(ew, ewi) {
+              var ebx = 0.15 + eWs.slice(0,ewi).reduce(function(a,b){return a+b;},0);
+              slide.addShape(pptx.ShapeType.rect, { x:ebx, y:ey, w:ew-0.05, h:0.57, fill:{color:eBg}, line:{type:'none'} });
+              var evc = ewi>=2 ? sC5 : T.text.replace('#','');
+              var ev = ewi===0&&eVals[0].length>30 ? eVals[0].substring(0,30)+'\u2026' : eVals[ewi];
+              slide.addText(ev, { x:ebx+0.05, y:ey, w:ew-0.1, h:0.57, fontSize:9, color:evc, fontFace:'Calibri', valign:'middle', bold:ewi===3 });
+            });
+          });
+
+          // Risk KPI boxes (right)
+          var recs6 = PERF_DATA.recruiter_monthly;
+          var atRisk6 = recs6.filter(function(r){return computeRiskScore(r).score>=45;}).length;
+          var highP6 = DASHBOARD_DATA.top_errors.filter(function(e){return e.Fail_Pct>=3;}).length;
+          var rKpis = [
+            { v:atRisk6.toString(), l:'Recruiters at Risk', c:'e74c3c' },
+            { v:highP6.toString(), l:'High-Risk Params', c:'FF8300' },
+            { v:D.overall.error_rate+'%', l:'Error Rate', c:'FF8300' }
+          ];
+          rKpis.forEach(function(rk, rki) {
+            var rbx = 6.8, rby = 1.1 + rki * 1.8;
+            slide.addShape(pptx.ShapeType.rect, { x:rbx, y:rby, w:6.3, h:1.55, fill:{color:T.bg2.replace('#','')}, line:{type:'none'}, rounding:'0.1' });
+            slide.addShape(pptx.ShapeType.rect, { x:rbx, y:rby, w:6.3, h:0.1, fill:{color:rk.c}, line:{type:'none'} });
+            slide.addText(rk.v, { x:rbx, y:rby+0.2, w:6.3, h:0.75, fontSize:34, bold:true, color:rk.c, align:'center', fontFace:'Calibri' });
+            slide.addText(rk.l, { x:rbx, y:rby+1.0, w:6.3, h:0.3, fontSize:10, color:T.sub.replace('#',''), align:'center', fontFace:'Calibri' });
+          });
+
+        } else if (n === 5) {
+          // ── AI INSIGHTS ─────────────────────────────────────────
+          slide.addText('AI Insights & Recommendations', { x:0.15, y:0.15, w:12, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
+          slide.addText('Auto-generated intelligence · FY2026 · HPE Talent Acquisition', { x:0.15, y:0.65, w:12, h:0.3, fontSize:10, color:T.sub.replace('#',''), fontFace:'Calibri' });
+
+          var aiCards = [
+            { icon:'\u26a0 CRITICAL', title:'April Accuracy Dip',
+              body:'Accuracy declined from 99.43% (Feb) to 97.25% (Apr) — a 2.18% drop. Downward trajectory across Feb→Mar→Apr requires immediate root cause analysis and corrective action plan.',
+              action:'Action: Schedule emergency review session for April recruiters. Identify specific audit types with highest error rates.',
+              c:'e74c3c', bg: T.bg2.replace('#','') },
+            { icon:'\ud83d\udd34 HIGH', title:'"Target Start Date" — 89.83% Fail Rate',
+              body:'53 out of 59 audits failed this parameter — accounting for 41.4% of all FY2026 errors. This is a systemic process issue requiring immediate intervention.',
+              action:'Action: Audit SOP review + targeted retraining for all recruiters. Consider mandatory checklist.',
+              c:'FF8300', bg: T.bg2.replace('#','') },
+            { icon:'\ud83d\udcc8 MODERATE', title:'3 Recruiters Below Team Average',
+              body:'Kusuma K (88.04%), Noor Mohammed M (90.91%), and Divya S (91.67%) are significantly below the 98.5% team benchmark. Combined: ~800+ audits at risk.',
+              action:'Action: 30-day structured coaching programme with bi-weekly checkpoint reviews and performance improvement plan.',
+              c:T.accent.replace('#',''), bg: T.bg2.replace('#','') },
+            { icon:'\u2714 POSITIVE', title:'Apr W4 Recovery Confirmed',
+              body:'After the W3 spike to 93.62%, accuracy recovered to 97.87% in W4 — confirming the W3 anomaly was an isolated incident driven by Target Start Date errors.',
+              action:'Monitor: Track W1 May to confirm continued recovery. The "Target Start Date" fix is the key lever.',
+              c:T.accent.replace('#',''), bg: T.bg2.replace('#','') }
+          ];
+
+          aiCards.forEach(function(card, ci7) {
+            var col7 = ci7 % 2, row7 = Math.floor(ci7/2);
+            var cx7 = 0.15 + col7 * 6.65, cy7 = 1.05 + row7 * 3.0;
+            slide.addShape(pptx.ShapeType.rect, { x:cx7, y:cy7, w:6.4, h:2.7, fill:{color:card.bg}, line:{type:'none'}, rounding:'0.1' });
+            slide.addShape(pptx.ShapeType.rect, { x:cx7, y:cy7, w:0.08, h:2.7, fill:{color:card.c}, line:{type:'none'} });
+            slide.addText(card.icon, { x:cx7+0.2, y:cy7+0.12, w:6.0, h:0.35, fontSize:9, bold:true, color:card.c, fontFace:'Calibri' });
+            slide.addText(card.title, { x:cx7+0.2, y:cy7+0.48, w:6.0, h:0.4, fontSize:13, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
+            slide.addText(card.body, { x:cx7+0.2, y:cy7+0.9, w:6.0, h:1.0, fontSize:9, color:T.sub.replace('#',''), fontFace:'Calibri', breakLine:true, paraSpaceBefore:0 });
+            slide.addText(card.action, { x:cx7+0.2, y:cy7+2.2, w:6.0, h:0.35, fontSize:8, italic:true, color:card.c, fontFace:'Calibri' });
+          });
+        }
+      });
+
+      setExportProgress('\ud83d\udcca','Saving .pptx file\u2026','Almost done\u2026',95);
+      pptx.writeFile({ fileName: filename }).then(function() {
+        hideProgress();
+        if (btn) btn.disabled = false;
+        showToast('success','\u2713 PowerPoint exported: ' + filename);
+      }).catch(function(err) {
+        hideProgress();
+        if (btn) btn.disabled = false;
+        showToast('error','PPT export failed: ' + err.message);
+      });
+
+    } catch(err) {
+      console.error('PPT export error:', err);
+      hideProgress();
+      if (btn) btn.disabled = false;
+      showToast('error','PPT export failed: ' + (err.message || err));
+    }
+  }, 50);
 }
 
 // ==================== INIT ====================
