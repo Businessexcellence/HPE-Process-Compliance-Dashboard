@@ -1920,28 +1920,28 @@ function getDashboardHTML(): string {
 
     <!-- ── PANEL 1: SLA EXECUTIVE SUMMARY ── -->
     <div class="sla-panel active" id="sla-exec">
-      <div id="slaHealthBanner" class="sla-health-banner good">
+      <div id="slaHealthBanner" class="sla-health-banner sla-health-good">
         <i class="fas fa-check-circle" style="font-size:22px"></i>
         <div>
-          <div style="font-size:14px;font-weight:800">SLA Health: IMPROVING — FY25-26 significantly outperforms FY24-25</div>
-          <div style="font-size:12px;font-weight:500;margin-top:2px">Overall Met Rate rose from 72.9% (FY24-25) to 86.0% (FY25-26 YTD). Critical risks remain in Time-to-Fill metrics and % Aged indicators.</div>
+          <div style="font-size:14px;font-weight:800">SLA Health: IMPROVING — FY25 full year (81.8%) outperforms FY24 partial (75.7%); FY26 YTD at 82.0%</div>
+          <div style="font-size:12px;font-weight:500;margin-top:2px">HPE FY = Nov–Oct &nbsp;|&nbsp; FY25 (Nov-24→Oct-25): 90 Met / 110 reported &nbsp;|&nbsp; Critical risk: TTF Enterprise (45% FY25) &amp; Feb-26 regression</div>
         </div>
       </div>
 
       <div class="sla-kpi-row">
         <div class="sla-kpi">
-          <div class="sla-kpi-val" style="color:var(--hpe-green)">82%</div>
+          <div class="sla-kpi-val" id="slaKpiCompliance" style="color:var(--hpe-green)">82%</div>
           <div class="sla-kpi-label">Overall Met Rate</div>
-          <div class="sla-kpi-sub">195 Met / 237 Total</div>
+          <div class="sla-kpi-sub" id="slaKpiTotalSub">184 Met / 230 reported</div>
         </div>
         <div class="sla-kpi red">
-          <div class="sla-kpi-val" style="color:var(--hpe-red)">28</div>
-          <div class="sla-kpi-label">Not Met (All Time)</div>
-          <div class="sla-kpi-sub">11.8% failure rate</div>
+          <div class="sla-kpi-val" id="slaKpiTotalNM" style="color:var(--hpe-red)">46</div>
+          <div class="sla-kpi-label">Total Not Met</div>
+          <div class="sla-kpi-sub">20.0% failure rate</div>
         </div>
         <div class="sla-kpi orange">
-          <div class="sla-kpi-val" style="color:var(--hpe-orange)">10</div>
-          <div class="sla-kpi-label">Not Reported Months</div>
+          <div class="sla-kpi-val" id="slaKpiTotalNR" style="color:var(--hpe-orange)">10</div>
+          <div class="sla-kpi-label">Not Reported</div>
           <div class="sla-kpi-sub">Apr-25 full blackout</div>
         </div>
         <div class="sla-kpi blue">
@@ -1992,13 +1992,13 @@ function getDashboardHTML(): string {
         <div class="card">
           <div class="sla-section-title"><i class="fas fa-lightbulb" style="color:var(--hpe-orange)"></i> Key Findings</div>
           <div class="sla-insight-box">
-            <strong>📈 Strong Recovery Trajectory:</strong> FY25-26 YTD Met Rate of 86% vs FY24-25's 72.9% — a +13.1pp improvement demonstrates effective corrective actions post-FY24-25.
+            <strong>📈 Steady Improvement (HPE FY):</strong> FY24 partial (Apr-Oct 24) = 75.7% → FY25 full (Nov-24 to Oct-25) = 81.8% → FY26 YTD (Nov-25 to Apr-26) = 82.0%. Strong Q4 FY25 momentum (93%) carries into FY26.
           </div>
           <div class="sla-insight-box warn">
-            <strong>⚠ Apr-25 Total Blackout:</strong> All 10 SLA metrics were "Not Reported" in April 2025 — a complete governance failure for that month, impacting quarterly rollup.
+            <strong>⚠ Apr-25 Total Blackout:</strong> All 10 SLA metrics were "Not Reported" in April 2025 (Q2 FY25) — a complete governance failure impacting FY25 Q2 reporting integrity.
           </div>
           <div class="sla-insight-box bad">
-            <strong>🔴 Time-to-Fill Enterprise Chronic Failure:</strong> This metric has the highest Not Met rate (45.8%) and was a persistent problem throughout FY24-25 before showing recovery in FY25-26 H2.
+            <strong>🔴 TTF Enterprise Chronic Failure:</strong> 45% compliance in FY25 and only 40% in FY26 YTD — the single most critical SLA. Q1 FY26 showed 90% overall but TTF Enterprise continues to drag performance.
           </div>
         </div>
         <div class="card">
@@ -2048,89 +2048,177 @@ function getDashboardHTML(): string {
 
     <!-- ── PANEL 3: FY WISE ANALYSIS ── -->
     <div class="sla-panel" id="sla-fy">
-      <div class="sla-fy-grid">
-        <div class="sla-fy-card">
-          <div class="sla-fy-label">FY 2024–25</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Apr 2024 – Mar 2025 (12 months)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-            <div style="text-align:center;background:#f4f7fb;padding:12px;border-radius:8px">
-              <div style="font-size:24px;font-weight:800;color:var(--hpe-blue)">72.9%</div>
-              <div style="font-size:11px;color:var(--text-muted)">Compliance Rate</div>
+
+      <!-- HPE FY banner -->
+      <div class="sla-health-banner sla-health-good" style="margin-bottom:20px">
+        <i class="fas fa-info-circle" style="font-size:20px"></i>
+        <div>
+          <div style="font-size:13px;font-weight:800">HPE Fiscal Year: November to October</div>
+          <div style="font-size:12px;font-weight:500;margin-top:2px">FY24 = Nov-23 → Oct-24 &nbsp;|&nbsp; FY25 = Nov-24 → Oct-25 &nbsp;|&nbsp; FY26 = Nov-25 → Oct-26 (current, partial)</div>
+        </div>
+      </div>
+
+      <!-- 3-card FY summary grid -->
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px">
+
+        <!-- FY24 partial -->
+        <div class="sla-fy-card" style="border-top:3px solid #95a5a6">
+          <div class="sla-fy-label" style="color:#7f8c8d">FY 2024 <span style="font-size:12px;font-weight:600;background:#ecf0f1;border-radius:8px;padding:2px 8px;margin-left:6px">Partial</span></div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">Apr-24 – Oct-24 (7 months in scope)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+            <div style="text-align:center;background:#f4f7fb;padding:10px;border-radius:8px">
+              <div style="font-size:22px;font-weight:800;color:#7f8c8d">75.7%</div>
+              <div style="font-size:10px;color:var(--text-muted)">Compliance</div>
             </div>
-            <div style="text-align:center;background:#fceaea;padding:12px;border-radius:8px">
-              <div style="font-size:24px;font-weight:800;color:var(--hpe-red)">27.1%</div>
-              <div style="font-size:11px;color:var(--text-muted)">Non-Compliance</div>
+            <div style="text-align:center;background:#fceaea;padding:10px;border-radius:8px">
+              <div style="font-size:22px;font-weight:800;color:var(--hpe-red)">24.3%</div>
+              <div style="font-size:10px;color:var(--text-muted)">Non-Compliance</div>
             </div>
           </div>
           <div style="font-size:12px;color:var(--text-secondary)">
-            <div style="padding:6px 0;border-bottom:1px solid var(--border)">✅ Met: <strong>87</strong> instances</div>
-            <div style="padding:6px 0;border-bottom:1px solid var(--border)">❌ Not Met: <strong>29</strong> instances</div>
-            <div style="padding:6px 0;border-bottom:1px solid var(--border)">📭 Not Reported: <strong>4</strong> (JAS quarter)</div>
-            <div style="padding:6px 0">🔴 Worst Month: Jun-24 (60% Met) & Jan-25 (70%)</div>
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">✅ Met: <strong>53</strong></div>
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">❌ Not Met: <strong>17</strong></div>
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">📭 NR: <strong>0</strong></div>
+            <div style="padding:5px 0">📅 Worst: Jun-24 (60%) | Best: Aug-24 (90%)</div>
           </div>
         </div>
-        <div class="sla-fy-card">
-          <div class="sla-fy-label" style="color:var(--hpe-green)">FY 2025–26</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Apr 2025 – Apr 2026 (YTD, 11 months reported)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-            <div style="text-align:center;background:#e6f7f2;padding:12px;border-radius:8px">
-              <div style="font-size:24px;font-weight:800;color:var(--hpe-green)">86.0%</div>
-              <div style="font-size:11px;color:var(--text-muted)">Compliance Rate</div>
+
+        <!-- FY25 full -->
+        <div class="sla-fy-card" style="border-top:3px solid var(--hpe-blue)">
+          <div class="sla-fy-label" style="color:var(--hpe-blue)">FY 2025 <span style="font-size:12px;font-weight:600;background:#ebf5fb;border-radius:8px;padding:2px 8px;margin-left:6px">Full Year</span></div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">Nov-24 – Oct-25 (12 months)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+            <div style="text-align:center;background:#ebf5fb;padding:10px;border-radius:8px">
+              <div style="font-size:22px;font-weight:800;color:var(--hpe-blue)">81.8%</div>
+              <div style="font-size:10px;color:var(--text-muted)">Compliance</div>
             </div>
-            <div style="text-align:center;background:#fff3e6;padding:12px;border-radius:8px">
-              <div style="font-size:24px;font-weight:800;color:var(--hpe-orange)">14.0%</div>
-              <div style="font-size:11px;color:var(--text-muted)">Non-Compliance</div>
+            <div style="text-align:center;background:#fceaea;padding:10px;border-radius:8px">
+              <div style="font-size:22px;font-weight:800;color:var(--hpe-red)">18.2%</div>
+              <div style="font-size:10px;color:var(--text-muted)">Non-Compliance</div>
             </div>
           </div>
           <div style="font-size:12px;color:var(--text-secondary)">
-            <div style="padding:6px 0;border-bottom:1px solid var(--border)">✅ Met: <strong>108</strong> instances</div>
-            <div style="padding:6px 0;border-bottom:1px solid var(--border)">❌ Not Met: <strong>18</strong> instances</div>
-            <div style="padding:6px 0;border-bottom:1px solid var(--border)">📭 Not Reported: <strong>10</strong> (Apr-25 blackout)</div>
-            <div style="padding:6px 0">🟢 Best Months: Aug-25, Sep-25, Nov-25 (100% Met)</div>
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">✅ Met: <strong>90</strong> / 110 reported</div>
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">❌ Not Met: <strong>20</strong></div>
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">📭 NR: <strong>10</strong> (Apr-25 blackout)</div>
+            <div style="padding:5px 0">📅 Worst: Nov-24 (70%) | Best: Aug/Sep-25 (100%)</div>
           </div>
+        </div>
+
+        <!-- FY26 YTD -->
+        <div class="sla-fy-card" style="border-top:3px solid var(--hpe-green)">
+          <div class="sla-fy-label" style="color:var(--hpe-green)">FY 2026 <span style="font-size:12px;font-weight:600;background:#e6f7f2;border-radius:8px;padding:2px 8px;margin-left:6px">YTD</span></div>
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">Nov-25 – Apr-26 (5 months reported so far)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
+            <div style="text-align:center;background:#e6f7f2;padding:10px;border-radius:8px">
+              <div style="font-size:22px;font-weight:800;color:var(--hpe-green)">82.0%</div>
+              <div style="font-size:10px;color:var(--text-muted)">Compliance YTD</div>
+            </div>
+            <div style="text-align:center;background:#fff3e6;padding:10px;border-radius:8px">
+              <div style="font-size:22px;font-weight:800;color:var(--hpe-orange)">18.0%</div>
+              <div style="font-size:10px;color:var(--text-muted)">Non-Compliance</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">✅ Met: <strong>41</strong> / 50 reported</div>
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">❌ Not Met: <strong>9</strong></div>
+            <div style="padding:5px 0;border-bottom:1px solid var(--border)">📭 NR: <strong>0</strong></div>
+            <div style="padding:5px 0">📅 Worst: Feb-26 (60%) | Best: Nov-25 (100%)</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- FY YoY delta banner -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px">
+        <div style="background:linear-gradient(135deg,#ebf5fb,#d6eaf8);border-radius:10px;padding:16px 20px;border:1px solid rgba(52,152,219,0.3)">
+          <div style="font-size:11px;font-weight:800;color:#1a4fa0;text-transform:uppercase;letter-spacing:0.5px">FY24 → FY25 Change</div>
+          <div style="font-size:28px;font-weight:800;color:var(--hpe-blue);margin:6px 0">▲ +6.1 pp</div>
+          <div style="font-size:12px;color:#555">75.7% → 81.8% | Improvement on full-year FY25 vs partial FY24</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#e6f7f2,#d5f5ec);border-radius:10px;padding:16px 20px;border:1px solid rgba(1,169,130,0.3)">
+          <div style="font-size:11px;font-weight:800;color:#0a7a56;text-transform:uppercase;letter-spacing:0.5px">FY25 → FY26 YTD Trend</div>
+          <div style="font-size:28px;font-weight:800;color:var(--hpe-green);margin:6px 0">▲ +0.2 pp</div>
+          <div style="font-size:12px;color:#555">81.8% → 82.0% YTD | FY26 on track; Feb-26 dip requires monitoring</div>
         </div>
       </div>
 
       <div class="card card-full mb-20">
-        <div class="sla-section-title"><i class="fas fa-balance-scale"></i> FY24-25 vs FY25-26: Metric-Level Compliance Comparison</div>
-        <div class="chart-container" style="height:300px">
+        <div class="sla-section-title"><i class="fas fa-balance-scale"></i> FY24 vs FY25 vs FY26 YTD — Per-Metric Compliance (HPE FY: Nov–Oct)</div>
+        <div class="card-subtitle">FY24 = Apr-Oct 24 (partial) &nbsp;|&nbsp; FY25 = Nov-24 to Oct-25 (full) &nbsp;|&nbsp; FY26 = Nov-25 to Apr-26 (YTD)</div>
+        <div class="chart-container" style="height:320px">
           <canvas id="slaFYCompareChart"></canvas>
         </div>
       </div>
 
       <div class="card card-full mb-20">
-        <div class="sla-section-title"><i class="fas fa-chart-area"></i> FY Trend Line: Monthly Compliance % Both FYs</div>
-        <div class="chart-container" style="height:260px">
+        <div class="sla-section-title"><i class="fas fa-chart-area"></i> Monthly Compliance Trend — FY24 vs FY25 vs FY26 (by FY month position)</div>
+        <div class="card-subtitle">M1 = first month of each FY (Nov for FY25/FY26; Apr for partial FY24). Dashed = partial FY24.</div>
+        <div class="chart-container" style="height:280px">
           <canvas id="slaFYTrendChart"></canvas>
         </div>
       </div>
 
       <div class="row-2">
         <div class="card">
-          <div class="sla-section-title"><i class="fas fa-arrow-up" style="color:var(--hpe-green)"></i> FY25-26 Improvements vs FY24-25</div>
+          <div class="sla-section-title"><i class="fas fa-arrow-up" style="color:var(--hpe-green)"></i> FY25 vs FY24 — Metric Improvements &amp; Risk (HPE FY)</div>
           <table class="sla-metric-table">
-            <thead><tr><th>Metric</th><th>FY24-25</th><th>FY25-26</th><th>Change</th></tr></thead>
-            <tbody>
-              <tr><td>Time to Fill – Enterprise</td><td style="color:var(--hpe-red)">33%</td><td style="color:var(--hpe-green)">73%</td><td><span class="sla-trend-up">▲ +40pp</span></td></tr>
-              <tr><td>% Aged – Enterprise</td><td style="color:var(--hpe-red)">42%</td><td style="color:var(--hpe-green)">73%</td><td><span class="sla-trend-up">▲ +31pp</span></td></tr>
-              <tr><td>% Aged – Technical</td><td style="color:var(--hpe-orange)">67%</td><td style="color:var(--hpe-green)">88%</td><td><span class="sla-trend-up">▲ +21pp</span></td></tr>
-              <tr><td>Time to Fill – Technical</td><td style="color:var(--hpe-orange)">67%</td><td style="color:var(--hpe-green)">80%</td><td><span class="sla-trend-up">▲ +13pp</span></td></tr>
-            </tbody>
+            <thead><tr><th>Metric</th><th>FY24</th><th>FY25</th><th>FY24→25</th><th>FY26 YTD</th><th>FY25→26</th></tr></thead>
+            <tbody id="slaFYImprovementBody"></tbody>
           </table>
         </div>
         <div class="card">
-          <div class="sla-section-title"><i class="fas fa-exclamation-circle" style="color:var(--hpe-orange)"></i> Metrics Still at Risk in FY25-26</div>
+          <div class="sla-section-title"><i class="fas fa-exclamation-circle" style="color:var(--hpe-orange)"></i> Metrics Below 80% in Any FY — Requires Focus</div>
           <table class="sla-metric-table">
-            <thead><tr><th>Metric</th><th>FY25-26 Met%</th><th>Issue</th></tr></thead>
-            <tbody>
-              <tr><td>Avg Reqs Vol – Technical</td><td style="color:var(--hpe-orange)">70%</td><td>Inconsistent volume load</td></tr>
-              <tr><td>Time to Fill – Enterprise</td><td style="color:var(--hpe-orange)">73%</td><td>Still below 80% threshold</td></tr>
-              <tr><td>Internal Hiring – Technical</td><td style="color:var(--hpe-orange)">80%</td><td>Mar-25, May-25, Apr-26 failures</td></tr>
-              <tr><td>% Aged – Technical</td><td style="color:var(--hpe-orange)">88%</td><td>Feb-26 & Apr-26 relapse</td></tr>
-            </tbody>
+            <thead><tr><th>Metric</th><th>FY24</th><th>FY25</th><th>FY26 YTD</th></tr></thead>
+            <tbody id="slaFYRiskBody"></tbody>
           </table>
         </div>
       </div>
+
+      <!-- Q1-Q4 summary (HPE FY25) -->
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-table"></i> Quarterly Performance — FY25 (Nov-24 to Oct-25) &amp; FY26 YTD</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:10px">
+          <div style="background:#fff9ed;border:1px solid #ffd9a8;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:#a05c00;text-transform:uppercase">Q1 FY25</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Nov-24 – Jan-25</div>
+            <div style="font-size:26px;font-weight:800;color:var(--hpe-orange)">70%</div>
+            <div style="font-size:11px;color:#555;margin-top:4px">21 Met / 30 reported</div>
+          </div>
+          <div style="background:#fff9ed;border:1px solid #ffd9a8;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:#a05c00;text-transform:uppercase">Q2 FY25</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Feb-25 – Apr-25</div>
+            <div style="font-size:26px;font-weight:800;color:var(--hpe-blue)">85%</div>
+            <div style="font-size:11px;color:#555;margin-top:4px">17 Met / 20 rep. (10 NR Apr-25)</div>
+          </div>
+          <div style="background:#f0fff9;border:1px solid #b3ead8;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:#0a7a56;text-transform:uppercase">Q3 FY25</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">May-25 – Jul-25</div>
+            <div style="font-size:26px;font-weight:800;color:var(--hpe-blue)">80%</div>
+            <div style="font-size:11px;color:#555;margin-top:4px">24 Met / 30 reported</div>
+          </div>
+          <div style="background:#f0fff9;border:1px solid #b3ead8;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:#0a7a56;text-transform:uppercase">Q4 FY25</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Aug-25 – Oct-25</div>
+            <div style="font-size:26px;font-weight:800;color:var(--hpe-green)">93%</div>
+            <div style="font-size:11px;color:#555;margin-top:4px">28 Met / 30 reported</div>
+          </div>
+          <div style="background:#f0fff9;border:1px solid #b3ead8;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:#0a7a56;text-transform:uppercase">Q1 FY26</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Nov-25 – Jan-26</div>
+            <div style="font-size:26px;font-weight:800;color:var(--hpe-green)">90%</div>
+            <div style="font-size:11px;color:#555;margin-top:4px">27 Met / 30 reported</div>
+          </div>
+          <div style="background:#fff9ed;border:1px solid #ffd9a8;border-radius:10px;padding:14px;text-align:center">
+            <div style="font-size:11px;font-weight:800;color:#a05c00;text-transform:uppercase">Q2 FY26 YTD</div>
+            <div style="font-size:10px;color:var(--text-muted);margin-bottom:8px">Feb-26 – Apr-26</div>
+            <div style="font-size:26px;font-weight:800;color:var(--hpe-orange)">70%</div>
+            <div style="font-size:11px;color:#555;margin-top:4px">14 Met / 20 reported</div>
+          </div>
+        </div>
+      </div>
+
     </div>
 
     <!-- ── PANEL 4: MET vs NOT MET ── -->
@@ -2266,21 +2354,21 @@ function getDashboardHTML(): string {
         <div id="slaTrendClassifications" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px">
           <div>
             <div style="font-weight:700;color:var(--hpe-green);margin-bottom:10px;font-size:13px">📈 IMPROVING Metrics</div>
-            <div class="sla-insight-box" style="margin-bottom:8px"><strong>Time to Fill – Enterprise:</strong> From 33% Met (FY24-25) → 73% (FY25-26). H2 FY25-26 shows 6 consecutive months Met.</div>
-            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Aged – Enterprise:</strong> From chronic 30–40% failures to consistent Met from Jun-25 onwards.</div>
-            <div class="sla-insight-box"><strong>% Aged – Technical:</strong> Stabilised after Sep-24; strong FY25-26 performance until minor relapse in Feb-26.</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>Time to Fill – Enterprise:</strong> 29% FY24 → 45% FY25. Q4 FY25 showed recovery but FY26 YTD still at 40%. Needs sustained focus.</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Aged – Enterprise:</strong> 71% FY24 → 55% FY25 → 80% FY26. FY25 dipped (Q1-Q2 FY25 failures) but FY26 recovering strongly.</div>
+            <div class="sla-insight-box"><strong>% Aged – Technical:</strong> 71% FY24 → 82% FY25. Strong Q4 FY25, though FY26 shows minor relapse (60%).</div>
           </div>
           <div>
             <div style="font-weight:700;color:var(--hpe-orange);margin-bottom:10px;font-size:13px">⚠ INCONSISTENT Metrics</div>
-            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Time to Fill – Technical:</strong> Fluctuates — improved in late FY25-26 but still had failures in Jun-25.</div>
-            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Internal Hiring – Technical:</strong> Generally Met but occasional dips; Apr-26 failure breaks a strong streak.</div>
-            <div class="sla-insight-box warn"><strong>Avg Reqs Vol – Technical/Enterprise:</strong> Mixed FY25-26 H2 with Nov-25 onwards showing instability.</div>
+            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Time to Fill – Technical:</strong> 71% FY24 → 64% FY25 → 80% FY26 YTD. Dipped in FY25 (Q1 failures Nov-Jan); improving in FY26.</div>
+            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Avg Reqs Vol – Technical:</strong> 100% FY24 → 73% FY25 (Q1 FY25 failures). FY26 back to 100% YTD.</div>
+            <div class="sla-insight-box warn"><strong>Internal Hiring – Technical:</strong> 86% FY24 → 91% FY25 → 80% FY26. Generally strong; Apr-26 failure breaks Q1 FY26 streak.</div>
           </div>
           <div>
             <div style="font-weight:700;color:var(--hpe-green);margin-bottom:10px;font-size:13px">✅ STABLE / PERFECT Metrics</div>
-            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Technical:</strong> 100% Met across all 23 reported months. Zero failures ever.</div>
-            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Enterprise:</strong> 100% Met. Perfect compliance throughout entire period.</div>
-            <div class="sla-insight-box"><strong>Internal Hiring – Enterprise:</strong> 91% Met; only 1 failure (Oct-24). Near-perfect and stable.</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Technical:</strong> 100% in FY24, FY25 and FY26 YTD. Zero failures across all 23 reported months.</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Enterprise:</strong> 100% all three FYs. Perfect compliance throughout entire period.</div>
+            <div class="sla-insight-box"><strong>Internal Hiring – Enterprise:</strong> 100% FY24 &amp; FY25 → 80% FY26 YTD (1 failure in Feb-26). Near-perfect historically.</div>
           </div>
         </div>
       </div>
@@ -3944,10 +4032,14 @@ const SLA_DATA = {
     // % Agency Util Enterprise
     ['MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','NR','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET']
   ],
-  // FY summaries
+  // FY summaries — HPE FY = Nov to Oct
+  // FY24 partial: Apr-24 → Oct-24 (7 months, indices 0-6)
+  // FY25 full:    Nov-24 → Oct-25 (12 months, indices 7-18, incl Apr-25 NR)
+  // FY26 partial: Nov-25 → Apr-26 (5 months, indices 19-23, YTD)
   fy: {
-    'FY24-25': { months:12, totalSLA:120, met:91, notMet:28, nr:1, compliance:76.5 },
-    'FY25-26': { months:12, totalSLA:120, met:103, notMet:16, nr:1, compliance:86.6 }
+    'FY24': { label:'FY24 (partial)', period:'Apr-24 \u2013 Oct-24', months:7, totalSLA:70, met:53, notMet:17, nr:0, compliance:75.7, idxStart:0,  idxEnd:7  },
+    'FY25': { label:'FY25 (full)',    period:'Nov-24 \u2013 Oct-25', months:12, totalSLA:110, met:90, notMet:20, nr:10, compliance:81.8, idxStart:7, idxEnd:19 },
+    'FY26': { label:'FY26 (YTD)',     period:'Nov-25 \u2013 Apr-26', months:5,  totalSLA:50,  met:41, notMet:9,  nr:0,  compliance:82.0, idxStart:19, idxEnd:24 }
   },
   region: 'South 1',
   practiceHead: 'Mahak',
@@ -4180,83 +4272,111 @@ function initSLAFYCharts() {
   if (_slaFYDone) return;
   _slaFYDone = true;
 
-  // FY KPI cards
-  const setEl = (id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
-  setEl('slaFY2425Compliance','76.5%');
-  setEl('slaFY2526Compliance','86.6%');
-  setEl('slaFY2425Met','91');
-  setEl('slaFY2526Met','103');
-  setEl('slaFY2425NM','28');
-  setEl('slaFY2526NM','16');
-  setEl('slaFYImprovement','+10.1%');
-
-  // Per-metric FY compliance for grouped bar
-  // FY24-25 = months index 0-11, FY25-26 = months 12-23
-  const fy2425 = SLA_DATA.metrics.map((_,mi)=>{
-    const slice = SLA_DATA.perMetricMonthly[mi].slice(0,12);
+  // HPE FY = Nov to Oct
+  // FY24 partial: indices 0-6   (Apr-24 to Oct-24, 7 months)
+  // FY25 full:    indices 7-18  (Nov-24 to Oct-25, 12 months)
+  // FY26 partial: indices 19-23 (Nov-25 to Apr-26, 5 months YTD)
+  const fySlice = (start, end) => (mi) => {
+    const slice = SLA_DATA.perMetricMonthly[mi].slice(start, end);
     const met = slice.filter(s=>s==='MET').length;
     const nm  = slice.filter(s=>s==='NOT_MET').length;
     return met+nm>0 ? Math.round(met/(met+nm)*100) : 0;
-  });
-  const fy2526 = SLA_DATA.metrics.map((_,mi)=>{
-    const slice = SLA_DATA.perMetricMonthly[mi].slice(12);
-    const met = slice.filter(s=>s==='MET').length;
-    const nm  = slice.filter(s=>s==='NOT_MET').length;
-    return met+nm>0 ? Math.round(met/(met+nm)*100) : 0;
-  });
+  };
+  const fy24  = SLA_DATA.metrics.map((_,mi)=>fySlice(0,7)(mi));
+  const fy25  = SLA_DATA.metrics.map((_,mi)=>fySlice(7,19)(mi));
+  const fy26  = SLA_DATA.metrics.map((_,mi)=>fySlice(19,24)(mi));
 
+  // ---- 3-FY Grouped Bar (FY24 partial | FY25 full | FY26 YTD) ----
   slaDestroyChart('slaFYCompareChart');
   new Chart(document.getElementById('slaFYCompareChart'), {
     type:'bar',
     data:{
       labels: SLA_DATA.metricsShort,
       datasets:[
-        { label:'FY24-25', data:fy2425, backgroundColor:'rgba(52,152,219,0.75)', borderRadius:4 },
-        { label:'FY25-26', data:fy2526, backgroundColor:'rgba(1,169,130,0.75)',  borderRadius:4 }
+        { label:'FY24 (Apr\u2013Oct 24, partial)', data:fy24, backgroundColor:'rgba(149,165,166,0.8)',  borderRadius:4 },
+        { label:'FY25 (Nov-24 \u2013 Oct-25, full)',  data:fy25, backgroundColor:'rgba(52,152,219,0.8)',   borderRadius:4 },
+        { label:'FY26 (Nov-25 \u2013 Apr-26, YTD)',   data:fy26, backgroundColor:'rgba(1,169,130,0.85)',  borderRadius:4 }
       ]
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{position:'bottom'} },
-      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+      plugins:{ legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}} },
+      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'},title:{display:true,text:'Compliance %'}} }
     }
   });
 
-  // FY trend comparison line (monthly compliance within each FY)
-  const fy2425Months = SLA_DATA.months.slice(0,12);
-  const fy2526Months = SLA_DATA.months.slice(12);
-  const fy2425Comp = fy2425Months.map((_,i)=>slaMonthCompliance(i));
-  const fy2526Comp = fy2526Months.map((_,i)=>slaMonthCompliance(i+12));
+  // ---- FY trend lines (monthly compliance within each FY, aligned by FY month position) ----
+  // FY24 partial: 7 months (Apr-Oct 24)
+  const fy24Labels = SLA_DATA.months.slice(0,7);
+  const fy24Comp   = fy24Labels.map((_,i)=>slaMonthCompliance(i));
+  // FY25 full: 12 months (Nov-24 to Oct-25)
+  const fy25Labels = SLA_DATA.months.slice(7,19);
+  const fy25Comp   = fy25Labels.map((_,i)=>slaMonthCompliance(i+7));
+  // FY26 partial: 5 months (Nov-25 to Apr-26)
+  const fy26Labels = SLA_DATA.months.slice(19,24);
+  const fy26Comp   = fy26Labels.map((_,i)=>slaMonthCompliance(i+19));
+
+  // Use unified month position labels (M1..M12); shorter FYs leave trailing nulls
+  const maxLen = 12;
+  const padNull = (arr, len) => arr.concat(new Array(len - arr.length).fill(null));
 
   slaDestroyChart('slaFYTrendChart');
   new Chart(document.getElementById('slaFYTrendChart'), {
     type:'line',
     data:{
-      labels:['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'],
+      labels: ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'],
       datasets:[
-        { label:'FY24-25', data:fy2425Comp, borderColor:'#3498db', backgroundColor:'rgba(52,152,219,0.08)', borderWidth:2.5, tension:0.35, pointRadius:4, fill:true },
-        { label:'FY25-26', data:fy2526Comp, borderColor:'#01a982', backgroundColor:'rgba(1,169,130,0.08)',  borderWidth:2.5, tension:0.35, pointRadius:4, fill:true }
+        { label:'FY24 (Apr-Oct 24)',      data:padNull(fy24Comp,maxLen),  borderColor:'#95a5a6', backgroundColor:'rgba(149,165,166,0.06)', borderWidth:2, tension:0.35, pointRadius:4, spanGaps:false, fill:true, borderDash:[5,4] },
+        { label:'FY25 (Nov-24\u2013Oct-25)', data:padNull(fy25Comp,maxLen),  borderColor:'#3498db', backgroundColor:'rgba(52,152,219,0.08)',   borderWidth:2.5, tension:0.35, pointRadius:4, spanGaps:false, fill:true },
+        { label:'FY26 YTD (Nov-25\u2013)',   data:padNull(fy26Comp,maxLen),  borderColor:'#01a982', backgroundColor:'rgba(1,169,130,0.10)',    borderWidth:2.5, tension:0.35, pointRadius:5, spanGaps:false, fill:true },
+        { label:'85% Target', data:new Array(maxLen).fill(85), borderColor:'#f7b731', borderDash:[6,3], borderWidth:1.5, pointRadius:0, fill:false }
       ]
     },
     options:{
       responsive:true, maintainAspectRatio:false,
-      plugins:{ legend:{position:'bottom'}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}} },
+      plugins:{ legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}},
+        tooltip:{callbacks:{
+          title: items => 'Month '+items[0].label,
+          label: ctx => {
+            if (ctx.parsed.y === null) return null;
+            const fyMonths = [fy24Labels, fy25Labels, fy26Labels, []];
+            const lbl = fyMonths[ctx.datasetIndex] ? (fyMonths[ctx.datasetIndex][ctx.dataIndex] || '') : '';
+            return ctx.dataset.label+': '+ctx.parsed.y+'%'+(lbl?' ('+lbl+')':'');
+          }
+        }}
+      },
       scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
     }
   });
 
-  // Improvement / Risk tables
+  // ---- Improvement / Risk tables: FY24 vs FY25 vs FY26 ----
   const impBody = document.getElementById('slaFYImprovementBody');
   if (impBody) {
-    const pairs = SLA_DATA.metrics.map((n,i)=>({name:n, fy1:fy2425[i], fy2:fy2526[i], delta:fy2526[i]-fy2425[i]}));
-    const improved = pairs.filter(p=>p.delta>0).sort((a,b)=>b.delta-a.delta);
-    impBody.innerHTML = improved.map(p=>'<tr><td>'+p.name+'</td><td>'+p.fy1+'%</td><td>'+p.fy2+'%</td><td><span style="color:#01a982;font-weight:700">▲ +'+p.delta+'%</span></td></tr>').join('') || '<tr><td colspan="4" style="color:#aaa">No improvements</td></tr>';;
+    const pairs = SLA_DATA.metrics.map((n,i)=>({
+      name:n,
+      fy24:fy24[i], fy25:fy25[i], fy26:fy26[i],
+      d2425: fy25[i]-fy24[i],
+      d2526: fy26[i]-fy25[i]
+    }));
+    const improved = pairs.filter(p=>p.d2425>0||p.d2526>0).sort((a,b)=>(b.d2425+b.d2526)-(a.d2425+a.d2526));
+    impBody.innerHTML = improved.map(p=>{
+      const arr25 = p.d2425>0?'<span style="color:#01a982;font-weight:700">\u25b2+'+p.d2425+'%</span>':'<span style="color:#e74c3c">\u25bc'+p.d2425+'%</span>';
+      const arr26 = p.d2526>0?'<span style="color:#01a982;font-weight:700">\u25b2+'+p.d2526+'%</span>':p.d2526===0?'<span style="color:#aaa">\u2014</span>':'<span style="color:#e74c3c">\u25bc'+p.d2526+'%</span>';
+      return '<tr><td>'+p.name+'</td><td>'+p.fy24+'%</td><td>'+p.fy25+'%</td><td>'+arr25+'</td><td>'+p.fy26+'%</td><td>'+arr26+'</td></tr>';
+    }).join('') || '<tr><td colspan="6" style="color:#aaa">No improvements detected</td></tr>';
   }
   const riskBody = document.getElementById('slaFYRiskBody');
   if (riskBody) {
-    const pairs = SLA_DATA.metrics.map((n,i)=>({name:n, fy1:fy2425[i], fy2:fy2526[i], delta:fy2526[i]-fy2425[i]}));
-    const declined = pairs.filter(p=>p.delta<0).sort((a,b)=>a.delta-b.delta);
-    riskBody.innerHTML = declined.map(p=>'<tr><td>'+p.name+'</td><td>'+p.fy1+'%</td><td>'+p.fy2+'%</td><td><span style="color:#e74c3c;font-weight:700">▼ '+p.delta+'%</span></td></tr>').join('') || '<tr><td colspan="4" style="color:#aaa">No decline detected</td></tr>';
+    const pairs = SLA_DATA.metrics.map((n,i)=>({
+      name:n, fy24:fy24[i], fy25:fy25[i], fy26:fy26[i],
+      d2425: fy25[i]-fy24[i], d2526: fy26[i]-fy25[i]
+    }));
+    const at_risk = pairs.filter(p=>p.fy25<80||p.fy26<80).sort((a,b)=>Math.min(a.fy25,a.fy26)-Math.min(b.fy25,b.fy26));
+    riskBody.innerHTML = at_risk.map(p=>{
+      const risk25 = p.fy25<60?'<span style="color:#e74c3c;font-weight:700">'+p.fy25+'%</span>':p.fy25<80?'<span style="color:#f7b731;font-weight:700">'+p.fy25+'%</span>':'<span style="color:#01a982">'+p.fy25+'%</span>';
+      const risk26 = p.fy26<60?'<span style="color:#e74c3c;font-weight:700">'+p.fy26+'%</span>':p.fy26<80?'<span style="color:#f7b731;font-weight:700">'+p.fy26+'%</span>':'<span style="color:#01a982">'+p.fy26+'%</span>';
+      return '<tr><td>'+p.name+'</td><td>'+p.fy24+'%</td><td>'+risk25+'</td><td>'+risk26+'</td></tr>';
+    }).join('') || '<tr><td colspan="4" style="color:#aaa">All metrics above threshold</td></tr>';
   }
 }
 
@@ -4427,16 +4547,15 @@ function initSLATrendCharts() {
     }
   });
 
-  // Quarterly compliance
+  // Quarterly compliance — HPE FY quarters (Nov-Oct)
+  // FY24 partial had no full quarters; show FY25 Q1-Q4 + FY26 Q1-Q2
   const quarters = [
-    { label:'Q1 FY24-25 (Apr-Jun 24)',  idx:[0,1,2]  },
-    { label:'Q2 FY24-25 (Jul-Sep 24)',  idx:[3,4,5]  },
-    { label:'Q3 FY24-25 (Oct-Dec 24)',  idx:[6,7,8]  },
-    { label:'Q4 FY24-25 (Jan-Mar 25)',  idx:[9,10,11]},
-    { label:'Q1 FY25-26 (Apr-Jun 25)',  idx:[12,13,14]},
-    { label:'Q2 FY25-26 (Jul-Sep 25)',  idx:[15,16,17]},
-    { label:'Q3 FY25-26 (Oct-Dec 25)',  idx:[18,19,20]},
-    { label:'Q4 FY25-26 (Jan-Apr 26)',  idx:[21,22,23]}
+    { label:'Q1 FY25 (Nov-Jan)',  idx:[7,8,9]    },
+    { label:'Q2 FY25 (Feb-Apr)',  idx:[10,11,12] },
+    { label:'Q3 FY25 (May-Jul)',  idx:[13,14,15] },
+    { label:'Q4 FY25 (Aug-Oct)',  idx:[16,17,18] },
+    { label:'Q1 FY26 (Nov-Jan)',  idx:[19,20,21] },
+    { label:'Q2 FY26 (Feb-Apr)',  idx:[22,23]    }
   ];
   const qMet = quarters.map(q=>q.idx.reduce((a,i)=>a+SLA_DATA.monthly[i][0],0));
   const qNM  = quarters.map(q=>q.idx.reduce((a,i)=>a+SLA_DATA.monthly[i][1],0));
@@ -4456,21 +4575,27 @@ function initSLATrendCharts() {
       responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{position:'bottom'},
         tooltip:{callbacks:{afterBody:items=>'Compliance: '+qComp[items[0].dataIndex]+'%'}} },
-      scales:{ x:{stacked:true}, y:{stacked:true,max:35,ticks:{stepSize:5}} }
+      scales:{ x:{stacked:true}, y:{stacked:true,max:32,ticks:{stepSize:4}} }
     }
   });
 
-  // Trend classification
+  // Trend classification — compare FY25 vs FY24 using HPE FY boundaries
   const classEl = document.getElementById('slaTrendClassifications');
   if (classEl) {
     const classify = (mi) => {
-      const data = SLA_DATA.perMetricMonthly[mi].filter(s=>s!=='NR');
-      const h1 = data.slice(0,12);  const h2 = data.slice(12);
-      const r1 = h1.filter(s=>s==='MET').length/h1.length;
-      const r2 = h2.filter(s=>s==='MET').length/h2.length;
-      const delta = r2-r1;
-      if (delta>0.08) return 'improving';
-      if (delta<-0.08) return 'declining';
+      const data = SLA_DATA.perMetricMonthly[mi];
+      // FY24 partial (idx 0-6), FY25 full (idx 7-18)
+      const fy24d = data.slice(0,7).filter(s=>s!=='NR');
+      const fy25d = data.slice(7,19).filter(s=>s!=='NR');
+      const fy26d = data.slice(19).filter(s=>s!=='NR');
+      const r24 = fy24d.length ? fy24d.filter(s=>s==='MET').length/fy24d.length : 0;
+      const r25 = fy25d.length ? fy25d.filter(s=>s==='MET').length/fy25d.length : 0;
+      const r26 = fy26d.length ? fy26d.filter(s=>s==='MET').length/fy26d.length : 0;
+      // Use FY25 vs FY24 trend as primary signal, FY26 as confirmation
+      const d2425 = r25 - r24;
+      const d2526 = r26 - r25;
+      if (d2425 > 0.1 || (d2425 >= 0 && d2526 > 0.05)) return 'improving';
+      if (d2425 < -0.1 || d2526 < -0.1) return 'declining';
       return 'stable';
     };
     const groups = { improving:[], stable:[], declining:[] };
@@ -4516,8 +4641,8 @@ function initSLATrendCharts() {
       +'</div>'
       +'<div class="sla-rec-item sla-rec-medium">'
       +'<div class="sla-rec-priority">P5 \u2014 MEDIUM</div>'
-      +'<div class="sla-rec-title"><i class="fas fa-calendar-check"></i> Leverage FY25-26 Momentum</div>'
-      +'<div class="sla-rec-body">FY25-26 compliance of 86.6% vs FY24-25 (76.5%) shows strong improvement (+10.1pp). Build on this by: (1) Maintaining Aug-Sep-25 perfect months as benchmark, (2) Investigating Feb-26 regression (60% compliance) to prevent recurrence, (3) Targeting 90%+ compliance for remaining FY25-26 months.</div>'
+      +'<div class="sla-rec-title"><i class="fas fa-calendar-check"></i> Leverage FY25 Momentum into FY26</div>'
+      +'<div class="sla-rec-body">FY25 (Nov-24 to Oct-25) achieved 81.8% compliance on 110 reported instances, recovering from FY24 partial (75.7%). FY26 YTD is at 82.0% but Feb-26 regression (60%) is a warning. Actions: (1) Protect Aug-Sep-25 and Nov-25 perfect-month benchmarks, (2) Investigate Feb-26 dip urgently, (3) Target 88%+ for FY26 full year (Nov-25 to Oct-26).</div>'
       +'</div>'
       +'<div class="sla-rec-item sla-rec-low">'
       +'<div class="sla-rec-priority">P6 \u2014 STRATEGIC</div>'
