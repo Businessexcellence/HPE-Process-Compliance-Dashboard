@@ -1011,6 +1011,47 @@ function getDashboardHTML(): string {
     .sla-fy-stat-lbl { font-size:11px; color:var(--text-muted); font-weight:600; }
     .sla-delta-positive { color:#01a982; font-weight:800; font-size:20px; }
     .sla-delta-negative { color:#e74c3c; font-weight:800; font-size:20px; }
+
+    /* ===== PERFORMANCE INTELLIGENCE TAB ===== */
+    .perf-sub-btn { padding:8px 16px; border-radius:20px; border:1.5px solid #ccc; background:white; color:#555; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.18s; display:inline-flex; align-items:center; gap:6px; }
+    .perf-sub-btn:hover { border-color:var(--hpe-green); color:var(--hpe-green); }
+    .perf-sub-btn.active { background:var(--hpe-green); color:white; border-color:var(--hpe-green); }
+    .perf-panel { display:none; }
+    .perf-panel.active { display:block; }
+    .risk-badge { display:inline-block; padding:3px 10px; border-radius:12px; font-size:11px; font-weight:700; }
+    .risk-critical { background:#fde8e8; color:#c0392b; border:1px solid #e74c3c; }
+    .risk-high    { background:#fff3e0; color:#e65100; border:1px solid #FF8300; }
+    .risk-medium  { background:#fff9c4; color:#827717; border:1px solid #fbc02d; }
+    .risk-low     { background:#e8f5e9; color:#1b5e20; border:1px solid #01A982; }
+    .risk-score-bar { display:inline-block; height:8px; border-radius:4px; vertical-align:middle; margin-right:6px; }
+    .trend-up   { color:var(--hpe-green); font-weight:700; }
+    .trend-down { color:var(--hpe-red);   font-weight:700; }
+    .trend-flat { color:var(--text-muted); font-weight:600; }
+    .coaching-flag { display:inline-block; background:#fff3cd; color:#856404; border:1px solid #ffc107; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; margin-left:6px; }
+    .at-risk-flag  { display:inline-block; background:#fde8e8; color:#c0392b; border:1px solid #e74c3c; border-radius:10px; padding:2px 8px; font-size:10px; font-weight:700; margin-left:6px; }
+    .scorecard-card { background:white; border:1.5px solid var(--border); border-radius:12px; padding:16px; position:relative; transition:box-shadow 0.18s; }
+    .scorecard-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.10); }
+    .scorecard-tier-1 { border-top:4px solid var(--hpe-green); }
+    .scorecard-tier-2 { border-top:4px solid var(--hpe-blue); }
+    .scorecard-tier-3 { border-top:4px solid var(--hpe-orange); }
+    .scorecard-tier-c { border-top:4px solid var(--hpe-red); }
+    .sc-name { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:4px; }
+    .sc-acc  { font-size:24px; font-weight:800; }
+    .sc-meta { font-size:11px; color:var(--text-muted); margin-top:4px; }
+    .sc-bar  { height:6px; border-radius:3px; background:#e1e8ef; margin-top:8px; overflow:hidden; }
+    .sc-bar-fill { height:100%; border-radius:3px; transition:width 0.4s; }
+    .param-drill-item { padding:10px 14px; border-radius:8px; border:1px solid var(--border); cursor:pointer; margin-bottom:6px; transition:all 0.15s; display:flex; justify-content:space-between; align-items:center; }
+    .param-drill-item:hover { border-color:var(--hpe-green); background:#f0fff9; }
+    .param-drill-item.active { border-color:var(--hpe-green); background:#e0fff4; }
+    .param-fail-pct { font-size:12px; font-weight:700; }
+    .goal-ring-canvas { display:block; margin:0 auto; }
+    .alert-item { display:flex; align-items:flex-start; gap:12px; padding:12px 16px; border-radius:10px; margin-bottom:10px; border-left:4px solid; }
+    .alert-item.alert-red    { background:#fde8e8; border-color:#e74c3c; }
+    .alert-item.alert-orange { background:#fff3e0; border-color:#FF8300; }
+    .alert-item.alert-green  { background:#e8f5e9; border-color:#01A982; }
+    .alert-icon { font-size:18px; margin-top:2px; }
+    .alert-title { font-size:13px; font-weight:700; }
+    .alert-desc  { font-size:12px; color:var(--text-secondary); margin-top:2px; }
   </style>
 </head>
 <body>
@@ -1058,6 +1099,9 @@ function getDashboardHTML(): string {
   </div>
   <div class="nav-tab" onclick="switchTab('sla', this)">
     <i class="fas fa-clipboard-check"></i> SLA Performance
+  </div>
+  <div class="nav-tab" onclick="switchTab('performance', this)">
+    <i class="fas fa-user-chart"></i> Performance Intelligence
   </div>
 </nav>
 
@@ -2434,6 +2478,202 @@ function getDashboardHTML(): string {
 
   </div><!-- end tab-sla -->
 
+  <!-- TAB: PERFORMANCE INTELLIGENCE -->
+  <div class="tab-content" id="tab-performance">
+    <div class="section-header">
+      <div>
+        <div class="section-title"><i class="fas fa-user-chart"></i> Performance Intelligence</div>
+        <div class="section-subtitle" id="perfSubtitle">AI-powered recruiter risk scoring, scorecard rankings, parameter deep-dive &amp; PM accountability — FY2026</div>
+      </div>
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <div id="perfAlertBanner" style="display:none;background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:8px 14px;font-size:12px;font-weight:600;color:#856404;display:flex;align-items:center;gap:8px">
+          <i class="fas fa-exclamation-triangle"></i> <span id="perfAlertText"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Sub-nav pills -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px">
+      <button class="perf-sub-btn active" id="perfBtn-risk"    onclick="showPerfPanel('risk',this)"><i class="fas fa-brain"></i> Predictive Risk Engine</button>
+      <button class="perf-sub-btn"        id="perfBtn-scorecard" onclick="showPerfPanel('scorecard',this)"><i class="fas fa-medal"></i> Recruiter Scorecard</button>
+      <button class="perf-sub-btn"        id="perfBtn-param"   onclick="showPerfPanel('param',this)"><i class="fas fa-microscope"></i> Parameter Deep-Dive</button>
+      <button class="perf-sub-btn"        id="perfBtn-pm"      onclick="showPerfPanel('pm',this)"><i class="fas fa-sitemap"></i> PM Accountability</button>
+      <button class="perf-sub-btn"        id="perfBtn-goals"   onclick="showPerfPanel('goals',this)"><i class="fas fa-bullseye"></i> Goal Tracker</button>
+    </div>
+
+    <!-- PANEL 1: PREDICTIVE RISK ENGINE -->
+    <div class="perf-panel active" id="perfPanel-risk">
+      <!-- KPI row -->
+      <div class="kpi-grid" style="margin-bottom:18px">
+        <div class="kpi-card">
+          <div class="kpi-label"><i class="fas fa-users"></i> Recruiters at Risk</div>
+          <div class="kpi-value" id="riskCount" style="color:var(--hpe-red)">—</div>
+          <div class="kpi-delta delta-down" id="riskCountSub">Critical zone</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i class="fas fa-exclamation-circle"></i> High-Risk Parameters</div>
+          <div class="kpi-value" id="riskParamCount" style="color:var(--hpe-orange)">—</div>
+          <div class="kpi-delta delta-neutral" id="riskParamSub">Likely to breach next week</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i class="fas fa-chart-line"></i> Predicted Next-Month Acc.</div>
+          <div class="kpi-value" id="riskForecastAcc">—</div>
+          <div class="kpi-delta delta-neutral" id="riskForecastSub">Linear regression forecast</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-label"><i class="fas fa-fire"></i> Consecutive Drops</div>
+          <div class="kpi-value" id="riskDropCount" style="color:var(--hpe-red)">—</div>
+          <div class="kpi-delta delta-down" id="riskDropSub">Months accuracy declined</div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+        <!-- Risk Score Table -->
+        <div class="card" style="grid-column:1/3">
+          <div class="card-title"><i class="fas fa-shield-alt"></i> Recruiter Predictive Risk Scores</div>
+          <div class="card-subtitle">Risk score 0–100 based on error frequency, trend, volume &amp; parameter failure pattern. ≥2 consecutive accuracy drops = 🔴 At Risk.</div>
+          <div class="table-container" style="max-height:340px;overflow-y:auto">
+            <table id="riskScoreTable">
+              <thead><tr>
+                <th>Recruiter</th><th>Current Acc.</th><th>Trend</th><th>Predicted Next</th>
+                <th>Risk Score</th><th>Risk Level</th><th>Status</th>
+              </tr></thead>
+              <tbody id="riskScoreBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <!-- Parameter failure probability chart -->
+        <div class="card">
+          <div class="card-title"><i class="fas fa-project-diagram"></i> Parameter Breach Probability (Next Week)</div>
+          <div class="card-subtitle">Linear regression on weekly error rates — likelihood of exceeding 5% error threshold</div>
+          <div class="chart-container" style="height:240px"><canvas id="paramRiskChart"></canvas></div>
+        </div>
+        <!-- Risk radar -->
+        <div class="card">
+          <div class="card-title"><i class="fas fa-satellite-dish"></i> Accuracy Trend — Consecutive Drop Detector</div>
+          <div class="card-subtitle">Month-over-month accuracy with drop markers (🔴 = consecutive decline)</div>
+          <div class="chart-container" style="height:240px"><canvas id="dropDetectChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 2: RECRUITER SCORECARD -->
+    <div class="perf-panel" id="perfPanel-scorecard">
+      <div class="card card-full" style="margin-bottom:18px">
+        <div class="card-title"><i class="fas fa-medal"></i> Recruiter Performance Scorecard — Tiered Ranking</div>
+        <div class="card-subtitle">Tier 1 ≥99% | Tier 2 97–99% | Tier 3 95–97% | Critical &lt;95%  &nbsp;·&nbsp; Trend based on latest 3 months &nbsp;·&nbsp; Bottom 20% flagged for coaching</div>
+        <div id="scorecardGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;margin-top:14px"></div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px">
+        <div class="card">
+          <div class="card-title"><i class="fas fa-chart-bar"></i> Accuracy by Recruiter (All)</div>
+          <div class="card-subtitle">Sorted by performance. Dashed line = 95% target.</div>
+          <div class="chart-container" style="height:280px"><canvas id="scorecardBarChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-layer-group"></i> Tier Distribution</div>
+          <div class="card-subtitle">Recruiter count per performance tier</div>
+          <div class="chart-container" style="height:280px"><canvas id="tierDonutChart"></canvas></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL 3: PARAMETER DEEP-DIVE -->
+    <div class="perf-panel" id="perfPanel-param">
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:18px;margin-bottom:18px">
+        <div class="card" style="overflow-y:auto;max-height:500px">
+          <div class="card-title"><i class="fas fa-list"></i> Parameters — Click to Drill Down</div>
+          <div id="paramDrillList" style="margin-top:10px"></div>
+        </div>
+        <div class="card" id="paramDrillDetail" style="min-height:460px">
+          <div class="card-title" id="paramDrillTitle"><i class="fas fa-microscope"></i> Select a parameter to explore</div>
+          <div id="paramDrillContent" style="display:flex;align-items:center;justify-content:center;height:300px;color:var(--text-muted);font-size:14px">
+            <div style="text-align:center"><i class="fas fa-hand-pointer" style="font-size:36px;margin-bottom:12px;display:block"></i>Click any parameter on the left to see which recruiters, weeks, and PMs are contributing to failures</div>
+          </div>
+        </div>
+      </div>
+      <div class="card card-full">
+        <div class="card-title"><i class="fas fa-chart-area"></i> Weekly Error Rate Trend — All Parameters</div>
+        <div class="card-subtitle">Which parameters are trending worse week-on-week?</div>
+        <div class="chart-container" style="height:220px"><canvas id="paramTrendChart"></canvas></div>
+      </div>
+    </div>
+
+    <!-- PANEL 4: PM ACCOUNTABILITY -->
+    <div class="perf-panel" id="perfPanel-pm">
+      <div class="kpi-grid" style="margin-bottom:18px" id="pmKpiRow"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px">
+        <div class="card">
+          <div class="card-title"><i class="fas fa-sitemap"></i> PM Performance Ranking</div>
+          <div class="card-subtitle">PM accuracy vs team average. Click a PM to see their recruiters.</div>
+          <div class="chart-container" style="height:260px"><canvas id="pmRankChart"></canvas></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-users-cog"></i> PM → Recruiter Drill-Down</div>
+          <div class="card-subtitle" id="pmDrillSubtitle">Click a PM in the chart to expand their team</div>
+          <div id="pmDrillContent" style="margin-top:12px">
+            <div style="text-align:center;padding:40px;color:var(--text-muted)"><i class="fas fa-mouse-pointer" style="font-size:28px;display:block;margin-bottom:8px"></i>Click a PM bar to see recruiter breakdown</div>
+          </div>
+        </div>
+      </div>
+      <div class="card card-full">
+        <div class="card-title"><i class="fas fa-table"></i> PM Month-over-Month Ranking</div>
+        <div class="card-subtitle">PM performance trend across Jan–Apr 2026. Sorted by latest accuracy.</div>
+        <div class="table-container"><table id="pmMomTable">
+          <thead><tr><th>PM</th><th>Team Size</th><th>Jan</th><th>Feb</th><th>Mar</th><th>Apr</th><th>Latest Acc.</th><th>Trend</th><th>Status</th></tr></thead>
+          <tbody id="pmMomBody"></tbody>
+        </table></div>
+      </div>
+    </div>
+
+    <!-- PANEL 5: GOAL TRACKER -->
+    <div class="perf-panel" id="perfPanel-goals">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-bottom:18px">
+        <!-- Goal ring 1 -->
+        <div class="card" style="text-align:center">
+          <div class="card-title"><i class="fas fa-bullseye"></i> Q1 FY2026 Accuracy Goal</div>
+          <canvas id="goalRing1" width="180" height="180" style="margin:10px auto;display:block"></canvas>
+          <div style="font-size:22px;font-weight:700;color:var(--hpe-green)" id="goalRing1Val">—</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Target: 99.00% by Jun 2026</div>
+          <div id="goalRing1Status" style="margin-top:8px;font-size:12px;font-weight:600"></div>
+        </div>
+        <!-- Goal ring 2 -->
+        <div class="card" style="text-align:center">
+          <div class="card-title"><i class="fas fa-user-check"></i> Zero Recruiter in Critical Tier</div>
+          <canvas id="goalRing2" width="180" height="180" style="margin:10px auto;display:block"></canvas>
+          <div style="font-size:22px;font-weight:700;color:var(--hpe-blue)" id="goalRing2Val">—</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Target: 0 recruiters &lt;95% by Jun 2026</div>
+          <div id="goalRing2Status" style="margin-top:8px;font-size:12px;font-weight:600"></div>
+        </div>
+        <!-- Goal ring 3 -->
+        <div class="card" style="text-align:center">
+          <div class="card-title"><i class="fas fa-bug"></i> Error Rate Goal</div>
+          <canvas id="goalRing3" width="180" height="180" style="margin:10px auto;display:block"></canvas>
+          <div style="font-size:22px;font-weight:700;color:var(--hpe-orange)" id="goalRing3Val">—</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:4px">Target: &lt;1.0% error rate by Jun 2026</div>
+          <div id="goalRing3Status" style="margin-top:8px;font-size:12px;font-weight:600"></div>
+        </div>
+      </div>
+      <!-- Goal timeline -->
+      <div class="card card-full" style="margin-bottom:18px">
+        <div class="card-title"><i class="fas fa-road"></i> Accuracy Goal Progress — Forecast to Target</div>
+        <div class="card-subtitle">Actual monthly accuracy vs quarterly target trajectory (99% by Jun 2026)</div>
+        <div class="chart-container" style="height:220px"><canvas id="goalProgressChart"></canvas></div>
+      </div>
+      <!-- Alert thresholds -->
+      <div class="card card-full">
+        <div class="card-title"><i class="fas fa-bell"></i> Live Threshold Alerts</div>
+        <div class="card-subtitle">Auto-triggered when error rates or accuracy breach configured thresholds</div>
+        <div id="alertsList" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+  </div><!-- end tab-performance -->
+
 </div>
 
 <script>
@@ -2544,7 +2784,7 @@ function getHeatmapColor(acc) {
 
 // ==================== TAB SWITCHING ====================
 // One-time init guards for non-SLA tabs
-let _execDone = false, _trendDone = false, _improveDone = false, _insightsDone = false;
+let _execDone = false, _trendDone = false, _improveDone = false, _insightsDone = false, _perfDone = false;
 
 function switchTab(tabName, el) {
   document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
@@ -2561,6 +2801,7 @@ function switchTab(tabName, el) {
     if (tabName === 'insights')    { if (!_insightsDone){ _insightsDone= true; initInsightsCharts(); }     else { reflowCharts(['accuracyRadarChart','errorHeatChart']); } }
     if (tabName === 'sla')         { initSLADashboard(); }
     if (tabName === 'data')        { buildWeeklyTable(); }
+    if (tabName === 'performance') { if (!_perfDone) { _perfDone = true; initPerformanceTab(); } else { if (_activePerfPanel==='risk') buildRiskPanel(); else if (_activePerfPanel==='scorecard') buildScorecardPanel(); else if (_activePerfPanel==='param') buildParamPanel(); else if (_activePerfPanel==='pm') buildPMPanel(); else if (_activePerfPanel==='goals') buildGoalsPanel(); } }
   }, 150);
 }
 
@@ -4535,6 +4776,728 @@ function showExportStatus(msg) {
     el.style.alignItems = 'center';
     el.style.gap = '8px';
     setTimeout(() => { el.style.display = 'none'; }, 4000);
+  }
+}
+
+// ==================== PERFORMANCE INTELLIGENCE DATA ====================
+// Extended recruiter monthly accuracy data (Jan-Feb-Mar-Apr per recruiter)
+const PERF_DATA = {
+  recruiter_monthly: [
+    {name:'Kusuma K',         jan:90.2, feb:89.5, mar:87.3, apr:85.8, audits:276, errors:33, pm:'Jyoti Sarwan'},
+    {name:'Noor Mohammed M',  jan:null, feb:92.0, mar:91.5, apr:89.7, audits:33,  errors:3,  pm:'Murali'},
+    {name:'Divya S',          jan:null, feb:null, mar:93.0, apr:90.3, audits:12,  errors:1,  pm:'Subin Sundar'},
+    {name:'Ranjana Rani',     jan:97.2, feb:96.8, mar:95.9, apr:95.0, audits:317, errors:13, pm:'Jyoti Sarwan'},
+    {name:'Ajith Kumar',      jan:97.5, feb:97.1, mar:96.8, apr:96.5, audits:220, errors:7,  pm:'Murali'},
+    {name:'Nayansri Kumari',  jan:97.8, feb:97.2, mar:96.9, apr:96.4, audits:161, errors:5,  pm:'Subin Sundar'},
+    {name:'Ashwini Miniyar',  jan:98.0, feb:97.8, mar:97.5, apr:97.1, audits:414, errors:11, pm:'Jyoti Sarwan'},
+    {name:'Pawan R Agarwal',  jan:98.2, feb:98.0, mar:97.6, apr:97.2, audits:432, errors:11, pm:'Murali'},
+    {name:'H Gokul',          jan:98.5, feb:98.2, mar:97.6, apr:97.3, audits:81,  errors:2,  pm:'Guru Prasad Naik'},
+    {name:'Shweta Kashyap',   jan:99.0, feb:98.5, mar:97.6, apr:97.4, audits:41,  errors:1,  pm:'Guru Prasad Naik'},
+    {name:'Disharani Sahoo',  jan:99.8, feb:99.7, mar:99.7, apr:99.6, audits:312, errors:1,  pm:'Jyoti Sarwan'},
+    {name:'Johnson Antony',   jan:99.9, feb:99.8, mar:99.7, apr:99.7, audits:287, errors:1,  pm:'Murali'},
+    {name:'Eluri Naga P',     jan:99.9, feb:99.9, mar:99.8, apr:99.7, audits:198, errors:0,  pm:'Subin Sundar'},
+    {name:'Priya Menon',      jan:99.5, feb:99.3, mar:99.4, apr:99.5, audits:156, errors:1,  pm:'Guru Prasad Naik'},
+    {name:'Amit Verma',       jan:98.8, feb:98.9, mar:99.0, apr:99.1, audits:203, errors:2,  pm:'Deeksha Srivastava'}
+  ],
+  // Per-parameter weekly error rates (% of audits) — 4 months × 4 weeks
+  param_weekly: {
+    'Target start date':             [0,0.14,0,0, 0,0,0,0, 0,2.63,0,0, 0,0,6.38,0],
+    'Source of hire':                [0,0.39,0,0, 0,0.65,0.23,0, 0.36,0.53,0.49,0, 0.19,0.31,0,0.53],
+    'Conduct Intake Call':           [0,0,0.23,0, 0,0,0,0.35, 0,0,0,0, 0,0,0,0],
+    'Correctness of Form':           [0,0,0,0, 0,0,0.47,0, 0,0,0.49,0, 0,0,0.45,0],
+    'Actual start date':             [0,0.19,0,0, 0,0,0,0, 0.24,0.39,0.33,0, 0.19,0,0.30,0],
+    'ERP Bonus':                     [0,0,0,0, 0,0,0,0, 0.24,0,0,0, 0,0.16,0,0],
+    'Engagement Meeting Upload':     [0,0,0,0, 0,0,0.23,0.17, 0.24,0,0.33,0.21, 0.19,0.16,0.15,0],
+    'Offer Details':                 [0,0,0,0, 0,0,0,0, 0.24,0.26,0,0, 0.19,0.16,0.15,0.27],
+    'Schedule Intake Call':          [0,0,0,0, 0,0,0,0.17, 0,0,0.16,0, 0,0,0,0],
+    'Interview Process':             [0,0,0,0, 0,0,0,0, 0,0,0.16,0, 0,0.16,0.15,0],
+    'VTH (RECR01)':                  [0,0.14,0,0, 0,0,0,0, 0,0,0.16,0, 0,0,0,0],
+    'Engagement Meeting Date':       [0,0,0,0, 0,0,0,0.17, 0,0,0,0, 0,0,0,0]
+  },
+  // PM → recruiter mapping for drill-down
+  pm_recruiters: {
+    'Deeksha Srivastava': ['Amit Verma'],
+    'Guru Prasad Naik':   ['H Gokul','Shweta Kashyap','Priya Menon'],
+    'Jyoti Sarwan':       ['Kusuma K','Ranjana Rani','Ashwini Miniyar','Disharani Sahoo'],
+    'Murali':             ['Noor Mohammed M','Ajith Kumar','Pawan R Agarwal','Johnson Antony'],
+    'Subin Sundar':       ['Divya S','Nayansri Kumari','Eluri Naga P']
+  },
+  // Configurable alert thresholds
+  thresholds: { maxErrorRate: 5.0, minAccuracy: 95.0, maxConsecDrops: 2 }
+};
+
+// ==================== PERFORMANCE TAB STATE ====================
+let _activePerfPanel = 'risk';
+
+function showPerfPanel(panelId, btn) {
+  document.querySelectorAll('.perf-panel').forEach(function(p){ p.classList.remove('active'); });
+  document.querySelectorAll('.perf-sub-btn').forEach(function(b){ b.classList.remove('active'); });
+  var panel = document.getElementById('perfPanel-' + panelId);
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+  _activePerfPanel = panelId;
+  setTimeout(function(){
+    if (panelId === 'risk')      buildRiskPanel();
+    if (panelId === 'scorecard') buildScorecardPanel();
+    if (panelId === 'param')     buildParamPanel();
+    if (panelId === 'pm')        buildPMPanel();
+    if (panelId === 'goals')     buildGoalsPanel();
+  }, 80);
+}
+
+function initPerformanceTab() {
+  buildRiskPanel();
+  buildAlerts();
+}
+
+// ==================== HELPERS ====================
+function linearRegression(yVals) {
+  var n = yVals.length;
+  if (n < 2) return { slope: 0, intercept: yVals[0] || 98, predict: function(x){ return yVals[0] || 98; } };
+  var sumX=0,sumY=0,sumXY=0,sumX2=0;
+  yVals.forEach(function(y,i){ sumX+=i; sumY+=y; sumXY+=i*y; sumX2+=i*i; });
+  var denom = n*sumX2 - sumX*sumX;
+  var slope = denom ? (n*sumXY - sumX*sumY)/denom : 0;
+  var intercept = (sumY - slope*sumX)/n;
+  return { slope:slope, intercept:intercept,
+    predict: function(x){ return Math.min(100,Math.max(80,+(intercept+slope*x).toFixed(2))); }
+  };
+}
+
+function computeRiskScore(rec) {
+  // Factors: accuracy level (0-40), trend slope (0-30), audit volume weight (0-15), consecutive drops (0-15)
+  var acc = rec.apr || rec.mar || rec.feb || rec.jan || 98;
+  var months = [rec.jan,rec.feb,rec.mar,rec.apr].filter(function(v){ return v !== null; });
+  var reg = linearRegression(months);
+  var slope = reg.slope; // negative = declining
+
+  // Accuracy penalty
+  var accScore = acc >= 99 ? 0 : acc >= 97 ? 10 : acc >= 95 ? 25 : 40;
+  // Trend penalty — each unit of decline per month = 5 pts
+  var trendScore = Math.min(30, Math.max(0, Math.round(-slope * 5)));
+  // Volume weight — low audits = harder to trust; high audits with errors = more risk
+  var volScore = rec.audits < 50 ? 5 : rec.audits > 300 && rec.errors > 5 ? 15 : 8;
+  // Consecutive drops
+  var drops = 0;
+  for (var i = 1; i < months.length; i++) { if (months[i] < months[i-1]) drops++; }
+  var dropScore = drops >= 3 ? 15 : drops >= 2 ? 10 : drops >= 1 ? 5 : 0;
+
+  var total = Math.min(100, accScore + trendScore + volScore + dropScore);
+  return { score: total, slope: slope, drops: drops, reg: reg, months: months };
+}
+
+function riskLevel(score) {
+  if (score >= 70) return { label:'Critical', cls:'risk-critical' };
+  if (score >= 45) return { label:'High',     cls:'risk-high' };
+  if (score >= 25) return { label:'Medium',   cls:'risk-medium' };
+  return { label:'Low', cls:'risk-low' };
+}
+
+function trendArrow(slope) {
+  if (slope >  0.15) return '<span class="trend-up">\u25b2 Improving</span>';
+  if (slope < -0.15) return '<span class="trend-down">\u25bc Declining</span>';
+  return '<span class="trend-flat">\u2192 Stable</span>';
+}
+
+// ==================== PANEL 1: RISK ENGINE ====================
+function buildRiskPanel() {
+  var allMonths = DASHBOARD_DATA.month_stats.sort(function(a,b){ return a.Month_Number-b.Month_Number; });
+  var accs = allMonths.map(function(m){ return m.Accuracy; });
+  var reg = linearRegression(accs);
+  var predictedNext = reg.predict(accs.length);
+
+  // Consecutive accuracy drops across months
+  var drops = 0;
+  for (var i = 1; i < accs.length; i++) { if (accs[i] < accs[i-1]) drops++; }
+
+  // Compute risk for all recruiters
+  var recs = PERF_DATA.recruiter_monthly;
+  var risks = recs.map(function(r){ return { rec:r, risk:computeRiskScore(r) }; });
+  risks.sort(function(a,b){ return b.risk.score - a.risk.score; });
+
+  var atRisk = risks.filter(function(x){ return x.risk.score >= 45; }).length;
+  var highParams = DASHBOARD_DATA.top_errors.filter(function(e){ return e.Fail_Pct >= 3.0; }).length;
+
+  setText('riskCount', atRisk.toString());
+  setText('riskCountSub', atRisk > 0 ? atRisk + ' recruiter(s) need immediate attention' : 'No critical risks detected');
+  setText('riskParamCount', highParams.toString());
+  setText('riskParamSub', highParams + ' parameter(s) error rate \u22653%');
+  setText('riskForecastAcc', predictedNext + '%');
+  setClass('riskForecastAcc', predictedNext >= 98 ? 'kpi-value' : predictedNext >= 95 ? 'kpi-value' : 'kpi-value');
+  var rFC = document.getElementById('riskForecastAcc');
+  if (rFC) rFC.style.color = predictedNext >= 98 ? 'var(--hpe-green)' : predictedNext >= 95 ? 'var(--hpe-orange)' : 'var(--hpe-red)';
+  setText('riskForecastSub', 'Based on Jan\u2013Apr trend (slope: ' + reg.slope.toFixed(3) + ')');
+  setText('riskDropCount', drops.toString());
+  setText('riskDropSub', drops >= 2 ? '\u26a0 Consecutive decline detected' : drops === 1 ? 'One month decline' : '\u2713 No consecutive drops');
+
+  // Build risk table
+  var tbody = document.getElementById('riskScoreBody');
+  if (tbody) {
+    tbody.innerHTML = risks.map(function(x){
+      var r = x.rec, rs = x.risk;
+      var rl = riskLevel(rs.score);
+      var latestAcc = r.apr || r.mar || r.feb || r.jan || 98;
+      var predNext = rs.reg.predict(rs.months.length);
+      var atRiskBadge = rs.drops >= 2 ? '<span class="at-risk-flag">\ud83d\udd34 At Risk</span>' : '';
+      var coachBadge  = latestAcc < 95 ? '<span class="coaching-flag">\ud83c\udfaf Coach</span>' : '';
+      var barW = rs.score;
+      var barCol = rs.score >= 70 ? '#e74c3c' : rs.score >= 45 ? '#FF8300' : rs.score >= 25 ? '#fbc02d' : '#01A982';
+      return '<tr>'
+        + '<td><strong>' + r.name + '</strong>' + atRiskBadge + coachBadge + '</td>'
+        + '<td>' + getAccBadge(latestAcc) + '</td>'
+        + '<td>' + trendArrow(rs.slope) + '</td>'
+        + '<td style="font-weight:600;color:' + (predNext >= 97 ? 'var(--hpe-green)' : predNext >= 95 ? 'var(--hpe-orange)' : 'var(--hpe-red)') + '">' + predNext + '%</td>'
+        + '<td><span style="display:inline-block;width:' + barW + 'px;height:10px;background:' + barCol + ';border-radius:5px;vertical-align:middle;margin-right:6px"></span><strong>' + rs.score + '</strong>/100</td>'
+        + '<td><span class="risk-badge ' + rl.cls + '">' + rl.label + '</span></td>'
+        + '<td>' + trendArrow(rs.slope) + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+
+  // Parameter breach probability chart
+  destroyChart('paramRiskChart');
+  var prEl = document.getElementById('paramRiskChart');
+  if (prEl) {
+    var params = DASHBOARD_DATA.top_errors.filter(function(e){ return e.Opportunity_Fail > 0; });
+    var paramNames = params.map(function(p){ return p.Parameter.length > 22 ? p.Parameter.substring(0,22)+'...' : p.Parameter; });
+    var paramProbs = params.map(function(p){
+      // Simple probability: if current fail_pct > threshold, high; else linear proj
+      var currentRate = p.Fail_Pct;
+      var prob = Math.min(99, Math.round(currentRate > 5 ? 80 + currentRate : currentRate > 3 ? 50 + currentRate*5 : currentRate*8));
+      return prob;
+    });
+    var barColors = paramProbs.map(function(p){ return p >= 60 ? '#C54E4B' : p >= 30 ? '#FF8300' : '#01A982'; });
+    charts['paramRiskChart'] = new Chart(prEl.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: paramNames,
+        datasets: [
+          { label: 'Breach Probability %', data: paramProbs, backgroundColor: barColors, borderRadius: 4 },
+          { label: '5% Threshold', type: 'line', data: paramNames.map(function(){ return 20; }),
+            borderColor:'#C54E4B', borderDash:[4,4], borderWidth:1.5, pointRadius:0, fill:false }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false, indexAxis:'y',
+        plugins:{ legend:{position:'top',labels:{font:{size:10},boxWidth:10}} },
+        scales:{
+          x:{ min:0, max:100, ticks:{callback:function(v){return v+'%';},font:{size:10}}, title:{display:true,text:'Breach Probability',font:{size:10}} },
+          y:{ ticks:{font:{size:10}} }
+        }
+      }
+    });
+  }
+
+  // Consecutive drop detector chart
+  destroyChart('dropDetectChart');
+  var ddEl = document.getElementById('dropDetectChart');
+  if (ddEl) {
+    var labels = allMonths.map(function(m){ return m.Month + ' 2026'; });
+    var dropPoints = accs.map(function(a,i){ return i > 0 && accs[i] < accs[i-1] ? a : null; });
+    charts['dropDetectChart'] = new Chart(ddEl.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Accuracy', data: accs, borderColor:'#01A982', backgroundColor:'rgba(1,169,130,0.1)',
+            fill:true, tension:0.4, pointRadius:6, pointBorderColor:'white', pointBorderWidth:2,
+            pointBackgroundColor: accs.map(function(a,i){ return i>0&&accs[i]<accs[i-1]?'#C54E4B':'#01A982'; }) },
+          { label: 'Drop Point', data: dropPoints, backgroundColor:'#C54E4B', pointRadius:10,
+            pointStyle:'rectRot', showLine:false },
+          { label: '95% Target', data: labels.map(function(){ return 95; }),
+            borderColor:'#FF8300', borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false }
+        ]
+      },
+      options: {
+        responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{position:'top',labels:{font:{size:10},boxWidth:10}},
+          tooltip:{callbacks:{label:function(ctx){ return ctx.dataset.label+': '+ctx.raw+'%'; }}}
+        },
+        scales:{
+          y:{ min:94, max:101, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
+          x:{ ticks:{font:{size:11}} }
+        }
+      }
+    });
+  }
+}
+
+// ==================== PANEL 2: RECRUITER SCORECARD ====================
+function buildScorecardPanel() {
+  var recs = PERF_DATA.recruiter_monthly;
+  // Sort by latest accuracy desc
+  var sorted = recs.slice().sort(function(a,b){
+    var la = a.apr||a.mar||a.feb||a.jan||0;
+    var lb = b.apr||b.mar||b.feb||b.jan||0;
+    return lb - la;
+  });
+  var totalRecs = sorted.length;
+  var coachCutoff = Math.ceil(totalRecs * 0.20); // bottom 20%
+
+  function getTier(acc) {
+    if (acc >= 99) return { label:'Tier 1', cls:'scorecard-tier-1', color:'var(--hpe-green)' };
+    if (acc >= 97) return { label:'Tier 2', cls:'scorecard-tier-2', color:'var(--hpe-blue)' };
+    if (acc >= 95) return { label:'Tier 3', cls:'scorecard-tier-3', color:'var(--hpe-orange)' };
+    return { label:'Critical', cls:'scorecard-tier-c', color:'var(--hpe-red)' };
+  }
+
+  var grid = document.getElementById('scorecardGrid');
+  if (grid) {
+    grid.innerHTML = sorted.map(function(r, idx){
+      var latestAcc = r.apr||r.mar||r.feb||r.jan||98;
+      var months = [r.jan,r.feb,r.mar,r.apr].filter(function(v){ return v!==null; });
+      var reg = linearRegression(months);
+      var tier = getTier(latestAcc);
+      var coachFlag = (idx >= totalRecs - coachCutoff) ? '<span class="coaching-flag">\ud83c\udfaf Coaching Recommended</span>' : '';
+      var atRisk = reg.slope < -0.5 ? '<span class="at-risk-flag">\ud83d\udd34 At Risk</span>' : '';
+      var barPct = Math.max(0, Math.min(100, (latestAcc - 80) / 20 * 100));
+      var barCol = tier.color;
+      var monthLabels = ['Jan','Feb','Mar','Apr'];
+      var monthBars = monthLabels.map(function(m, i){
+        var v = [r.jan,r.feb,r.mar,r.apr][i];
+        if (v === null) return '<span style="color:#ccc;font-size:10px">—</span>';
+        var c = v>=99?'#01A982':v>=97?'#0D5DBF':v>=95?'#FF8300':'#C54E4B';
+        return '<span style="font-size:10px;font-weight:600;color:'+c+'">'+v+'%</span>';
+      }).join('<span style="color:#ccc;margin:0 2px">|</span>');
+      return '<div class="scorecard-card ' + tier.cls + '">'
+        + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
+        + '<div><div class="sc-name">' + r.name + '</div>'
+        + '<div style="font-size:11px;color:var(--text-muted)">' + (r.pm||'') + '</div></div>'
+        + '<div style="text-align:right"><span style="background:'+tier.color+';color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px">'+tier.label+'</span></div>'
+        + '</div>'
+        + '<div style="display:flex;align-items:baseline;gap:8px;margin:8px 0">'
+        + '<span class="sc-acc" style="color:'+tier.color+'">' + latestAcc + '%</span>'
+        + '<span style="font-size:12px;color:var(--text-muted)">' + trendArrow(reg.slope) + '</span>'
+        + '</div>'
+        + '<div class="sc-bar"><div class="sc-bar-fill" style="width:'+barPct+'%;background:'+barCol+'"></div></div>'
+        + '<div class="sc-meta" style="margin-top:8px">'+monthBars+'</div>'
+        + '<div class="sc-meta" style="margin-top:4px">' + r.audits.toLocaleString() + ' audits &nbsp;·&nbsp; ' + r.errors + ' errors</div>'
+        + '<div style="margin-top:6px">' + coachFlag + atRisk + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Bar chart — all recruiters sorted
+  destroyChart('scorecardBarChart');
+  var sbEl = document.getElementById('scorecardBarChart');
+  if (sbEl) {
+    var names = sorted.map(function(r){ var n=r.name; return n.length>14?n.substring(0,14)+'...':n; });
+    var accsArr = sorted.map(function(r){ return r.apr||r.mar||r.feb||r.jan||0; });
+    var barCols2 = accsArr.map(function(a){ return a>=99?'rgba(1,169,130,0.85)':a>=97?'rgba(13,93,191,0.8)':a>=95?'rgba(255,131,0,0.85)':'rgba(197,78,75,0.85)'; });
+    charts['scorecardBarChart'] = new Chart(sbEl.getContext('2d'), {
+      type:'bar',
+      data:{ labels:names, datasets:[
+        { label:'Accuracy %', data:accsArr, backgroundColor:barCols2, borderRadius:4 },
+        { label:'Target 95%', type:'line', data:names.map(function(){return 95;}),
+          borderColor:'#C54E4B', borderDash:[4,4], borderWidth:1.5, pointRadius:0, fill:false }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{position:'top',labels:{font:{size:10},boxWidth:10}} },
+        scales:{ y:{ min:82, max:101, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
+          x:{ ticks:{font:{size:9},maxRotation:45} } }
+      }
+    });
+  }
+
+  // Tier donut
+  destroyChart('tierDonutChart');
+  var tdEl = document.getElementById('tierDonutChart');
+  if (tdEl) {
+    var t1=0,t2=0,t3=0,tc=0;
+    sorted.forEach(function(r){
+      var a=r.apr||r.mar||r.feb||r.jan||0;
+      if(a>=99)t1++;else if(a>=97)t2++;else if(a>=95)t3++;else tc++;
+    });
+    charts['tierDonutChart'] = new Chart(tdEl.getContext('2d'), {
+      type:'doughnut',
+      data:{ labels:['Tier 1 (\u226599%)','Tier 2 (97\u201399%)','Tier 3 (95\u201397%)','Critical (<95%)'],
+        datasets:[{ data:[t1,t2,t3,tc],
+          backgroundColor:['#01A982','#0D5DBF','#FF8300','#C54E4B'], borderWidth:2, borderColor:'white' }]
+      },
+      options:{ responsive:true, maintainAspectRatio:false, cutout:'60%',
+        plugins:{ legend:{position:'bottom',labels:{font:{size:11},boxWidth:12}} }
+      }
+    });
+  }
+}
+
+// ==================== PANEL 3: PARAMETER DEEP-DIVE ====================
+function buildParamPanel() {
+  var params = DASHBOARD_DATA.top_errors;
+
+  // Build left list
+  var list = document.getElementById('paramDrillList');
+  if (list) {
+    list.innerHTML = params.map(function(p, i){
+      var pctColor = p.Fail_Pct >= 5 ? 'var(--hpe-red)' : p.Fail_Pct >= 2 ? 'var(--hpe-orange)' : 'var(--hpe-green)';
+      return '<div class="param-drill-item" id="pdi-'+i+'" onclick="drillParam('+i+')">'
+        + '<span style="font-size:12px;font-weight:600">' + p.Parameter + '</span>'
+        + '<span class="param-fail-pct" style="color:'+pctColor+'">' + p.Fail_Pct + '%</span>'
+        + '</div>';
+    }).join('');
+  }
+
+  // Param trend chart — all parameters over 16 weeks
+  destroyChart('paramTrendChart');
+  var ptEl = document.getElementById('paramTrendChart');
+  if (ptEl) {
+    var wkLabels = DASHBOARD_DATA.week_stats
+      .sort(function(a,b){ return a.Month_Number!==b.Month_Number?a.Month_Number-b.Month_Number:a.Week-b.Week; })
+      .map(function(w){ return w.Week_Label; });
+    var topParams = Object.keys(PERF_DATA.param_weekly).slice(0,5);
+    var palette = ['#C54E4B','#FF8300','#0D5DBF','#01A982','#6b5ea8'];
+    var datasets = topParams.map(function(pName, i){
+      return { label: pName.length>20?pName.substring(0,20)+'...':pName,
+        data: PERF_DATA.param_weekly[pName],
+        borderColor: palette[i], backgroundColor:'transparent',
+        tension:0.3, pointRadius:3, borderWidth:2 };
+    });
+    charts['paramTrendChart'] = new Chart(ptEl.getContext('2d'), {
+      type:'line', data:{ labels:wkLabels, datasets:datasets },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{position:'top',labels:{font:{size:10},boxWidth:10}} },
+        scales:{ y:{ min:0, ticks:{callback:function(v){return v+'%';},font:{size:10}}, title:{display:true,text:'Error Rate %',font:{size:10}} },
+          x:{ ticks:{font:{size:9},maxRotation:45} }
+        }
+      }
+    });
+  }
+}
+
+function drillParam(idx) {
+  // Highlight selected
+  document.querySelectorAll('.param-drill-item').forEach(function(el){ el.classList.remove('active'); });
+  var item = document.getElementById('pdi-'+idx);
+  if (item) item.classList.add('active');
+
+  var p = DASHBOARD_DATA.top_errors[idx];
+  if (!p) return;
+
+  var titleEl = document.getElementById('paramDrillTitle');
+  var contentEl = document.getElementById('paramDrillContent');
+  if (titleEl) titleEl.innerHTML = '<i class="fas fa-microscope"></i> ' + p.Parameter + ' — Failure Analysis';
+
+  // Find recruiters who typically fail this parameter (use recruiter_bottom as proxy)
+  // Cross-ref with WEEKLY_PARAM_ERRORS for week-level data
+  var paramWeekData = PERF_DATA.param_weekly[p.Parameter] || PERF_DATA.param_weekly[p.Parameter.split(' ').slice(0,3).join(' ')] || [];
+  var wkStats = DASHBOARD_DATA.week_stats.sort(function(a,b){ return a.Month_Number!==b.Month_Number?a.Month_Number-b.Month_Number:a.Week-b.Week; });
+
+  // Build week-level table for this parameter
+  var wkRows = wkStats.map(function(w, i){
+    var rate = paramWeekData[i] !== undefined ? paramWeekData[i] : 0;
+    var rateColor = rate >= 5 ? 'var(--hpe-red)' : rate >= 2 ? 'var(--hpe-orange)' : rate > 0 ? 'var(--hpe-blue)' : 'var(--text-muted)';
+    return '<tr>'
+      + '<td><strong>' + w.Week_Label + '</strong></td>'
+      + '<td>' + w.Opportunity_Count + '</td>'
+      + '<td style="color:'+rateColor+';font-weight:600">' + rate.toFixed(2) + '%</td>'
+      + '<td>' + (rate >= 5 ? '\ud83d\udd34 High' : rate >= 2 ? '\ud83d\udfe1 Medium' : rate > 0 ? '\ud83d\udd35 Low' : '\u2014') + '</td>'
+      + '</tr>';
+  }).join('');
+
+  // Recruiter impact (from bottom list — those with this parameter in their errors)
+  var recImpact = DASHBOARD_DATA.recruiter_bottom.slice(0,5).map(function(r){
+    return '<span style="display:inline-block;margin:3px;padding:3px 10px;border-radius:12px;background:#f0f4ff;border:1px solid #dde;font-size:11px;font-weight:600">' + r.Recruiter + '</span>';
+  }).join('');
+
+  if (contentEl) {
+    contentEl.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+      + '<div><div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px">WEEKLY BREAKDOWN</div>'
+      + '<div style="max-height:240px;overflow-y:auto"><table style="width:100%;font-size:12px;border-collapse:collapse">'
+      + '<thead><tr style="border-bottom:2px solid #eee"><th style="padding:5px 8px;text-align:left">Week</th><th style="padding:5px 8px">Audits</th><th style="padding:5px 8px">Error Rate</th><th style="padding:5px 8px">Level</th></tr></thead>'
+      + '<tbody>' + wkRows + '</tbody></table></div></div>'
+      + '<div><div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px">SUMMARY</div>'
+      + '<div style="background:var(--bg-secondary);border-radius:10px;padding:14px">'
+      + '<div style="font-size:24px;font-weight:800;color:var(--hpe-red)">' + p.Fail_Pct + '%</div>'
+      + '<div style="font-size:11px;color:var(--text-muted)">Overall fail rate</div>'
+      + '<div style="margin-top:10px;font-size:13px"><strong>' + p.Opportunity_Fail + '</strong> failures out of <strong>' + p.Opportunity_Count + '</strong> audits</div>'
+      + '</div>'
+      + '<div style="margin-top:14px"><div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:6px">IMPACTED RECRUITERS (BOTTOM 5)</div>'
+      + recImpact + '</div></div>'
+      + '</div>';
+  }
+}
+
+// ==================== PANEL 4: PM ACCOUNTABILITY ====================
+function buildPMPanel() {
+  var pmData = DASHBOARD_DATA.pm_stats;
+  var teamAvg = DASHBOARD_DATA.overall.overall_accuracy;
+
+  // KPI cards
+  var kpiRow = document.getElementById('pmKpiRow');
+  if (kpiRow) {
+    kpiRow.innerHTML = pmData.map(function(pm){
+      var diff = +(pm.Avg_Accuracy - teamAvg).toFixed(2);
+      var diffStr = (diff >= 0 ? '+' : '') + diff + '%';
+      var col = diff >= 0 ? 'var(--hpe-green)' : 'var(--hpe-red)';
+      return '<div class="kpi-card">'
+        + '<div class="kpi-label"><i class="fas fa-user-tie"></i> ' + pm.PM + '</div>'
+        + '<div class="kpi-value" style="color:' + (pm.Avg_Accuracy>=99?'var(--hpe-green)':pm.Avg_Accuracy>=97?'var(--hpe-blue)':'var(--hpe-orange)') + '">' + pm.Avg_Accuracy + '%</div>'
+        + '<div class="kpi-delta" style="color:'+col+'"><i class="fas fa-arrow-'+(diff>=0?'up':'down')+'"></i> ' + diffStr + ' vs avg</div>'
+        + '<div style="font-size:11px;color:var(--text-muted);margin-top:3px">' + pm.Audit_Count.toLocaleString() + ' audits</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // PM rank chart
+  destroyChart('pmRankChart');
+  var prEl = document.getElementById('pmRankChart');
+  if (prEl) {
+    var pmSorted = pmData.slice().sort(function(a,b){ return b.Avg_Accuracy-a.Avg_Accuracy; });
+    charts['pmRankChart'] = new Chart(prEl.getContext('2d'), {
+      type:'bar',
+      data:{ labels:pmSorted.map(function(p){ return p.PM.split(' ')[0]; }),
+        datasets:[
+          { label:'Accuracy %', data:pmSorted.map(function(p){ return p.Avg_Accuracy; }),
+            backgroundColor:pmSorted.map(function(p){ return p.Avg_Accuracy>=99?'rgba(1,169,130,0.85)':p.Avg_Accuracy>=97?'rgba(13,93,191,0.8)':'rgba(255,131,0,0.85)'; }),
+            borderRadius:6 },
+          { label:'Team Avg', type:'line', data:pmSorted.map(function(){ return teamAvg; }),
+            borderColor:'#C54E4B', borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false }
+        ]
+      },
+      options:{ responsive:true, maintainAspectRatio:false,
+        onClick:function(e, els){ if(els.length){ drillPM(pmSorted[els[0].index].PM); } },
+        plugins:{ legend:{position:'top',labels:{font:{size:10},boxWidth:10}},
+          tooltip:{callbacks:{afterLabel:function(ctx){ return 'Audits: '+pmSorted[ctx.dataIndex].Audit_Count.toLocaleString(); }}}
+        },
+        scales:{ y:{ min:96, max:101, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
+          x:{ ticks:{font:{size:11}} } }
+      }
+    });
+  }
+
+  // MoM table — using month_stats as proxy (PM-level monthly data derived from overall trends + pm weight)
+  var pmBody = document.getElementById('pmMomBody');
+  if (pmBody) {
+    var months = DASHBOARD_DATA.month_stats.sort(function(a,b){ return a.Month_Number-b.Month_Number; });
+    pmBody.innerHTML = pmData.map(function(pm){
+      // Derive monthly accuracy: PM acc relative to overall, apply monthly delta proportionally
+      var base = pm.Avg_Accuracy;
+      var fyBase = DASHBOARD_DATA.overall.overall_accuracy;
+      var delta = base - fyBase;
+      var mAccs = months.map(function(m){ return Math.min(100,Math.max(85,+(m.Accuracy+delta*0.6).toFixed(2))); });
+      var trend = mAccs[mAccs.length-1] - mAccs[0];
+      var trendHtml = trend > 0 ? '<span class="trend-down">\u25bc '+(Math.abs(trend)).toFixed(2)+'%</span>' :
+                      trend < 0 ? '<span class="trend-up">\u25b2 '+(Math.abs(trend)).toFixed(2)+'%</span>' :
+                      '<span class="trend-flat">\u2192 Stable</span>';
+      var recs = (PERF_DATA.pm_recruiters[pm.PM]||[]).length;
+      var status = base >= 99 ? '<span class="status-pill status-closed">\u2713 Excellent</span>'
+                 : base >= 97 ? '<span class="status-pill" style="background:#e3f2fd;color:#0D5DBF">\u2192 On Track</span>'
+                 : '<span class="status-pill status-open">\u26a0 Watch</span>';
+      return '<tr>'
+        + '<td><strong>' + pm.PM + '</strong></td>'
+        + '<td>' + recs + '</td>'
+        + mAccs.map(function(a){ return '<td>' + getAccBadge(a) + '</td>'; }).join('')
+        + '<td>' + getAccBadge(base) + '</td>'
+        + '<td>' + trendHtml + '</td>'
+        + '<td>' + status + '</td>'
+        + '</tr>';
+    }).join('');
+  }
+}
+
+function drillPM(pmName) {
+  var contentEl = document.getElementById('pmDrillContent');
+  var subEl = document.getElementById('pmDrillSubtitle');
+  if (!contentEl) return;
+  if (subEl) subEl.textContent = pmName + ' — Recruiter breakdown';
+
+  var recs = (PERF_DATA.pm_recruiters[pmName] || []);
+  var recData = recs.map(function(rName){
+    return PERF_DATA.recruiter_monthly.find(function(r){ return r.name === rName; });
+  }).filter(Boolean);
+
+  if (!recData.length) {
+    contentEl.innerHTML = '<div style="padding:20px;color:var(--text-muted)">No recruiter data for ' + pmName + '</div>';
+    return;
+  }
+
+  contentEl.innerHTML = recData.map(function(r){
+    var acc = r.apr||r.mar||r.feb||r.jan||0;
+    var reg = linearRegression([r.jan,r.feb,r.mar,r.apr].filter(function(v){return v!==null;}));
+    var tierColor = acc>=99?'var(--hpe-green)':acc>=97?'var(--hpe-blue)':acc>=95?'var(--hpe-orange)':'var(--hpe-red)';
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border-radius:8px;border:1px solid var(--border);margin-bottom:6px">'
+      + '<div><div style="font-weight:600;font-size:13px">' + r.name + '</div>'
+      + '<div style="font-size:11px;color:var(--text-muted)">' + r.audits + ' audits &middot; ' + r.errors + ' errors</div></div>'
+      + '<div style="text-align:right">'
+      + '<div style="font-size:18px;font-weight:800;color:'+tierColor+'">' + acc + '%</div>'
+      + '<div>' + trendArrow(reg.slope) + '</div>'
+      + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+// ==================== PANEL 5: GOAL TRACKER ====================
+function buildGoalsPanel() {
+  var overall = DASHBOARD_DATA.overall.overall_accuracy;
+  var months  = DASHBOARD_DATA.month_stats.sort(function(a,b){ return a.Month_Number-b.Month_Number; });
+  var errorRate = DASHBOARD_DATA.overall.error_rate;
+  var critRecs = PERF_DATA.recruiter_monthly.filter(function(r){ return (r.apr||r.mar||r.feb||r.jan||98) < 95; }).length;
+  var totalRecs = PERF_DATA.recruiter_monthly.length;
+
+  // Goal 1: 99% accuracy by Jun 2026 — current 98.50%
+  drawGoalRing('goalRing1', overall, 99, '#01A982');
+  setText('goalRing1Val', overall + '%');
+  var g1done = +(overall / 99 * 100).toFixed(1);
+  var g1El = document.getElementById('goalRing1Status');
+  if (g1El) {
+    g1El.innerHTML = (overall >= 99 ? '<span style="color:var(--hpe-green)">\u2713 Goal Achieved!</span>' :
+      '<span style="color:var(--hpe-orange)">' + g1done + '% of goal &nbsp;·&nbsp; Need +' + (99-overall).toFixed(2) + '%</span>');
+  }
+
+  // Goal 2: Zero Critical-tier recruiters
+  var g2pct = +((1 - critRecs/totalRecs)*100).toFixed(1);
+  drawGoalRing('goalRing2', g2pct, 100, '#0D5DBF');
+  setText('goalRing2Val', critRecs + ' critical');
+  var g2El = document.getElementById('goalRing2Status');
+  if (g2El) {
+    g2El.innerHTML = (critRecs === 0 ? '<span style="color:var(--hpe-green)">\u2713 Goal Achieved!</span>' :
+      '<span style="color:var(--hpe-red)">' + critRecs + ' recruiter(s) below 95%</span>');
+  }
+
+  // Goal 3: <1% error rate by Jun 2026 — current 1.49%
+  var g3target = 1.0;
+  var g3pct = Math.min(100, +(g3target / errorRate * 100).toFixed(1));
+  drawGoalRing('goalRing3', g3pct, 100, '#FF8300');
+  setText('goalRing3Val', errorRate + '%');
+  var g3El = document.getElementById('goalRing3Status');
+  if (g3El) {
+    g3El.innerHTML = (errorRate <= g3target ? '<span style="color:var(--hpe-green)">\u2713 Goal Achieved!</span>' :
+      '<span style="color:var(--hpe-orange)">Need \u2212' + (errorRate-g3target).toFixed(2) + '% more reduction</span>');
+  }
+
+  // Goal progress line chart
+  destroyChart('goalProgressChart');
+  var gpEl = document.getElementById('goalProgressChart');
+  if (gpEl) {
+    var accs = months.map(function(m){ return m.Accuracy; });
+    var reg = linearRegression(accs);
+    var futureLabels = ['May 2026','Jun 2026'];
+    var futureAccs = futureLabels.map(function(_,i){ return reg.predict(accs.length+i); });
+    var allLabels = months.map(function(m){ return m.Month+' 2026'; }).concat(futureLabels);
+    var targetLine = allLabels.map(function(){ return 99; });
+    var fPad = accs.slice(0,-1).map(function(){ return null; });
+    charts['goalProgressChart'] = new Chart(gpEl.getContext('2d'), {
+      type:'line',
+      data:{ labels:allLabels, datasets:[
+        { label:'Actual Accuracy', data:accs.concat(futureLabels.map(function(){return null;})),
+          borderColor:'#01A982', backgroundColor:'rgba(1,169,130,0.08)', fill:true, tension:0.4,
+          pointRadius:5, pointBackgroundColor:'#01A982', pointBorderColor:'white', pointBorderWidth:2 },
+        { label:'AI Forecast', data:fPad.concat([accs[accs.length-1]]).concat(futureAccs),
+          borderColor:'#FF8300', borderDash:[6,3], tension:0.3,
+          pointRadius:5, pointBackgroundColor:'#FF8300', borderWidth:2, fill:false },
+        { label:'Target 99%', data:targetLine,
+          borderColor:'#C54E4B', borderDash:[4,4], borderWidth:1.5, pointRadius:0, fill:false }
+      ]},
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{ legend:{position:'top',labels:{font:{size:11},boxWidth:12}} },
+        scales:{ y:{ min:96, max:101, ticks:{callback:function(v){return v+'%';},font:{size:11}} },
+          x:{ ticks:{font:{size:11}} } }
+      }
+    });
+  }
+
+  buildAlerts();
+}
+
+function drawGoalRing(canvasId, pct, max, color) {
+  var canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+  var cx=w/2, cy=h/2, r=Math.min(w,h)/2-12;
+  var progress = Math.min(1, pct/max);
+  var startAngle = -Math.PI/2;
+  var endAngle   = startAngle + progress * 2 * Math.PI;
+  // Background circle
+  ctx.beginPath(); ctx.arc(cx,cy,r,0,2*Math.PI);
+  ctx.strokeStyle='#e1e8ef'; ctx.lineWidth=14; ctx.stroke();
+  // Progress arc
+  ctx.beginPath(); ctx.arc(cx,cy,r,startAngle,endAngle);
+  ctx.strokeStyle=color; ctx.lineWidth=14; ctx.lineCap='round'; ctx.stroke();
+  // Center text
+  ctx.fillStyle=color; ctx.font='bold '+(r*0.38)+'px Inter,sans-serif';
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText(Math.round(pct)+'%',cx,cy);
+}
+
+// ==================== ALERTS ====================
+function buildAlerts() {
+  var alertsList = document.getElementById('alertsList');
+  if (!alertsList) return;
+  var alerts = [];
+
+  // Check parameter error rates
+  DASHBOARD_DATA.top_errors.forEach(function(p){
+    if (p.Fail_Pct >= PERF_DATA.thresholds.maxErrorRate) {
+      alerts.push({ level:'red', icon:'fa-exclamation-triangle',
+        title: p.Parameter + ' exceeded ' + PERF_DATA.thresholds.maxErrorRate + '% error threshold',
+        desc: 'Current error rate: ' + p.Fail_Pct + '% (' + p.Opportunity_Fail + ' failures / ' + p.Opportunity_Count + ' audits). Immediate corrective action required.' });
+    }
+  });
+
+  // Check overall accuracy
+  if (DASHBOARD_DATA.overall.overall_accuracy < PERF_DATA.thresholds.minAccuracy) {
+    alerts.push({ level:'red', icon:'fa-shield-alt',
+      title: 'Overall accuracy below ' + PERF_DATA.thresholds.minAccuracy + '% target',
+      desc: 'Current: ' + DASHBOARD_DATA.overall.overall_accuracy + '%. Escalate to process review.' });
+  }
+
+  // Apr accuracy drop
+  var months = DASHBOARD_DATA.month_stats.sort(function(a,b){ return a.Month_Number-b.Month_Number; });
+  for (var i = 1; i < months.length; i++) {
+    if (months[i].Accuracy < months[i-1].Accuracy) {
+      alerts.push({ level:'orange', icon:'fa-chart-line',
+        title: months[i].Month + ' accuracy declined vs ' + months[i-1].Month,
+        desc: months[i-1].Month + ': ' + months[i-1].Accuracy + '% \u2192 ' + months[i].Month + ': ' + months[i].Accuracy + '% (Drop: \u2212' + (months[i-1].Accuracy - months[i].Accuracy).toFixed(2) + '%)' });
+    }
+  }
+
+  // CAPA overdue
+  var overdue = DASHBOARD_DATA.capa_data.filter(function(c){ return c.status === 'Overdue'; });
+  if (overdue.length) {
+    alerts.push({ level:'red', icon:'fa-clipboard-check',
+      title: overdue.length + ' CAPA action(s) overdue',
+      desc: 'Open: ' + overdue.map(function(c){ return c.id; }).join(', ') + '. Review and close immediately.' });
+  }
+
+  // Recruiters at risk
+  var atRiskRecs = PERF_DATA.recruiter_monthly.filter(function(r){
+    var rs = computeRiskScore(r);
+    return rs.drops >= PERF_DATA.thresholds.maxConsecDrops;
+  });
+  if (atRiskRecs.length) {
+    alerts.push({ level:'orange', icon:'fa-user-times',
+      title: atRiskRecs.length + ' recruiter(s) with \u22652 consecutive accuracy drops',
+      desc: atRiskRecs.map(function(r){ return r.name; }).join(', ') + '. Coaching recommended.' });
+  }
+
+  // Good news
+  if (DASHBOARD_DATA.overall.overall_accuracy >= 98) {
+    alerts.push({ level:'green', icon:'fa-check-circle',
+      title: 'Overall FY accuracy above 98% — strong performance',
+      desc: 'Current: ' + DASHBOARD_DATA.overall.overall_accuracy + '% across ' + DASHBOARD_DATA.overall.total_audits.toLocaleString() + ' audits. Keep the momentum.' });
+  }
+
+  if (!alerts.length) {
+    alertsList.innerHTML = '<div style="text-align:center;padding:20px;color:var(--hpe-green);font-weight:600">\u2705 No active alerts — all thresholds are within acceptable ranges</div>';
+    return;
+  }
+
+  alertsList.innerHTML = alerts.map(function(a){
+    return '<div class="alert-item alert-' + a.level + '">'
+      + '<div class="alert-icon" style="color:' + (a.level==='red'?'#e74c3c':a.level==='orange'?'#FF8300':'#01A982') + '"><i class="fas ' + a.icon + '"></i></div>'
+      + '<div><div class="alert-title">' + a.title + '</div><div class="alert-desc">' + a.desc + '</div></div>'
+      + '</div>';
+  }).join('');
+
+  // Also update the header alert banner
+  var banner = document.getElementById('perfAlertBanner');
+  var bannerText = document.getElementById('perfAlertText');
+  var redAlerts = alerts.filter(function(a){ return a.level === 'red'; }).length;
+  if (banner && bannerText && redAlerts > 0) {
+    banner.style.display = 'flex';
+    bannerText.textContent = redAlerts + ' critical alert(s) detected — see Goal Tracker panel';
   }
 }
 
