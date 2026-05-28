@@ -6441,8 +6441,22 @@ function runExportPDF() {
   if (btn) btn.disabled = true;
   closeExportModal();
 
-  var quality = parseFloat((document.getElementById('pdfQuality') || {}).value || '2');
-  var filename = ((document.getElementById('pdfFilename') || {}).value || 'HPE_Audit_FY2026_Report').replace(/\s+/g,'_') + '.pdf';
+  // ── Resolve jsPDF from any CDN UMD export pattern ──────────────────
+  var jsPDFCtor = (window.jspdf && window.jspdf.jsPDF)
+               || (window.jspdf && window.jspdf.default && window.jspdf.default.jsPDF)
+               || window.jsPDF
+               || null;
+
+  if (!jsPDFCtor) {
+    alert('jsPDF library not loaded yet — please wait a moment and try again.');
+    hideProgress();
+    if (btn) btn.disabled = false;
+    return;
+  }
+
+  var rawName = (document.getElementById('pdfFilename') || {}).value || 'HPE_Audit_FY2026_Report';
+  // Replace whitespace using split/join to avoid regex escape issues in template literals
+  var filename = rawName.split(' ').join('_') + '.pdf';
 
   var sec = {
     cover:      !document.getElementById('pdfSec-cover')      || document.getElementById('pdfSec-cover').checked,
@@ -6457,11 +6471,10 @@ function runExportPDF() {
 
   showProgress('\ud83d\udcc4', 'Generating PDF Report\u2026', 'Initialising\u2026');
 
-  setTimeout(async function() {
+  setTimeout(function() {
     try {
-      if (!jsPDF) { alert('jsPDF not loaded yet — please wait a moment and try again.'); hideProgress(); if (btn) btn.disabled = false; return; }
 
-      var doc = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+      var doc = new jsPDFCtor({ orientation:'portrait', unit:'mm', format:'a4' });
       var PW = 210, PH = 297;
       var margin = 16, contentW = PW - margin*2;
       var D = DASHBOARD_DATA;
@@ -6620,17 +6633,33 @@ function runExportPDF() {
 
         if (sec.gauge) {
           cy = secHeader(doc, 'Accuracy Gauges', '\u25cb', cy);
-          // Capture gauges via html2canvas
-          var gaugeEl = document.querySelector('.gauge-grid');
-          if (gaugeEl) {
-            try {
-              var gaugeCanvas = await html2canvas(gaugeEl, { scale: quality, backgroundColor: '#ffffff', useCORS: true, logging: false });
-              var gaugeImg = gaugeCanvas.toDataURL('image/jpeg', 0.92);
-              var gh = (gaugeEl.offsetHeight / gaugeEl.offsetWidth) * contentW;
-              doc.addImage(gaugeImg, 'JPEG', margin, cy, contentW, Math.min(gh, 50));
-              cy += Math.min(gh, 50) + 8;
-            } catch(e) { /* skip if capture fails */ }
-          }
+          // Draw gauges programmatically (no html2canvas dependency)
+          var gaugeData = [
+            { label:'Overall', value: parseFloat(D.overall.overall_accuracy), target:95, col:'#01A982' },
+            { label:'Jan 2026', value: parseFloat((D.month_stats.find(function(m){return m.Month==='Jan';}) || {Accuracy:0}).Accuracy), target:95, col:'#0D5DBF' },
+            { label:'Feb 2026', value: parseFloat((D.month_stats.find(function(m){return m.Month==='Feb';}) || {Accuracy:0}).Accuracy), target:95, col:'#01A982' },
+            { label:'Mar 2026', value: parseFloat((D.month_stats.find(function(m){return m.Month==='Mar';}) || {Accuracy:0}).Accuracy), target:95, col:'#FF8300' },
+            { label:'Apr 2026', value: parseFloat((D.month_stats.find(function(m){return m.Month==='Apr';}) || {Accuracy:0}).Accuracy), target:95, col:'#e74c3c' }
+          ];
+          var gW = (contentW - 12) / gaugeData.length;
+          gaugeData.forEach(function(g, gi) {
+            var gx = margin + gi * (gW + 3);
+            var gy = cy;
+            // Background card
+            doc.setFillColor('#f8fafc'); doc.roundedRect(gx, gy, gW, 22, 2, 2, 'F');
+            doc.setFillColor(g.col); doc.roundedRect(gx, gy, gW, 2, 1, 1, 'F');
+            // Value
+            var valStr = g.value.toFixed(2) + '%';
+            doc.setFontSize(11); doc.setFont('helvetica','bold'); doc.setTextColor(g.value >= 99 ? '#01A982' : g.value >= 97 ? '#0D5DBF' : g.value >= 95 ? '#FF8300' : '#e74c3c');
+            doc.text(valStr, gx + gW/2, gy + 12, {align:'center'});
+            // Label
+            doc.setFontSize(6.5); doc.setFont('helvetica','normal'); doc.setTextColor('#6b7280');
+            doc.text(g.label, gx + gW/2, gy + 18, {align:'center'});
+            // Target line
+            doc.setFontSize(6); doc.setTextColor('#9ca3af');
+            doc.text('T:' + g.target + '%', gx + gW/2, gy + 21, {align:'center'});
+          });
+          cy += 26;
         }
       }
 
@@ -6678,23 +6707,97 @@ function runExportPDF() {
         });
       }
 
-      // ── PAGE 4: TREND CHART (html2canvas) ─────────────────────
+      // ── PAGE 4: TREND DATA TABLE (programmatic — no html2canvas) ──────
       if (sec.trend) {
-        progress('Capturing trend charts\u2026');
-        var sparkEl = document.getElementById('sparklineChart');
-        if (sparkEl && sparkEl.parentElement) {
-          try {
-            var sparkCanvas2 = await html2canvas(sparkEl.parentElement, { scale: quality, backgroundColor: '#ffffff', useCORS: true, logging: false });
-            doc.addPage(); cy = margin;
-            doc.setFillColor('#0f1624'); doc.rect(0,0,PW,14,'F');
-            doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
-            doc.text('ACCURACY TRENDS', margin, 9.5);
-            cy = 20;
-            cy = secHeader(doc, '16-Week Accuracy Trend — FY2026', '\ud83d\udcc8', cy);
-            var sparkH = (sparkEl.parentElement.offsetHeight / sparkEl.parentElement.offsetWidth) * contentW;
-            doc.addImage(sparkCanvas2.toDataURL('image/jpeg',0.92), 'JPEG', margin, cy, contentW, Math.min(sparkH, 80));
-            cy += Math.min(sparkH, 80) + 8;
-          } catch(e) { /* skip */ }
+        progress('Writing trend data\u2026');
+        doc.addPage(); cy = margin;
+        doc.setFillColor('#0f1624'); doc.rect(0,0,PW,14,'F');
+        doc.setFontSize(9); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+        doc.text('ACCURACY TRENDS', margin, 9.5);
+        doc.setFontSize(7); doc.setFont('helvetica','normal'); doc.setTextColor('#94a3b8');
+        doc.text('16-Week Accuracy Trend · FY2026', PW-margin, 9.5, {align:'right'});
+        cy = 20;
+        cy = secHeader(doc, '16-Week Accuracy Trend — FY2026', '\ud83d\udcc8', cy);
+
+        // Collect weekly data from PERF_DATA
+        var weeks = (PERF_DATA && PERF_DATA.weekly_stats) ? PERF_DATA.weekly_stats.slice() : [];
+        if (weeks.length > 0) {
+          // Draw a simple bar chart (programmatic)
+          var chartH = 40, chartW = contentW, barW = Math.floor(chartW / weeks.length) - 1;
+          var minAcc = 88, maxAcc = 100;
+          weeks.forEach(function(w){ if(w.Accuracy < minAcc) minAcc = Math.floor(w.Accuracy - 1); });
+          var chartBottom = cy + chartH;
+
+          // Axis
+          doc.setDrawColor('#e5e7eb'); doc.setLineWidth(0.3);
+          doc.line(margin, cy, margin, chartBottom);
+          doc.line(margin, chartBottom, margin + chartW, chartBottom);
+
+          // Y-axis labels
+          [88, 91, 94, 97, 100].forEach(function(yv) {
+            var ypos = chartBottom - ((yv - minAcc) / (maxAcc - minAcc)) * chartH;
+            if (ypos >= cy && ypos <= chartBottom) {
+              doc.setFontSize(5.5); doc.setTextColor('#9ca3af');
+              doc.text(yv + '%', margin - 1, ypos, {align:'right'});
+              doc.setDrawColor('#f3f4f6'); doc.setLineWidth(0.15);
+              doc.line(margin, ypos, margin + chartW, ypos);
+            }
+          });
+
+          // Bars
+          weeks.forEach(function(w, wi) {
+            var bx = margin + wi * (barW + 1);
+            var barH2 = ((w.Accuracy - minAcc) / (maxAcc - minAcc)) * chartH;
+            barH2 = Math.max(barH2, 1);
+            var barColor = w.Accuracy >= 99 ? '#01A982' : w.Accuracy >= 97 ? '#0D5DBF' : w.Accuracy >= 95 ? '#FF8300' : '#e74c3c';
+            doc.setFillColor(barColor);
+            doc.rect(bx, chartBottom - barH2, barW, barH2, 'F');
+            // Week label (every other)
+            if (wi % 2 === 0) {
+              doc.setFontSize(5); doc.setTextColor('#6b7280');
+              var wLabel = (w.Week_Label || ('W'+(wi+1))).substring(0,6);
+              doc.text(wLabel, bx + barW/2, chartBottom + 4, {align:'center'});
+            }
+          });
+          cy = chartBottom + 10;
+
+          // Weekly data table
+          cy = secHeader(doc, 'Weekly Detail', '\ud83d\udcca', cy);
+          var wCols = ['Week','Audits','Pass','Fail','Accuracy','Error Rate'];
+          var wWidths = [36,28,24,18,28,24];
+          doc.setFillColor('#1a2332'); doc.rect(margin, cy, contentW, 7, 'F');
+          var wx2 = margin+2;
+          wCols.forEach(function(c,ci){ doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff'); doc.text(c,wx2,cy+5); wx2+=wWidths[ci]; });
+          cy+=7;
+          weeks.forEach(function(w,wi){
+            if(cy > PH-16){ doc.addPage(); cy=margin+14; }
+            doc.setFillColor(wi%2===0?'#f8fafc':'#ffffff'); doc.rect(margin,cy,contentW,7,'F');
+            var wvx=margin+2;
+            var acStr=w.Accuracy+'%', erStr=w.Error_Rate+'%';
+            var acCol=w.Accuracy>=99?'#01A982':w.Accuracy>=97?'#0D5DBF':w.Accuracy>=95?'#FF8300':'#e74c3c';
+            [(w.Week_Label||'W'+(wi+1)), (w.Opportunity_Count||0).toString(), (w.Opportunity_Pass||0).toString(), (w.Opportunity_Fail||0).toString(), acStr, erStr].forEach(function(v,vi){
+              var vc=vi===4||vi===5?acCol:'#1a2332';
+              doc.setFontSize(7); doc.setFont('helvetica',vi===0?'bold':'normal'); doc.setTextColor(vc);
+              doc.text(v,wvx,cy+5); wvx+=wWidths[vi];
+            });
+            cy+=7;
+          });
+          cy+=6;
+        } else {
+          // Fallback: monthly trend table if no weekly data
+          doc.setFontSize(8); doc.setFont('helvetica','normal'); doc.setTextColor('#6b7280');
+          doc.text('Monthly accuracy trend (Jan–Apr 2026)', margin, cy+6);
+          cy += 12;
+          months.forEach(function(m,mi){
+            var prev2 = mi>0 ? months[mi-1].Accuracy : null;
+            var mom2 = prev2 ? (m.Accuracy>=prev2?'+':'')+(m.Accuracy-prev2).toFixed(2)+'%' : '—';
+            var barW2 = ((m.Accuracy-90)/10)*contentW;
+            doc.setFillColor(m.Accuracy>=99?'#01A982':m.Accuracy>=97?'#0D5DBF':'#FF8300');
+            doc.rect(margin, cy, Math.min(Math.max(barW2,2), contentW), 8, 'F');
+            doc.setFontSize(7); doc.setFont('helvetica','bold'); doc.setTextColor('#ffffff');
+            doc.text(m.Month+': '+m.Accuracy+'% (MoM: '+mom2+')', margin+3, cy+5.5);
+            cy+=11;
+          });
         }
       }
 
@@ -6818,7 +6921,8 @@ function runExportPPT() {
   if (btn) btn.disabled = true;
   closeExportModal();
 
-  var filename = ((document.getElementById('pptFilename') || {}).value || 'HPE_Audit_FY2026_Deck').replace(/\s+/g,'_') + '.pptx';
+  var rawPptName = (document.getElementById('pptFilename') || {}).value || 'HPE_Audit_FY2026_Deck';
+  var filename = rawPptName.split(' ').join('_') + '.pptx';
   var theme = (document.getElementById('pptTheme') || {}).value || 'dark';
   var selected = [];
   [1,2,3,4,5].forEach(function(n){
