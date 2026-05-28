@@ -20,6 +20,7 @@ function getDashboardHTML(): string {
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>HPE Audit Performance Dashboard</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2301A982'/><text x='16' y='22' font-size='14' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>H</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -526,6 +527,10 @@ function getDashboardHTML(): string {
     .acc-badge.good { background: #e8f0fb; color: var(--hpe-blue); }
     .acc-badge.warning { background: #fff3e6; color: var(--hpe-orange); }
     .acc-badge.bad { background: #fceaea; color: var(--hpe-red); }
+    /* ========== DRILL-DOWN TABLE ROWS ========== */
+    .drill-row-clickable { cursor: pointer; transition: background 0.15s; }
+    .drill-row-clickable:hover { background: #edfff8 !important; }
+    .drill-row-selected { background: #d4f7eb !important; outline: 2px solid var(--hpe-green); }
     
     /* ========== PROGRESS BAR ========== */
     .progress-bar-container {
@@ -2523,21 +2528,32 @@ function getHeatmapColor(acc) {
 }
 
 // ==================== TAB SWITCHING ====================
+// One-time init guards for non-SLA tabs
+let _execDone = false, _trendDone = false, _improveDone = false, _insightsDone = false;
+
 function switchTab(tabName, el) {
-  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
+  document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
   document.getElementById('tab-' + tabName).classList.add('active');
   el.classList.add('active');
   
-  // Render tab-specific charts
-  setTimeout(() => {
-    if (tabName === 'executive') initExecutiveCharts();
-    if (tabName === 'trends') initTrendCharts();
-    if (tabName === 'improvement') initImprovementCharts();
-    if (tabName === 'capa') initCAPACharts();
-    if (tabName === 'insights') initInsightsCharts();
-    if (tabName === 'sla') { initSLADashboard(); }
-  }, 50);
+  // 150ms: enough for CSS display:block to propagate so canvas has real dimensions
+  setTimeout(function() {
+    if (tabName === 'executive')   { if (!_execDone)    { _execDone    = true; initExecutiveCharts(); }    else { reflowCharts(['sparklineChart','critChart','stageChart','weeklyLineChart']); } }
+    if (tabName === 'trends')      { if (!_trendDone)   { _trendDone   = true; initTrendCharts(); }         else { reflowCharts(['monthlyTrendChart','weeklyBarChart','criticalityChart','recruiterChart']); } }
+    if (tabName === 'improvement') { if (!_improveDone) { _improveDone = true; initImprovementCharts(); }  else { reflowCharts(['forecastChart','paretoChart','recruiterErrorChart','pmChart','stageErrorChart']); } }
+    if (tabName === 'capa')        { initCAPACharts(); }
+    if (tabName === 'insights')    { if (!_insightsDone){ _insightsDone= true; initInsightsCharts(); }     else { reflowCharts(['accuracyRadarChart','errorHeatChart']); } }
+    if (tabName === 'sla')         { initSLADashboard(); }
+    if (tabName === 'data')        { buildWeeklyTable(); }
+  }, 150);
+}
+
+// Force Chart.js to resize all registered charts (fixes blank charts on re-visit)
+function reflowCharts(ids) {
+  ids.forEach(function(id) {
+    if (charts[id]) { try { charts[id].resize(); } catch(e) {} }
+  });
 }
 
 // ==================== EXECUTIVE CHARTS ====================
@@ -2930,7 +2946,7 @@ function buildWeeklyTable() {
   if (!tbody) return;
   const weeks = [...DASHBOARD_DATA.week_stats].sort((a,b) => a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week);
   let prevAcc = null;
-  tbody.innerHTML = weeks.map((w, idx) => {
+  tbody.innerHTML = weeks.map(function(w) {
     const wow = prevAcc !== null ? (w.Accuracy - prevAcc).toFixed(2) : null;
     const wowHtml = wow !== null
       ? parseFloat(wow) > 0 ? '<span style="color:var(--hpe-green);font-weight:600">\u25b2 +' + wow + '%</span>'
@@ -2939,16 +2955,11 @@ function buildWeeklyTable() {
       : '<span style="color:var(--text-muted)">\u2014</span>';
     prevAcc = w.Accuracy;
     const hasErrors = w.Opportunity_Fail > 0;
-    const rowStyle = hasErrors
-      ? 'cursor:pointer;transition:background 0.15s'
-      : 'color:inherit';
-    const hoverAttr = hasErrors
-      ? 'onmouseover="this.style.background=\'#f0fff9\'" onmouseout="this.style.background=\'\'" onclick="showParamBreakdown(\'' + w.Week_Label + '\')"'
-      : '';
-    const clickHint = hasErrors
-      ? '<span style="font-size:10px;color:var(--hpe-green);margin-left:6px">\ud83d\udd0d</span>'
-      : '';
-    return '<tr style="' + rowStyle + '" ' + hoverAttr + '>'
+    const clickHint = hasErrors ? ' <span style="font-size:10px;color:var(--hpe-green)">\ud83d\udd0d</span>' : '';
+    const rowClass = hasErrors ? 'drill-row drill-row-clickable' : 'drill-row';
+    const dataAttr = hasErrors ? ' data-week="' + w.Week_Label + '"' : '';
+    const perfLabel = w.Accuracy >= 99 ? '\ud83d\udfe2 Excellent' : w.Accuracy >= 98 ? '\ud83d\udd35 On Target' : w.Accuracy >= 95 ? '\ud83d\udfe1 Watch' : '\ud83d\udd34 Below Target';
+    return '<tr class="' + rowClass + '"' + dataAttr + '>'
       + '<td><strong>Week ' + w.Week + '</strong>' + clickHint + '</td>'
       + '<td>' + w.Month + ' 2026</td>'
       + '<td>' + w.Opportunity_Count.toLocaleString() + '</td>'
@@ -2957,9 +2968,24 @@ function buildWeeklyTable() {
       + '<td style="color:var(--text-muted)">' + w.Opportunity_NA + '</td>'
       + '<td>' + getAccBadge(w.Accuracy) + '</td>'
       + '<td>' + wowHtml + '</td>'
-      + '<td>' + (w.Accuracy >= 99 ? '\ud83d\udfe2 Excellent' : w.Accuracy >= 98 ? '\ud83d\udd35 On Target' : w.Accuracy >= 95 ? '\ud83d\udfe1 Watch' : '\ud83d\udd34 Below Target') + '</td>'
+      + '<td>' + perfLabel + '</td>'
       + '</tr>';
   }).join('');
+
+  // Attach click via event delegation — safe, no inline attr escaping needed
+  tbody.onclick = function(e) {
+    const tr = e.target.closest('tr[data-week]');
+    if (!tr) return;
+    showParamBreakdown(tr.getAttribute('data-week'));
+  };
+  tbody.onmouseover = function(e) {
+    const tr = e.target.closest('tr.drill-row-clickable');
+    if (tr) tr.style.background = '#edfff8';
+  };
+  tbody.onmouseout = function(e) {
+    const tr = e.target.closest('tr.drill-row-clickable');
+    if (tr && !tr.classList.contains('drill-row-selected')) tr.style.background = '';
+  };
 }
 
 function showParamBreakdown(weekLabel) {
@@ -3034,12 +3060,17 @@ function showParamBreakdown(weekLabel) {
   card.style.display = 'block';
   card.scrollIntoView({behavior:'smooth', block:'nearest'});
 
-  // Highlight selected row
-  document.querySelectorAll('#weeklyDrillTable tr').forEach(tr => tr.style.background = '');
-  const allRows = document.querySelectorAll('#weeklyDrillTable tr');
-  allRows.forEach(tr => {
-    if (tr.getAttribute('onclick') && tr.getAttribute('onclick').includes(weekLabel)) {
-      tr.style.background = '#e8fdf5';
+  // Highlight selected row using CSS class
+  document.querySelectorAll('#weeklyDrillTable tr.drill-row-selected').forEach(function(r) {
+    r.classList.remove('drill-row-selected');
+    r.style.background = '';
+    r.style.outline = '';
+  });
+  const allRows = document.querySelectorAll('#weeklyDrillTable tr[data-week]');
+  allRows.forEach(function(tr) {
+    if (tr.getAttribute('data-week') === weekLabel) {
+      tr.classList.add('drill-row-selected');
+      tr.style.background = '#d4f7eb';
       tr.style.outline = '2px solid var(--hpe-green)';
     }
   });
@@ -3048,7 +3079,8 @@ function showParamBreakdown(weekLabel) {
 function closeParamBreakdown() {
   const card = document.getElementById('paramBreakdownCard');
   if (card) card.style.display = 'none';
-  document.querySelectorAll('#weeklyDrillTable tr').forEach(tr => {
+  document.querySelectorAll('#weeklyDrillTable tr').forEach(function(tr) {
+    tr.classList.remove('drill-row-selected');
     tr.style.background = '';
     tr.style.outline = '';
   });
@@ -4141,14 +4173,18 @@ function showExportStatus(msg) {
 }
 
 // ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', () => {
-  initExecutiveCharts();
+document.addEventListener('DOMContentLoaded', function() {
+  // Small delay so browser paints the page before Chart.js measures canvas sizes
+  setTimeout(function() {
+    _execDone = true;
+    initExecutiveCharts();
+  }, 100);
   refreshDashboard();
   // Pre-populate CAPA table with seed data so it shows on first load
   buildCAPATable('all');
   recomputeCAPAKPIs(DASHBOARD_DATA.capa_data);
   rebuildCAPAAIInsights(DASHBOARD_DATA.capa_data);
-  // Charts rendered when tab is first activated (need canvas to be visible)
+  // Charts for other tabs rendered when tab is first activated (need canvas visible)
 });
 
 // ==================== SLA PERFORMANCE DASHBOARD ====================
@@ -4160,15 +4196,19 @@ function showSLAPanel(panelId, btn) {
   const panel = document.getElementById(panelId);
   if (panel) panel.classList.add('active');
   if (btn) btn.classList.add('active');
-  // Lazy-init charts for this panel
-  setTimeout(() => {
+  // Lazy-init charts for this panel (150ms lets the panel become visible first)
+  setTimeout(function() {
     if (panelId === 'sla-exec')      initSLAExecCharts();
     if (panelId === 'sla-monthly')   initSLAMonthlyCharts();
     if (panelId === 'sla-fy')        initSLAFYCharts();
     if (panelId === 'sla-metnotmet') initSLAMetNotMetCharts();
     if (panelId === 'sla-reporting') initSLAReportingChart();
     if (panelId === 'sla-trends')    initSLATrendCharts();
-  }, 60);
+    // Reflow all registered SLA charts in case canvas was resized
+    reflowCharts(['slaOverallTrendChart','slaStatusDonut','slaMonthlyBarChart','slaMonthlyComplianceChart',
+                  'slaFYCompareChart','slaFYTrendChart','slaMetByMetricChart','slaFailShareChart',
+                  'slaReportingChart','slaPerMetricTrendChart','slaQuarterlyChart']);
+  }, 150);
 }
 
 // ---- Master SLA Data Store ----
@@ -4862,8 +4902,8 @@ let _slaInitDone = false;
 function initSLADashboard() {
   if (_slaInitDone) return;
   _slaInitDone = true;
-  // Init the active (first) panel
-  setTimeout(()=>{ initSLAExecCharts(); }, 80);
+  // Init the active (first) panel — wait 200ms so the SLA tab is fully visible
+  setTimeout(function() { initSLAExecCharts(); }, 200);
 }
 </script>
 
