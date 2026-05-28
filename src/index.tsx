@@ -1074,15 +1074,18 @@ function getDashboardHTML(): string {
         </div>
         <div class="section-subtitle">FY2026 | HPE Talent Acquisition Audit Performance Overview — South 1 Region</div>
       </div>
-      <div class="period-filter">
+      <div class="period-filter" id="execPeriodFilter">
         <span style="font-size:12px;color:var(--text-muted);font-weight:600">PERIOD:</span>
-        <button class="filter-btn active" onclick="setFilter('fy', this)">FY 2026</button>
-        <select class="filter-select" id="monthFilter" onchange="filterByMonth(this.value)">
+        <button class="filter-btn active" id="execFYBtn" onclick="applyGlobalFilter('fy','all',this,'exec')">FY 2026</button>
+        <select class="filter-select" id="execMonthSelect" onchange="applyGlobalFilter('month',this.value,null,'exec')">
           <option value="all">All Months</option>
           <option value="Jan">January</option>
           <option value="Feb">February</option>
           <option value="Mar">March</option>
           <option value="Apr">April</option>
+        </select>
+        <select class="filter-select" id="execWeekSelect" onchange="applyGlobalFilter('week',this.value,null,'exec')" style="display:none">
+          <option value="all">All Weeks</option>
         </select>
       </div>
     </div>
@@ -1093,43 +1096,43 @@ function getDashboardHTML(): string {
         <div class="kpi-icon green"><i class="fas fa-bullseye"></i></div>
         <div class="kpi-label">Overall Accuracy</div>
         <div class="kpi-value big" id="kpi-accuracy">98.50%</div>
-        <div class="kpi-delta delta-up"><i class="fas fa-arrow-up"></i> +1.18% vs Jan</div>
-        <div class="kpi-sub">Target: 95.00%</div>
+        <div class="kpi-delta delta-up" id="kpi-accuracy-delta"><i class="fas fa-arrow-up"></i> +1.18% vs Jan</div>
+        <div class="kpi-sub" id="kpi-accuracy-sub">Target: 95.00%</div>
       </div>
       <div class="kpi-card blue">
         <div class="kpi-icon blue"><i class="fas fa-clipboard-list"></i></div>
         <div class="kpi-label">Total Audits (FY)</div>
         <div class="kpi-value" id="kpi-total">8,599</div>
-        <div class="kpi-delta delta-up"><i class="fas fa-arrow-up"></i> +63% vs last period</div>
-        <div class="kpi-sub">Across 4 months</div>
+        <div class="kpi-delta delta-up" id="kpi-total-delta"><i class="fas fa-arrow-up"></i> +63% vs last period</div>
+        <div class="kpi-sub" id="kpi-total-sub">Across 4 months</div>
       </div>
       <div class="kpi-card green">
         <div class="kpi-icon green"><i class="fas fa-check-circle"></i></div>
         <div class="kpi-label">Passed Audits</div>
         <div class="kpi-value" id="kpi-pass">8,400</div>
-        <div class="kpi-delta delta-neutral"><i class="fas fa-minus"></i> 97.69% pass rate</div>
-        <div class="kpi-sub">Out of 8,599 total</div>
+        <div class="kpi-delta delta-neutral" id="kpi-pass-delta"><i class="fas fa-minus"></i> 97.69% pass rate</div>
+        <div class="kpi-sub" id="kpi-pass-sub">Out of 8,599 total</div>
       </div>
       <div class="kpi-card red">
         <div class="kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
         <div class="kpi-label">Total Errors</div>
         <div class="kpi-value" id="kpi-errors">128</div>
-        <div class="kpi-delta delta-down"><i class="fas fa-arrow-down"></i> 1.49% error rate</div>
-        <div class="kpi-sub">Across 12 parameters</div>
+        <div class="kpi-delta delta-down" id="kpi-errors-delta"><i class="fas fa-arrow-down"></i> 1.49% error rate</div>
+        <div class="kpi-sub" id="kpi-errors-sub">Across 12 parameters</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-icon orange"><i class="fas fa-arrow-up"></i></div>
         <div class="kpi-label">MoM Improvement</div>
         <div class="kpi-value" id="kpi-mom">+0.94%</div>
-        <div class="kpi-delta delta-up"><i class="fas fa-arrow-up"></i> Mar vs Feb</div>
-        <div class="kpi-sub">Consistent upward trend</div>
+        <div class="kpi-delta delta-up" id="kpi-mom-delta"><i class="fas fa-arrow-up"></i> Mar vs Feb</div>
+        <div class="kpi-sub" id="kpi-mom-sub">Consistent upward trend</div>
       </div>
       <div class="kpi-card yellow">
         <div class="kpi-icon yellow"><i class="fas fa-calendar-week"></i></div>
         <div class="kpi-label">WoW Change</div>
         <div class="kpi-value" id="kpi-wow">+0.34%</div>
-        <div class="kpi-delta delta-up"><i class="fas fa-arrow-up"></i> W4 vs W3 (Mar)</div>
-        <div class="kpi-sub">Last week performance</div>
+        <div class="kpi-delta delta-up" id="kpi-wow-delta"><i class="fas fa-arrow-up"></i> W4 vs W3 (Mar)</div>
+        <div class="kpi-sub" id="kpi-wow-sub">Last week performance</div>
       </div>
     </div>
 
@@ -1140,20 +1143,21 @@ function getDashboardHTML(): string {
         <canvas id="gaugeOverall" width="200" height="110"></canvas>
         <div class="gauge-value-display" id="gaugeOverallVal">98.50%</div>
         <div class="gauge-target">Target: 95.00%</div>
-        <div class="gauge-status good">✓ Above Target</div>
+        <div class="gauge-status good" id="gaugeOverallStatus">✓ Above Target</div>
       </div>
       <div class="gauge-card">
         <div class="gauge-title"><i class="fas fa-circle-dot" style="color:var(--hpe-blue);margin-right:6px"></i>Critical Parameters</div>
         <canvas id="gaugeCritical" width="200" height="110"></canvas>
         <div class="gauge-value-display" id="gaugeCriticalVal">98.62%</div>
         <div class="gauge-target">Target: 99.00%</div>
-        <div class="gauge-status warning">⚠ Below Target</div>
+        <div class="gauge-status warning" id="gaugeCriticalStatus">⚠ Below Target</div>
       </div>
       <div class="gauge-card">
         <div class="gauge-title"><i class="fas fa-circle-dot" style="color:var(--hpe-orange);margin-right:6px"></i>Non-Critical Parameters</div>
         <canvas id="gaugeNonCritical" width="200" height="110"></canvas>
         <div class="gauge-value-display" id="gaugeNonCriticalVal">97.89%</div>
         <div class="gauge-target">Target: 97.00%</div>
+        
         <div class="gauge-status good">✓ Above Target</div>
       </div>
     </div>
@@ -1237,10 +1241,18 @@ function getDashboardHTML(): string {
         </div>
         <div class="section-subtitle">Deep-dive into accuracy patterns across time periods, stages, and criticality</div>
       </div>
-      <div class="period-filter">
-        <button class="filter-btn active" onclick="filterTrend('all', this)">All</button>
-        <button class="filter-btn" onclick="filterTrend('critical', this)">Critical Only</button>
-        <button class="filter-btn" onclick="filterTrend('noncritical', this)">Non-Critical</button>
+      <div class="period-filter" id="trendsPeriodFilter">
+        <button class="filter-btn active" id="trendsAllBtn" onclick="applyGlobalFilter('fy','all',this,'trends')">All Months</button>
+        <select class="filter-select" id="trendsMonthSelect" onchange="applyGlobalFilter('month',this.value,null,'trends')">
+          <option value="all">Month</option>
+          <option value="Jan">January</option>
+          <option value="Feb">February</option>
+          <option value="Mar">March</option>
+          <option value="Apr">April</option>
+        </select>
+        <select class="filter-select" id="trendsWeekSelect" onchange="applyGlobalFilter('week',this.value,null,'trends')">
+          <option value="all">Week</option>
+        </select>
       </div>
     </div>
 
@@ -1358,23 +1370,26 @@ function getDashboardHTML(): string {
         </div>
         <div class="section-subtitle">Accuracy trajectory, forecasting, and root cause analysis for targeted improvement</div>
       </div>
-      <!-- Accuracy Trend Filter -->
-      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+      <!-- Accuracy Trend Filter — unified with global filter -->
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap" id="improvePeriodFilter">
         <span style="font-size:13px;font-weight:600;color:var(--text-muted)"><i class="fas fa-filter" style="margin-right:4px"></i>View By:</span>
         <div style="display:flex;gap:6px">
-          <button class="trend-filter-btn active" id="trendFilterWeek" onclick="applyTrendFilter('week',this)"
+          <button class="trend-filter-btn active" id="improveFilterWeek" onclick="applyGlobalFilter('week','all',this,'improve')"
             style="padding:5px 14px;border-radius:20px;border:2px solid var(--hpe-green);background:var(--hpe-green);color:white;font-size:12px;font-weight:600;cursor:pointer">Weekly</button>
-          <button class="trend-filter-btn" id="trendFilterMonth" onclick="applyTrendFilter('month',this)"
+          <button class="trend-filter-btn" id="improveFilterMonth" onclick="applyGlobalFilter('month','all',this,'improve')"
             style="padding:5px 14px;border-radius:20px;border:2px solid #ccc;background:white;color:#555;font-size:12px;font-weight:600;cursor:pointer">Monthly</button>
-          <button class="trend-filter-btn" id="trendFilterFY" onclick="applyTrendFilter('fy',this)"
+          <button class="trend-filter-btn" id="improveFilterFY" onclick="applyGlobalFilter('fy','all',this,'improve')"
             style="padding:5px 14px;border-radius:20px;border:2px solid #ccc;background:white;color:#555;font-size:12px;font-weight:600;cursor:pointer">FY Wise</button>
         </div>
-        <select id="trendMonthSelect" onchange="applyTrendFilter('month',document.getElementById('trendFilterMonth'))" style="display:none;padding:5px 10px;border-radius:6px;border:1px solid #ccc;font-size:12px">
+        <select id="improveMonthSelect" onchange="applyGlobalFilter('month',this.value,null,'improve')" style="display:none;padding:5px 10px;border-radius:6px;border:1px solid #ccc;font-size:12px">
           <option value="all">All Months</option>
-          <option value="10">January</option>
-          <option value="11">February</option>
-          <option value="12">March</option>
-          <option value="1">April</option>
+          <option value="Jan">January</option>
+          <option value="Feb">February</option>
+          <option value="Mar">March</option>
+          <option value="Apr">April</option>
+        </select>
+        <select id="improveWeekSelect" onchange="applyGlobalFilter('week',this.value,null,'improve')" style="display:none;padding:5px 10px;border-radius:6px;border:1px solid #ccc;font-size:12px">
+          <option value="all">All Weeks</option>
         </select>
       </div>
     </div>
@@ -2539,9 +2554,9 @@ function switchTab(tabName, el) {
   
   // 150ms: enough for CSS display:block to propagate so canvas has real dimensions
   setTimeout(function() {
-    if (tabName === 'executive')   { if (!_execDone)    { _execDone    = true; initExecutiveCharts(); }    else { reflowCharts(['sparklineChart','critChart','stageChart','weeklyLineChart']); } }
-    if (tabName === 'trends')      { if (!_trendDone)   { _trendDone   = true; initTrendCharts(); }         else { reflowCharts(['monthlyTrendChart','weeklyBarChart','criticalityChart','recruiterChart']); } }
-    if (tabName === 'improvement') { if (!_improveDone) { _improveDone = true; initImprovementCharts(); }  else { reflowCharts(['forecastChart','paretoChart','recruiterErrorChart','pmChart','stageErrorChart']); } }
+    if (tabName === 'executive')   { if (!_execDone)    { _execDone    = true; initExecutiveCharts(); }    else { updateExecutiveKPIs(); updateExecutiveCharts(); reflowCharts(['sparklineChart','stageDonutChart']); } }
+    if (tabName === 'trends')      { if (!_trendDone)   { _trendDone   = true; initTrendCharts(); }         else { updateTrendCharts(); reflowCharts(['stageComparisonChart','criticalBarChart']); } }
+    if (tabName === 'improvement') { if (!_improveDone) { _improveDone = true; initImprovementCharts(); }  else { updateImprovementCharts(); reflowCharts(['paretoChart','recruiterErrorChart','pmChart','stageErrorChart']); } }
     if (tabName === 'capa')        { initCAPACharts(); }
     if (tabName === 'insights')    { if (!_insightsDone){ _insightsDone= true; initInsightsCharts(); }     else { reflowCharts(['accuracyRadarChart','errorHeatChart']); } }
     if (tabName === 'sla')         { initSLADashboard(); }
@@ -2558,58 +2573,17 @@ function reflowCharts(ids) {
 
 // ==================== EXECUTIVE CHARTS ====================
 function initExecutiveCharts() {
-  // Gauge charts
-  drawGauge('gaugeOverall', 98.50, '#01A982');
-  drawGauge('gaugeCritical', 98.62, '#0D5DBF');
-  drawGauge('gaugeNonCritical', 97.89, '#FF8300');
-  
-  // Sparkline
-  destroyChart('sparklineChart');
-  const weekLabels = DASHBOARD_DATA.week_stats.map(w => w.Week_Label);
-  const weekAccs = DASHBOARD_DATA.week_stats.map(w => w.Accuracy);
-  
-  const ctx = document.getElementById('sparklineChart').getContext('2d');
-  charts['sparklineChart'] = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: weekLabels,
-      datasets: [
-        {
-          label: 'Accuracy %',
-          data: weekAccs,
-          borderColor: '#01A982',
-          backgroundColor: 'rgba(1,169,130,0.1)',
-          tension: 0.4,
-          fill: true,
-          pointRadius: 4,
-          pointBackgroundColor: weekAccs.map(a => a < 95 ? '#C54E4B' : a < 98 ? '#FF8300' : '#01A982'),
-          pointBorderColor: 'white',
-          pointBorderWidth: 2,
-          pointHoverRadius: 7
-        },
-        {
-          label: '95% Target',
-          data: weekLabels.map(() => 95),
-          borderColor: '#C54E4B',
-          borderDash: [5,5],
-          borderWidth: 1.5,
-          pointRadius: 0,
-          fill: false
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false }, tooltip: { mode: 'index' } },
-      scales: {
-        y: { min: 92, max: 101, ticks: { callback: v => v + '%', font: {size:11} }, grid: { color: 'rgba(0,0,0,0.05)' } },
-        x: { ticks: { font: {size:10}, maxRotation: 45 }, grid: { display: false } }
-      }
-    }
-  });
-  
-  // Stage donut
+  // Populate week dropdowns for all filter areas (safe to call multiple times)
+  populateWeekOptions('execWeekSelect');
+  populateWeekOptions('trendsWeekSelect');
+  populateWeekOptions('improveWeekSelect');
+
+  // KPI cards + gauges driven by current filter state
+  updateExecutiveKPIs();
+  // Filter-aware sparkline + month table
+  updateExecutiveCharts();
+
+  // Stage donut (always full-FY, not filter-dependent)
   destroyChart('stageDonutChart');
   const stageCtx = document.getElementById('stageDonutChart').getContext('2d');
   charts['stageDonutChart'] = new Chart(stageCtx, {
@@ -2633,8 +2607,8 @@ function initExecutiveCharts() {
       cutout: '65%'
     }
   });
-  
-  // Month summary table
+
+  // Month summary table (filter-aware via buildMonthTable)
   buildMonthTable();
 }
 
@@ -2686,39 +2660,45 @@ function drawGauge(canvasId, value, color) {
 function buildMonthTable() {
   const tbody = document.getElementById('monthSummaryTable');
   if (!tbody) return;
-  const months = [...DASHBOARD_DATA.month_stats].sort((a, b) => a.Month_Number - b.Month_Number);
+  const months = getFilteredMonths();
+  const allSorted = [...DASHBOARD_DATA.month_stats].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
   let prevAcc = null;
-  tbody.innerHTML = months.map(m => {
-    const momChange = prevAcc !== null ? (m.Accuracy - prevAcc).toFixed(2) : null;
-    const momHtml = momChange !== null 
-      ? (parseFloat(momChange) > 0 
-        ? '<span style="color:var(--hpe-green);font-weight:600">▲ +' + momChange + '%</span>'
-        : parseFloat(momChange) < 0 
-          ? '<span style="color:var(--hpe-red);font-weight:600">▼ ' + momChange + '%</span>'
-          : '<span style="color:var(--text-muted)">— 0%</span>')
-      : '<span style="color:var(--text-muted)">—</span>';
-    prevAcc = m.Accuracy;
-    const status = m.Accuracy >= 95 
-      ? '<span class="status-pill status-closed">✓ On Target</span>'
-      : '<span class="status-pill status-open">✗ Below Target</span>';
-    return \`<tr>
-      <td><strong>\${m.Month} 2026</strong></td>
-      <td>\${m.Opportunity_Count.toLocaleString()}</td>
-      <td style="color:var(--hpe-green);font-weight:600">\${m.Opportunity_Pass.toLocaleString()}</td>
-      <td style="color:var(--hpe-red);font-weight:600">\${m.Opportunity_Fail}</td>
-      <td style="color:var(--text-muted)">\${m.Opportunity_NA}</td>
-      <td>\${getAccBadge(m.Accuracy)}</td>
-      <td style="color:var(--hpe-orange);font-weight:600">\${m.Error_Rate}%</td>
-      <td>\${momHtml}</td>
-      <td>\${status}</td>
-    </tr>\`;
+  tbody.innerHTML = months.map(function(m) {
+    // Find previous month in full list for MoM
+    var idx = allSorted.findIndex(function(x){ return x.Month === m.Month; });
+    var prev = idx > 0 ? allSorted[idx-1] : null;
+    var momChange = prev !== null ? (m.Accuracy - prev.Accuracy).toFixed(2) : null;
+    var momHtml = momChange !== null
+      ? (parseFloat(momChange) > 0
+        ? '<span style="color:var(--hpe-green);font-weight:600">\u25b2 +' + momChange + '%</span>'
+        : parseFloat(momChange) < 0
+          ? '<span style="color:var(--hpe-red);font-weight:600">\u25bc ' + momChange + '%</span>'
+          : '<span style="color:var(--text-muted)">\u2014 0%</span>')
+      : '<span style="color:var(--text-muted)">\u2014</span>';
+    var status = m.Accuracy >= 95
+      ? '<span class="status-pill status-closed">\u2713 On Target</span>'
+      : '<span class="status-pill status-open">\u2717 Below Target</span>';
+    return '<tr>'
+      + '<td><strong>' + m.Month + ' 2026</strong></td>'
+      + '<td>' + m.Opportunity_Count.toLocaleString() + '</td>'
+      + '<td style="color:var(--hpe-green);font-weight:600">' + m.Opportunity_Pass.toLocaleString() + '</td>'
+      + '<td style="color:var(--hpe-red);font-weight:600">' + m.Opportunity_Fail + '</td>'
+      + '<td style="color:var(--text-muted)">' + m.Opportunity_NA + '</td>'
+      + '<td>' + getAccBadge(m.Accuracy) + '</td>'
+      + '<td style="color:var(--hpe-orange);font-weight:600">' + m.Error_Rate + '%</td>'
+      + '<td>' + momHtml + '</td>'
+      + '<td>' + status + '</td>'
+      + '</tr>';
   }).join('');
 }
 
 // ==================== TREND CHARTS ====================
 function initTrendCharts() {
-  const months = DASHBOARD_DATA.month_stats.sort((a,b) => a.Month_Number - b.Month_Number);
-  
+  // Filter-aware charts: monthly trend + weekly error + weekly drill table
+  // (updateTrendCharts checks _trendDone so we bypass it here by calling directly)
+  var months = getFilteredMonths().sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  var weeks  = getFilteredWeeks();
+
   // Monthly trend line
   destroyChart('monthlyTrendChart');
   const mtCtx = document.getElementById('monthlyTrendChart').getContext('2d');
@@ -2860,18 +2840,17 @@ function initTrendCharts() {
     }
   });
   
-  // Weekly error chart
+  // Weekly error chart (filter-aware — uses weeks from getFilteredWeeks())
   destroyChart('weeklyErrorChart');
   const weCtx = document.getElementById('weeklyErrorChart').getContext('2d');
-  const weekData = DASHBOARD_DATA.week_stats;
   charts['weeklyErrorChart'] = new Chart(weCtx, {
     type: 'bar',
     data: {
-      labels: weekData.map(w => w.Week_Label),
+      labels: weeks.map(w => w.Week_Label),
       datasets: [{
         label: 'Errors',
-        data: weekData.map(w => w.Opportunity_Fail),
-        backgroundColor: weekData.map(w => w.Opportunity_Fail > 20 ? '#C54E4B' : w.Opportunity_Fail > 10 ? '#FF8300' : '#01A982'),
+        data: weeks.map(w => w.Opportunity_Fail),
+        backgroundColor: weeks.map(w => w.Opportunity_Fail > 20 ? '#C54E4B' : w.Opportunity_Fail > 10 ? '#FF8300' : '#01A982'),
         borderRadius: 4
       }]
     },
@@ -2944,10 +2923,17 @@ const WEEKLY_PARAM_ERRORS = {
 function buildWeeklyTable() {
   const tbody = document.getElementById('weeklyDrillTable');
   if (!tbody) return;
-  const weeks = [...DASHBOARD_DATA.week_stats].sort((a,b) => a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week);
+  // Use filtered weeks so filter changes are reflected in the drill table too
+  const weeks = getFilteredWeeks();
+  const allSorted = [...DASHBOARD_DATA.week_stats].sort(function(a,b){
+    return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
+  });
   let prevAcc = null;
   tbody.innerHTML = weeks.map(function(w) {
-    const wow = prevAcc !== null ? (w.Accuracy - prevAcc).toFixed(2) : null;
+    // Look up previous week from the full sorted list for accurate cross-filter WoW
+    var wIdx = allSorted.findIndex(function(x){ return x.Week_Label === w.Week_Label; });
+    var prevW = wIdx > 0 ? allSorted[wIdx - 1] : null;
+    const wow = prevW !== null ? (w.Accuracy - prevW.Accuracy).toFixed(2) : null;
     const wowHtml = wow !== null
       ? parseFloat(wow) > 0 ? '<span style="color:var(--hpe-green);font-weight:600">\u25b2 +' + wow + '%</span>'
         : parseFloat(wow) < 0 ? '<span style="color:var(--hpe-red);font-weight:600">\u25bc ' + wow + '%</span>'
@@ -3088,119 +3074,94 @@ function closeParamBreakdown() {
 }
 
 // ==================== IMPROVEMENT CHARTS ====================
-let _trendFilterMode = 'week'; // 'week' | 'month' | 'fy'
-
+// applyTrendFilter now delegates to the global filter
 function applyTrendFilter(mode, btn) {
-  _trendFilterMode = mode;
-  // Update button styles
-  document.querySelectorAll('.trend-filter-btn').forEach(b => {
-    b.style.background = 'white';
-    b.style.color = '#555';
-    b.style.borderColor = '#ccc';
-  });
-  if (btn) {
-    btn.style.background = 'var(--hpe-green)';
-    btn.style.color = 'white';
-    btn.style.borderColor = 'var(--hpe-green)';
+  var value = 'all';
+  if (mode === 'month') {
+    var sel = document.getElementById('improveMonthSelect');
+    value = (sel && sel.value !== 'all') ? sel.value : 'all';
   }
-  // Show/hide month sub-select
-  const sel = document.getElementById('trendMonthSelect');
-  if (sel) sel.style.display = mode === 'month' ? 'inline-block' : 'none';
-  // Rebuild forecast chart only
-  buildForecastChart();
-  buildDeltaTable();
+  applyGlobalFilter(mode, value, btn, 'improve');
 }
 
 function buildForecastChart() {
-  const mode = _trendFilterMode;
-  let labels = [], actualData = [], forecastLabels = [], forecastData = [];
+  var weeks  = getFilteredWeeks();
+  var months = getFilteredMonths();
+  var mode   = ACTIVE_FILTER.mode;
+
+  var labels = [], actualData = [], forecastLabels = [];
 
   if (mode === 'week') {
-    const weekData = [...DASHBOARD_DATA.week_stats].sort((a,b) => a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week);
-    labels = weekData.map(w => w.Week_Label);
-    actualData = weekData.map(w => w.Accuracy);
-    forecastLabels = ['May W1', 'May W2', 'May W3', 'May W4'];
-
+    // Show individual weekly data points for the selected week or all weeks
+    labels     = weeks.map(function(w){ return w.Week_Label; });
+    actualData = weeks.map(function(w){ return w.Accuracy; });
+    forecastLabels = weeks.length === 1 ? [] : ['May W1','May W2','May W3','May W4'];
   } else if (mode === 'month') {
-    const sel = document.getElementById('trendMonthSelect');
-    const selVal = sel ? sel.value : 'all';
-    const allMonths = [...DASHBOARD_DATA.month_stats].sort((a,b) => a.Month_Number - b.Month_Number);
-    const filtered = selVal === 'all' ? allMonths : allMonths.filter(m => String(m.Month_Number) === selVal);
-    if (filtered.length === 0) {
-      labels = allMonths.map(m => m.Month + ' 2026');
-      actualData = allMonths.map(m => m.Accuracy);
-    } else {
-      labels = filtered.map(m => m.Month + ' 2026');
-      actualData = filtered.map(m => m.Accuracy);
-    }
+    // Show weekly data within the selected month (or all months if all)
+    labels     = weeks.map(function(w){ return w.Week_Label; });
+    actualData = weeks.map(function(w){ return w.Accuracy; });
+    forecastLabels = ['May W1', 'May W2'];
+  } else {
+    // FY mode — monthly aggregates
+    labels     = months.map(function(m){ return m.Month + ' 2026'; });
+    actualData = months.map(function(m){ return m.Accuracy; });
     forecastLabels = ['May 2026', 'Jun 2026'];
-
-  } else if (mode === 'fy') {
-    // FY-level summary: FY24 partial, FY25 full, FY26 YTD
-    labels = ['FY24 (Partial Apr-Oct)', 'FY25 (Nov-Apr)', 'FY26 YTD (Jan-Apr)'];
-    // Compute from month_stats: FY26 = current year (months 1-4 = Apr25? use week_stats months)
-    const ms = [...DASHBOARD_DATA.month_stats].sort((a,b) => a.Month_Number - b.Month_Number);
-    const totalCount = ms.reduce((s,m) => s + m.Opportunity_Count, 0);
-    const totalPass = ms.reduce((s,m) => s + m.Opportunity_Pass, 0);
-    const fy26Acc = totalCount > 0 ? +((totalPass / totalCount) * 100).toFixed(2) : 98.5;
-    actualData = [97.25, 98.49, fy26Acc];
-    forecastLabels = ['FY27 (Forecast)'];
-    forecastLabels = [];
   }
 
-  // Compute linear forecast
-  const n = actualData.length;
+  // Linear regression forecast
+  var forecastData = [];
+  var n = actualData.length;
   if (n > 1 && forecastLabels.length > 0) {
-    const sumX = n*(n-1)/2;
-    const sumY = actualData.reduce((s,v)=>s+v,0);
-    const sumXY = actualData.reduce((s,v,i)=>s+i*v,0);
-    const sumX2 = actualData.reduce((s,v,i)=>s+i*i,0);
-    const slope = (n*sumXY - sumX*sumY) / (n*sumX2 - sumX*sumX);
-    const intercept = (sumY - slope*sumX) / n;
-    forecastData = forecastLabels.map((_,k) => Math.min(99.8, Math.max(93, +(intercept + slope*(n+k)).toFixed(2))));
+    var sumX = n*(n-1)/2;
+    var sumY = actualData.reduce(function(s,v){ return s+v; }, 0);
+    var sumXY= actualData.reduce(function(s,v,i){ return s+i*v; }, 0);
+    var sumX2= actualData.reduce(function(s,v,i){ return s+i*i; }, 0);
+    var denom = n*sumX2 - sumX*sumX;
+    if (denom !== 0) {
+      var slope = (n*sumXY - sumX*sumY) / denom;
+      var intercept = (sumY - slope*sumX) / n;
+      forecastData = forecastLabels.map(function(_,k){ return Math.min(99.8, Math.max(93, +(intercept + slope*(n+k)).toFixed(2))); });
+    }
   }
 
-  const allLabels = [...labels, ...forecastLabels];
-  const yMin = mode === 'fy' ? 94 : 92;
+  var allLabels = labels.concat(forecastLabels);
+  var yMin = Math.min(92, Math.floor(Math.min.apply(null, actualData.concat([95]))) - 1);
 
   destroyChart('forecastChart');
-  const fEl = document.getElementById('forecastChart');
+  var fEl = document.getElementById('forecastChart');
   if (!fEl) return;
+
+  var datasets = [
+    { label: 'Actual Accuracy', data: actualData.concat(forecastLabels.map(function(){ return null; })),
+      borderColor: '#01A982', backgroundColor: 'rgba(1,169,130,0.08)', tension: 0.4, fill: true,
+      pointRadius: 5, pointBackgroundColor: actualData.map(function(a){ return a < 95 ? '#C54E4B' : a < 98 ? '#FF8300' : '#01A982'; }),
+      borderWidth: 2 }
+  ];
+  if (forecastData.length > 0) {
+    var fPad = actualData.slice(0,-1).map(function(){ return null; });
+    datasets.push({ label: 'AI Forecast',
+      data: fPad.concat([actualData[actualData.length-1]]).concat(forecastData),
+      borderColor: '#FF8300', borderDash: [6,3], tension: 0.3,
+      pointRadius: 5, pointBackgroundColor: '#FF8300', borderWidth: 2, fill: false });
+  }
+  datasets.push({ label: '95% Target', data: allLabels.map(function(){ return 95; }),
+    borderColor: '#C54E4B', borderDash: [4,4], borderWidth: 1.5, pointRadius: 0, fill: false });
+
+  // Period title annotation
+  var periodTitle = getPeriodLabel();
+
   charts['forecastChart'] = new Chart(fEl.getContext('2d'), {
     type: 'line',
-    data: {
-      labels: allLabels,
-      datasets: [
-        {
-          label: 'Actual Accuracy',
-          data: [...actualData, ...forecastLabels.map(()=>null)],
-          borderColor: '#01A982',
-          backgroundColor: 'rgba(1,169,130,0.08)',
-          tension: 0.4, fill: true,
-          pointRadius: 5, pointBackgroundColor: '#01A982', borderWidth: 2
-        },
-        ...(forecastData.length > 0 ? [{
-          label: 'AI Forecast',
-          data: [...actualData.slice(0,-1).map(()=>null), actualData[actualData.length-1], ...forecastData],
-          borderColor: '#FF8300', borderDash: [6,3],
-          tension: 0.3, pointRadius: 5, pointBackgroundColor: '#FF8300', borderWidth: 2, fill: false
-        }] : []),
-        {
-          label: '95% Target',
-          data: allLabels.map(()=>95),
-          borderColor: '#C54E4B', borderDash: [4,4],
-          borderWidth: 1.5, pointRadius: 0, fill: false
-        }
-      ]
-    },
+    data: { labels: allLabels, datasets: datasets },
     options: {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { position: 'top', labels: {font:{size:11},boxWidth:12} },
-        tooltip: { mode: 'index', intersect: false }
+        tooltip: { mode: 'index', intersect: false,
+          callbacks: { title: function(items){ return items[0].label + ' — ' + periodTitle; } } }
       },
       scales: {
-        y: { min: yMin, max: 101, ticks: { callback: v => v + '%', font:{size:11} } },
+        y: { min: yMin, max: 101, ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
         x: { ticks: {font:{size:10}, maxRotation:45}, grid:{display:false} }
       }
     }
@@ -4065,25 +4026,392 @@ function initInsightsCharts() {
   });
 }
 
-// ==================== FILTERS ====================
+// ==================== UNIFIED GLOBAL FILTER ENGINE ====================
+// Single source of truth for all period filters across Executive, Trends, Improvement tabs
+var ACTIVE_FILTER = { mode: 'fy', value: 'all' }; // mode: 'fy'|'month'|'week'
+
+// Helper: get filtered week_stats based on current ACTIVE_FILTER
+function getFilteredWeeks() {
+  var all = [...DASHBOARD_DATA.week_stats].sort(function(a,b) {
+    return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
+  });
+  if (ACTIVE_FILTER.mode === 'fy' || ACTIVE_FILTER.value === 'all') return all;
+  if (ACTIVE_FILTER.mode === 'month') return all.filter(function(w) { return w.Month === ACTIVE_FILTER.value; });
+  if (ACTIVE_FILTER.mode === 'week')  return all.filter(function(w) { return w.Week_Label === ACTIVE_FILTER.value; });
+  return all;
+}
+
+// Helper: get filtered month_stats based on current ACTIVE_FILTER
+function getFilteredMonths() {
+  var all = [...DASHBOARD_DATA.month_stats].sort(function(a,b) { return a.Month_Number - b.Month_Number; });
+  if (ACTIVE_FILTER.mode === 'fy' || ACTIVE_FILTER.value === 'all') return all;
+  if (ACTIVE_FILTER.mode === 'month') return all.filter(function(m) { return m.Month === ACTIVE_FILTER.value; });
+  if (ACTIVE_FILTER.mode === 'week') {
+    // For week filter on monthly view, show only the month that contains that week
+    var w = DASHBOARD_DATA.week_stats.find(function(x) { return x.Week_Label === ACTIVE_FILTER.value; });
+    return w ? all.filter(function(m) { return m.Month === w.Month; }) : all;
+  }
+  return all;
+}
+
+// Populate week dropdown options (called once per filter area)
+function populateWeekOptions(selectId) {
+  var sel = document.getElementById(selectId);
+  if (!sel) return;
+  var weeks = [...DASHBOARD_DATA.week_stats].sort(function(a,b) {
+    return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
+  });
+  var html = '<option value="all">All Weeks</option>';
+  weeks.forEach(function(w) {
+    html += '<option value="' + w.Week_Label + '">' + w.Week_Label + '</option>';
+  });
+  sel.innerHTML = html;
+}
+
+// Master filter entry point — called from ALL filter controls
+function applyGlobalFilter(mode, value, btn, source) {
+  ACTIVE_FILTER = { mode: mode, value: value };
+
+  // --- Sync ALL filter UI controls to reflect the new state ---
+  // Executive
+  syncFilterUI('execMonthSelect', 'execWeekSelect', 'execFYBtn');
+  // Trends
+  syncFilterUI('trendsMonthSelect', 'trendsWeekSelect', 'trendsAllBtn');
+  // Improve
+  syncFilterUI('improveMonthSelect', 'improveWeekSelect', 'improveFilterFY');
+  syncImproveBtns();
+
+  // Set dropdown value for the source that triggered
+  if (mode === 'month' && value !== 'all') {
+    setSelectVal('execMonthSelect', value);
+    setSelectVal('trendsMonthSelect', value);
+    setSelectVal('improveMonthSelect', value);
+  } else if (mode === 'week' && value !== 'all') {
+    setSelectVal('execWeekSelect', value);
+    setSelectVal('trendsWeekSelect', value);
+    setSelectVal('improveWeekSelect', value);
+  }
+
+  // --- Rebuild all affected visualisations ---
+  updateExecutiveKPIs();
+  updateExecutiveCharts();
+  updateTrendCharts();
+  updateImprovementCharts();
+}
+
+function setSelectVal(id, val) {
+  var el = document.getElementById(id);
+  if (el) el.value = val;
+}
+
+// Sync show/hide dropdowns and active button states
+function syncFilterUI(monthSelId, weekSelId, fyBtnId) {
+  var monthSel = document.getElementById(monthSelId);
+  var weekSel  = document.getElementById(weekSelId);
+  var fyBtn    = document.getElementById(fyBtnId);
+  if (monthSel) monthSel.style.display = 'inline-block';
+  if (weekSel)  weekSel.style.display  = 'inline-block';
+  if (fyBtn) {
+    fyBtn.classList.toggle('active', ACTIVE_FILTER.mode === 'fy' && ACTIVE_FILTER.value === 'all');
+  }
+  // Reset dropdowns if fy mode
+  if (ACTIVE_FILTER.mode === 'fy') {
+    if (monthSel) monthSel.value = 'all';
+    if (weekSel)  weekSel.value  = 'all';
+  }
+}
+
+function syncImproveBtns() {
+  ['improveFilterWeek','improveFilterMonth','improveFilterFY'].forEach(function(id) {
+    var el = document.getElementById(id);
+    if (!el) return;
+    var isActive = (id === 'improveFilterWeek' && ACTIVE_FILTER.mode === 'week')
+                || (id === 'improveFilterMonth' && ACTIVE_FILTER.mode === 'month')
+                || (id === 'improveFilterFY'    && ACTIVE_FILTER.mode === 'fy');
+    el.style.background    = isActive ? 'var(--hpe-green)' : 'white';
+    el.style.color         = isActive ? 'white' : '#555';
+    el.style.borderColor   = isActive ? 'var(--hpe-green)' : '#ccc';
+    // show sub-selects
+    var monthSel = document.getElementById('improveMonthSelect');
+    var weekSel  = document.getElementById('improveWeekSelect');
+    if (monthSel) monthSel.style.display = ACTIVE_FILTER.mode === 'month' ? 'inline-block' : 'none';
+    if (weekSel)  weekSel.style.display  = ACTIVE_FILTER.mode === 'week'  ? 'inline-block' : 'none';
+  });
+}
+
+// ---- UPDATE EXECUTIVE KPI CARDS ----
+function updateExecutiveKPIs() {
+  var weeks  = getFilteredWeeks();
+  var months = getFilteredMonths();
+  var sortedMonths = [...DASHBOARD_DATA.month_stats].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+
+  // Compute aggregated metrics from filtered weeks
+  var totalCount = weeks.reduce(function(s,w){ return s + w.Opportunity_Count; }, 0);
+  var totalPass  = weeks.reduce(function(s,w){ return s + w.Opportunity_Pass;  }, 0);
+  var totalFail  = weeks.reduce(function(s,w){ return s + w.Opportunity_Fail;  }, 0);
+  var totalNA    = weeks.reduce(function(s,w){ return s + w.Opportunity_NA;    }, 0);
+  var accuracy   = totalCount > 0 ? +((totalPass / totalCount) * 100).toFixed(2) : 0;
+  var errRate    = totalCount > 0 ? +((totalFail / totalCount) * 100).toFixed(2) : 0;
+  var passRate   = totalCount > 0 ? +((totalPass / totalCount) * 100).toFixed(2) : 0;
+
+  // Period label
+  var periodLabel = getPeriodLabel();
+
+  // MoM / WoW computation
+  var momVal = '', momLabel = '', momClass = 'delta-neutral';
+  var wowVal = '', wowLabel = '', wowClass = 'delta-neutral';
+
+  if (ACTIVE_FILTER.mode === 'fy' || ACTIVE_FILTER.value === 'all') {
+    // FY mode: latest vs previous month
+    var lastM = sortedMonths[sortedMonths.length - 1];
+    var prevM = sortedMonths[sortedMonths.length - 2];
+    if (lastM && prevM) {
+      var d = +(lastM.Accuracy - prevM.Accuracy).toFixed(2);
+      momVal = (d >= 0 ? '+' : '') + d + '%';
+      momLabel = lastM.Month + ' vs ' + prevM.Month;
+      momClass = d >= 0 ? 'delta-up' : 'delta-down';
+    }
+    // WoW: last vs second-last week
+    var allW = [...DASHBOARD_DATA.week_stats].sort(function(a,b){
+      return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
+    });
+    var lastW = allW[allW.length-1], prevW = allW[allW.length-2];
+    if (lastW && prevW) {
+      var dw = +(lastW.Accuracy - prevW.Accuracy).toFixed(2);
+      wowVal = (dw >= 0 ? '+' : '') + dw + '%';
+      wowLabel = lastW.Week_Label + ' vs ' + prevW.Week_Label;
+      wowClass = dw >= 0 ? 'delta-up' : 'delta-down';
+    }
+  } else if (ACTIVE_FILTER.mode === 'month') {
+    // Month mode: this month vs previous month
+    var curM = sortedMonths.find(function(m){ return m.Month === ACTIVE_FILTER.value; });
+    var curIdx = sortedMonths.indexOf(curM);
+    var preM = curIdx > 0 ? sortedMonths[curIdx - 1] : null;
+    if (curM && preM) {
+      var dm = +(curM.Accuracy - preM.Accuracy).toFixed(2);
+      momVal = (dm >= 0 ? '+' : '') + dm + '%';
+      momLabel = curM.Month + ' vs ' + preM.Month;
+      momClass = dm >= 0 ? 'delta-up' : 'delta-down';
+    } else { momVal = 'N/A'; momLabel = 'No prior month'; }
+    // WoW: last week of this month vs previous week
+    var mWeeks = weeks;
+    var lW = mWeeks[mWeeks.length-1], pW = mWeeks[mWeeks.length-2];
+    if (lW && pW) {
+      var dwm = +(lW.Accuracy - pW.Accuracy).toFixed(2);
+      wowVal = (dwm >= 0 ? '+' : '') + dwm + '%';
+      wowLabel = lW.Week_Label + ' vs ' + pW.Week_Label;
+      wowClass = dwm >= 0 ? 'delta-up' : 'delta-down';
+    } else if (lW) { wowVal = lW.Accuracy + '%'; wowLabel = 'Only week'; }
+  } else if (ACTIVE_FILTER.mode === 'week') {
+    // Week mode: this week vs previous week
+    var allSorted = [...DASHBOARD_DATA.week_stats].sort(function(a,b){
+      return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
+    });
+    var curWIdx = allSorted.findIndex(function(w){ return w.Week_Label === ACTIVE_FILTER.value; });
+    var curW = allSorted[curWIdx], preW = curWIdx > 0 ? allSorted[curWIdx - 1] : null;
+    if (curW && preW) {
+      var dwk = +(curW.Accuracy - preW.Accuracy).toFixed(2);
+      wowVal = (dwk >= 0 ? '+' : '') + dwk + '%';
+      wowLabel = curW.Week_Label + ' vs ' + preW.Week_Label;
+      wowClass = dwk >= 0 ? 'delta-up' : 'delta-down';
+    } else { wowVal = 'First week'; wowLabel = 'No prior data'; }
+    momVal = 'N/A'; momLabel = 'Select a month for MoM'; momClass = 'delta-neutral';
+  }
+
+  // Accuracy delta vs Jan (FY reference)
+  var janData = DASHBOARD_DATA.month_stats.find(function(m){ return m.Month === 'Jan'; });
+  var accDelta = '', accDeltaClass = 'delta-up';
+  if (ACTIVE_FILTER.mode !== 'fy' && ACTIVE_FILTER.value !== 'all' && janData) {
+    var ad = +(accuracy - janData.Accuracy).toFixed(2);
+    accDelta = (ad >= 0 ? '+' : '') + ad + '% vs Jan';
+    accDeltaClass = ad >= 0 ? 'delta-up' : 'delta-down';
+  } else {
+    var lastMon = sortedMonths[sortedMonths.length - 1];
+    var firstMon = sortedMonths[0];
+    if (lastMon && firstMon) {
+      var ad2 = +(lastMon.Accuracy - firstMon.Accuracy).toFixed(2);
+      accDelta = (ad2 >= 0 ? '+' : '') + ad2 + '% vs ' + firstMon.Month;
+      accDeltaClass = ad2 >= 0 ? 'delta-up' : 'delta-down';
+    }
+  }
+
+  // --- Update DOM ---
+  setText('kpi-accuracy', accuracy + '%');
+  setHtml('kpi-accuracy-delta', '<i class="fas fa-' + (accDeltaClass==='delta-up'?'arrow-up':'arrow-down') + '"></i> ' + accDelta);
+  setClass('kpi-accuracy-delta', 'kpi-delta ' + accDeltaClass);
+  setText('kpi-accuracy-sub', 'Target: 95.00% | ' + periodLabel);
+
+  setText('kpi-total', totalCount.toLocaleString());
+  setHtml('kpi-total-delta', '<i class="fas fa-clipboard-list"></i> ' + periodLabel);
+  setText('kpi-total-sub', weeks.length + ' week(s) in view');
+
+  setText('kpi-pass', totalPass.toLocaleString());
+  setHtml('kpi-pass-delta', '<i class="fas fa-minus"></i> ' + passRate + '% pass rate');
+  setText('kpi-pass-sub', 'Out of ' + totalCount.toLocaleString() + ' total');
+
+  setText('kpi-errors', totalFail.toString());
+  setHtml('kpi-errors-delta', '<i class="fas fa-arrow-' + (errRate > 2 ? 'up' : 'down') + '"></i> ' + errRate + '% error rate');
+  setClass('kpi-errors-delta', 'kpi-delta ' + (errRate > 2 ? 'delta-down' : 'delta-up'));
+  setText('kpi-errors-sub', 'Across 12 parameters');
+
+  setText('kpi-mom', momVal || '—');
+  setHtml('kpi-mom-delta', '<i class="fas fa-arrow-' + (momClass==='delta-up'?'up':momClass==='delta-down'?'down':'right') + '"></i> ' + momLabel);
+  setClass('kpi-mom-delta', 'kpi-delta ' + momClass);
+  setText('kpi-mom-sub', momClass === 'delta-up' ? 'Improvement trend' : momClass === 'delta-down' ? 'Declining trend' : 'Stable');
+
+  setText('kpi-wow', wowVal || '—');
+  setHtml('kpi-wow-delta', '<i class="fas fa-arrow-' + (wowClass==='delta-up'?'up':wowClass==='delta-down'?'down':'right') + '"></i> ' + wowLabel);
+  setClass('kpi-wow-delta', 'kpi-delta ' + wowClass);
+  setText('kpi-wow-sub', 'Weekly performance');
+
+  // Gauges
+  drawGauge('gaugeOverall', accuracy, '#01A982');
+  setText('gaugeOverallVal', accuracy + '%');
+  var gOS = document.getElementById('gaugeOverallStatus');
+  if (gOS) { gOS.className = 'gauge-status ' + (accuracy >= 95 ? 'good' : 'bad'); gOS.textContent = accuracy >= 95 ? '\u2713 Above Target' : '\u2717 Below Target'; }
+
+  // Section subtitle
+  var subEl = document.querySelector('#tab-executive .section-subtitle');
+  if (subEl) subEl.textContent = periodLabel + ' | HPE Talent Acquisition Audit Performance Overview — South 1 Region';
+}
+
+function getPeriodLabel() {
+  if (ACTIVE_FILTER.mode === 'fy' || ACTIVE_FILTER.value === 'all') return 'FY2026 (Jan\u2013Apr)';
+  if (ACTIVE_FILTER.mode === 'month') return ACTIVE_FILTER.value + ' 2026';
+  if (ACTIVE_FILTER.mode === 'week')  return ACTIVE_FILTER.value + ' 2026';
+  return 'FY2026';
+}
+
+function setText(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; }
+function setHtml(id, val) { var el = document.getElementById(id); if (el) el.innerHTML = val; }
+function setClass(id, cls) { var el = document.getElementById(id); if (el) el.className = cls; }
+
+// ---- UPDATE EXECUTIVE CHARTS ----
+function updateExecutiveCharts() {
+  var weeks = getFilteredWeeks();
+  var labels = weeks.map(function(w){ return w.Week_Label; });
+  var accData = weeks.map(function(w){ return w.Accuracy; });
+
+  // Sparkline
+  destroyChart('sparklineChart');
+  var spEl = document.getElementById('sparklineChart');
+  if (spEl) {
+    charts['sparklineChart'] = new Chart(spEl.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: 'Accuracy %', data: accData, borderColor: '#01A982', backgroundColor: 'rgba(1,169,130,0.1)',
+            tension: 0.4, fill: true, pointRadius: 4,
+            pointBackgroundColor: accData.map(function(a){ return a < 95 ? '#C54E4B' : a < 98 ? '#FF8300' : '#01A982'; }),
+            pointBorderColor: 'white', pointBorderWidth: 2, pointHoverRadius: 7 },
+          { label: '95% Target', data: labels.map(function(){ return 95; }),
+            borderColor: '#C54E4B', borderDash: [5,5], borderWidth: 1.5, pointRadius: 0, fill: false }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: {display:false}, tooltip: {mode:'index'} },
+        scales: {
+          y: { min: Math.min(91, Math.floor(Math.min(...accData)) - 1), max: 101, ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
+          x: { ticks: {font:{size:10}, maxRotation:45}, grid:{display:false} }
+        }
+      }
+    });
+  }
+
+  // Rebuild month table filtered
+  buildMonthTable();
+}
+
+// ---- UPDATE ACCURACY TRENDS CHARTS ----
+function updateTrendCharts() {
+  if (!_trendDone) return; // not initialized yet, initTrendCharts will build with current filter
+  var weeks  = getFilteredWeeks();
+  var months = getFilteredMonths();
+
+  // Monthly trend chart
+  destroyChart('monthlyTrendChart');
+  var mtEl = document.getElementById('monthlyTrendChart');
+  if (mtEl && months.length > 0) {
+    charts['monthlyTrendChart'] = new Chart(mtEl.getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: months.map(function(m){ return m.Month + ' 2026'; }),
+        datasets: [
+          { label: 'Accuracy %', data: months.map(function(m){ return m.Accuracy; }),
+            borderColor: '#01A982', backgroundColor: 'rgba(1,169,130,0.12)', tension: 0.4, fill: true,
+            pointRadius: 6, pointBackgroundColor: '#01A982', pointBorderColor: 'white', pointBorderWidth: 2,
+            yAxisID: 'y', order: 1 },
+          { label: 'Error Rate %', data: months.map(function(m){ return m.Error_Rate; }),
+            borderColor: '#C54E4B', backgroundColor: 'rgba(197,78,75,0.08)', tension: 0.4,
+            type: 'bar', yAxisID: 'y2', order: 2 },
+          { label: '95% Target', data: months.map(function(){ return 95; }),
+            borderColor: '#FF8300', borderDash: [8,4], borderWidth: 2, pointRadius: 0, fill: false, yAxisID: 'y', order: 0 }
+        ]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        interaction: {mode:'index', intersect:false},
+        plugins: { legend: {position:'top', labels:{font:{size:12},padding:16,boxWidth:14}} },
+        scales: {
+          y:  { min: 94, max: 101, position:'left', ticks:{callback:function(v){return v+'%';}, font:{size:11}} },
+          y2: { min: 0,  max: 5,   position:'right', ticks:{callback:function(v){return v+'%';}, font:{size:11}}, grid:{display:false} },
+          x:  { ticks:{font:{size:12}}, grid:{display:false} }
+        }
+      }
+    });
+  }
+
+  // Weekly error chart
+  destroyChart('weeklyErrorChart');
+  var weEl = document.getElementById('weeklyErrorChart');
+  if (weEl && weeks.length > 0) {
+    charts['weeklyErrorChart'] = new Chart(weEl.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: weeks.map(function(w){ return w.Week_Label; }),
+        datasets: [{ label: 'Errors', data: weeks.map(function(w){ return w.Opportunity_Fail; }),
+          backgroundColor: weeks.map(function(w){ return w.Opportunity_Fail > 20 ? '#C54E4B' : w.Opportunity_Fail > 10 ? '#FF8300' : '#01A982'; }),
+          borderRadius: 4 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: {legend:{display:false}},
+        scales: {
+          y: { ticks:{font:{size:11}}, title:{display:true, text:'Error Count', font:{size:11}} },
+          x: { ticks:{font:{size:10}, maxRotation:45}, grid:{display:false} }
+        }
+      }
+    });
+  }
+
+  // Rebuild drill table with filter
+  buildWeeklyTable();
+}
+
+// ---- UPDATE IMPROVEMENT CHARTS ----
+function updateImprovementCharts() {
+  if (!_improveDone) return;
+  buildForecastChart();
+  buildDeltaTable();
+}
+
+// ==================== OLD FILTER STUBS (kept for any residual calls) ====================
 function setFilter(type, el) {
-  document.querySelectorAll('.period-filter .filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('.period-filter .filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (el) el.classList.add('active');
 }
+function filterTrend(type, el) { applyGlobalFilter('fy','all',el,'trends'); }
+function filterByMonth(month) { if (month && month !== 'all') applyGlobalFilter('month', month, null, 'exec'); else applyGlobalFilter('fy','all',null,'exec'); }
 
-function filterTrend(type, el) {
-  document.querySelectorAll('#tab-trends .filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
-}
-
+// CAPA status filter — used by filter buttons on the CAPA tab
 function filterCapa(type, el) {
-  document.querySelectorAll('#tab-capa .filter-btn').forEach(b => b.classList.remove('active'));
-  el.classList.add('active');
+  document.querySelectorAll('#tab-capa .filter-btn').forEach(function(b){ b.classList.remove('active'); });
+  if (el) el.classList.add('active');
   capaFilterState = type;
   buildCAPATable(type);
 }
-
-function filterByMonth(month) { /* Filter handler — refreshes view */ }
 
 // ==================== REFRESH ====================
 function refreshDashboard() {
