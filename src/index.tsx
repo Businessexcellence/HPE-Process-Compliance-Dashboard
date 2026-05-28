@@ -886,6 +886,132 @@ function getDashboardHTML(): string {
     .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px; }
     .mt-0 { margin-top: 0; }
     .mb-20 { margin-bottom: 20px; }
+
+    /* ========== SLA DASHBOARD STYLES ========== */
+    .sla-sub-nav { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:22px; padding:14px 18px; background:white; border-radius:10px; border:1px solid var(--border); box-shadow:var(--shadow); }
+    .sla-sub-btn { padding:7px 16px; border-radius:20px; border:1px solid var(--border); background:white; font-size:12px; font-weight:600; cursor:pointer; transition:all 0.2s; font-family:'Inter',sans-serif; color:var(--text-secondary); }
+    .sla-sub-btn:hover,.sla-sub-btn.active { background:var(--hpe-green); border-color:var(--hpe-green); color:white; }
+    .sla-panel { display:none; }
+    .sla-panel.active { display:block; }
+    .sla-kpi-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:22px; }
+    .sla-kpi { background:white; border-radius:12px; padding:18px 20px; border:1px solid var(--border); box-shadow:var(--shadow); text-align:center; position:relative; overflow:hidden; }
+    .sla-kpi::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:var(--hpe-green); }
+    .sla-kpi.red::before { background:var(--hpe-red); }
+    .sla-kpi.orange::before { background:var(--hpe-orange); }
+    .sla-kpi.blue::before { background:var(--hpe-blue); }
+    .sla-kpi-val { font-size:30px; font-weight:800; color:var(--text-primary); }
+    .sla-kpi-label { font-size:11px; color:var(--text-muted); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; margin-top:3px; }
+    .sla-kpi-sub { font-size:12px; color:var(--text-secondary); margin-top:4px; }
+    .sla-health-banner { border-radius:10px; padding:16px 20px; margin-bottom:22px; display:flex; align-items:center; gap:14px; font-size:13px; font-weight:600; }
+    .sla-health-banner.good { background:#e6f7f2; border:1px solid #b3ead8; color:#0a7a56; }
+    .sla-health-banner.warn { background:#fff3e6; border:1px solid #ffd9a8; color:#a05c00; }
+    .sla-health-banner.bad  { background:#fceaea; border:1px solid #f5c0c0; color:#8b1a1a; }
+    .sla-section-title { font-size:14px; font-weight:700; color:var(--text-primary); margin-bottom:12px; display:flex; align-items:center; gap:8px; }
+    .sla-metric-table { width:100%; border-collapse:collapse; font-size:12px; }
+    .sla-metric-table th { background:#f4f7fb; color:var(--text-muted); font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.4px; padding:10px 12px; text-align:left; border-bottom:2px solid var(--border); }
+    .sla-metric-table td { padding:10px 12px; border-bottom:1px solid var(--border); vertical-align:middle; }
+    .sla-metric-table tr:hover td { background:#f8fbff; }
+    .sla-pill { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:10px; font-size:11px; font-weight:700; }
+    .sla-pill.met { background:#e6f7f2; color:#0a7a56; }
+    .sla-pill.notmet { background:#fceaea; color:#8b1a1a; }
+    .sla-pill.nr { background:#f4f7fb; color:#425563; }
+    .sla-pill.na { background:#fff3e6; color:#a05c00; }
+    .sla-heatmap-grid { display:grid; gap:3px; margin-top:10px; }
+    .sla-hm-cell { padding:8px 5px; border-radius:5px; text-align:center; font-size:10px; font-weight:700; cursor:default; transition:opacity 0.2s; }
+    .sla-hm-cell:hover { opacity:0.8; }
+    .sla-fy-grid { display:grid; grid-template-columns:1fr 1fr; gap:20px; margin-bottom:22px; }
+    .sla-fy-card { background:white; border-radius:12px; padding:20px; border:1px solid var(--border); box-shadow:var(--shadow); }
+    .sla-fy-label { font-size:18px; font-weight:800; color:var(--hpe-blue); margin-bottom:4px; }
+    .sla-insight-box { background:linear-gradient(135deg,#f8fffe,#f0faf7); border:1px solid rgba(1,169,130,0.2); border-radius:10px; padding:16px 18px; margin-bottom:14px; }
+    .sla-insight-box.warn { background:linear-gradient(135deg,#fffdf8,#fff8ed); border-color:rgba(255,131,0,0.2); }
+    .sla-insight-box.bad  { background:linear-gradient(135deg,#fff8f8,#fceaea); border-color:rgba(197,78,75,0.2); }
+    .sla-trend-arrow { font-size:14px; font-weight:700; }
+    .sla-trend-up { color:var(--hpe-green); }
+    .sla-trend-dn { color:var(--hpe-red); }
+    .sla-trend-st { color:var(--hpe-orange); }
+    .sla-rec-item { display:flex; gap:12px; align-items:flex-start; padding:12px 0; border-bottom:1px solid var(--border); font-size:12px; }
+    .sla-rec-item:last-child { border-bottom:none; }
+    .sla-rec-num { min-width:24px; height:24px; border-radius:50%; background:var(--hpe-green); color:white; font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .sla-rec-num.orange { background:var(--hpe-orange); }
+    .sla-rec-num.red { background:var(--hpe-red); }
+
+    /* SLA health banner variants (used by JS) */
+    .sla-health-good { background:#e6f7f2; border:1px solid #b3ead8; color:#0a7a56; }
+    .sla-health-warn { background:#fff3e6; border:1px solid #ffd9a8; color:#a05c00; }
+    .sla-health-crit { background:#fceaea; border:1px solid #f5c0c0; color:#8b1a1a; }
+
+    /* SLA badges */
+    .sla-badge { display:inline-block; padding:2px 8px; border-radius:8px; font-size:11px; font-weight:700; }
+    .sla-badge-met  { background:#e6f7f2; color:#0a7a56; }
+    .sla-badge-nm   { background:#fceaea; color:#8b1a1a; }
+    .sla-badge-nr   { background:#f0f0f0; color:#666; }
+
+    /* SLA heatmap */
+    .sla-heatmap-wrap { overflow-x:auto; font-size:10px; }
+    .sla-heatmap-grid { display:grid; grid-template-columns:130px repeat(24,38px); gap:2px; min-width:max-content; }
+    .sla-hm-corner,.sla-hm-month,.sla-hm-label { padding:4px 3px; font-size:10px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+    .sla-hm-corner { background:#f4f7fb; border-radius:4px; }
+    .sla-hm-month  { background:#e9ecef; border-radius:4px; writing-mode:vertical-rl; transform:rotate(180deg); height:56px; }
+    .sla-hm-label  { background:#f4f7fb; border-radius:4px; justify-content:flex-start; padding-left:6px; }
+    .sla-hm-met,.sla-hm-nm,.sla-hm-nr,.sla-hm-na { width:38px; height:32px; display:flex; align-items:center; justify-content:center; border-radius:4px; font-size:11px; font-weight:700; cursor:default; }
+    .sla-hm-met { background:#b7f5dc; color:#0a7a56; }
+    .sla-hm-nm  { background:#ffc9c9; color:#8b1a1a; }
+    .sla-hm-nr  { background:#e9ecef; color:#555; }
+    .sla-hm-na  { background:#fff3e6; color:#a05c00; }
+    .sla-hm-legend { display:flex; gap:16px; padding:10px 4px; font-size:12px; }
+    .sla-hm-legend span { display:inline-flex; align-items:center; gap:5px; padding:3px 9px; border-radius:6px; font-weight:600; }
+
+    /* SLA insight cards (reporting section) */
+    .sla-insight-card { border-radius:10px; padding:14px 16px; margin-bottom:12px; }
+    .sla-ic-title { font-size:13px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:7px; }
+    .sla-ic-body  { font-size:12px; line-height:1.6; }
+    .sla-ic-warn  { background:#fff9ed; border:1px solid #ffd9a8; }
+    .sla-ic-warn .sla-ic-title { color:#a05c00; }
+    .sla-ic-good  { background:#f0fff9; border:1px solid #b3ead8; }
+    .sla-ic-good .sla-ic-title { color:#0a7a56; }
+    .sla-ic-info  { background:#f0f6ff; border:1px solid #c5d8f8; }
+    .sla-ic-info .sla-ic-title { color:#1a4fa0; }
+
+    /* SLA chronic fail panel */
+    .sla-chronic-item { background:#fff8f8; border:1px solid #f5c0c0; border-radius:8px; padding:12px 14px; margin-bottom:10px; }
+    .sla-chronic-name { font-size:13px; font-weight:700; color:#8b1a1a; margin-bottom:3px; }
+    .sla-chronic-stat { font-size:12px; color:#555; margin-bottom:6px; }
+    .sla-chronic-bar  { background:#f0f0f0; border-radius:4px; height:8px; overflow:hidden; }
+
+    /* SLA trend classification groups */
+    .sla-trend-classifications { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-bottom:22px; }
+    .sla-trend-group { border-radius:10px; padding:14px 16px; }
+    .sla-tg-title { font-size:13px; font-weight:700; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+    .sla-tg-item  { font-size:12px; padding:5px 0; border-bottom:1px solid rgba(0,0,0,0.06); }
+    .sla-tg-item:last-child { border-bottom:none; }
+    .sla-tg-improving { background:#f0fff9; border:1px solid #b3ead8; }
+    .sla-tg-improving .sla-tg-title { color:#0a7a56; }
+    .sla-tg-stable { background:#f4f7fb; border:1px solid #d1dae6; }
+    .sla-tg-stable .sla-tg-title { color:#425563; }
+    .sla-tg-declining { background:#fff8f8; border:1px solid #f5c0c0; }
+    .sla-tg-declining .sla-tg-title { color:#8b1a1a; }
+
+    /* SLA recommendations (new style — replaces old .sla-rec-item) */
+    .sla-rec-item { display:block; border-radius:10px; padding:14px 16px; margin-bottom:12px; border-left:4px solid #ccc; }
+    .sla-rec-priority { font-size:10px; font-weight:800; text-transform:uppercase; letter-spacing:0.8px; margin-bottom:4px; }
+    .sla-rec-title { font-size:13px; font-weight:700; margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+    .sla-rec-body  { font-size:12px; line-height:1.6; color:#444; }
+    .sla-rec-critical { background:#fff8f8; border-left-color:#e74c3c; }
+    .sla-rec-critical .sla-rec-priority { color:#e74c3c; }
+    .sla-rec-high { background:#fff9ed; border-left-color:#f7b731; }
+    .sla-rec-high .sla-rec-priority { color:#d68910; }
+    .sla-rec-medium { background:#f0f9f6; border-left-color:#01a982; }
+    .sla-rec-medium .sla-rec-priority { color:#0a7a56; }
+    .sla-rec-low { background:#f0f6ff; border-left-color:#3498db; }
+    .sla-rec-low .sla-rec-priority { color:#1a4fa0; }
+
+    /* SLA FY comparison extras */
+    .sla-fy-stat-row { display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; }
+    .sla-fy-stat { text-align:center; }
+    .sla-fy-stat-val { font-size:22px; font-weight:800; color:var(--hpe-blue); }
+    .sla-fy-stat-lbl { font-size:11px; color:var(--text-muted); font-weight:600; }
+    .sla-delta-positive { color:#01a982; font-weight:800; font-size:20px; }
+    .sla-delta-negative { color:#e74c3c; font-weight:800; font-size:20px; }
   </style>
 </head>
 <body>
@@ -930,6 +1056,9 @@ function getDashboardHTML(): string {
   </div>
   <div class="nav-tab" onclick="switchTab('data', this)">
     <i class="fas fa-database"></i> Data Management
+  </div>
+  <div class="nav-tab" onclick="switchTab('sla', this)">
+    <i class="fas fa-clipboard-check"></i> SLA Performance
   </div>
 </nav>
 
@@ -1767,6 +1896,403 @@ function getDashboardHTML(): string {
     </div>
   </div>
 
+  <!-- TAB: SLA PERFORMANCE DASHBOARD -->
+  <div class="tab-content" id="tab-sla">
+    <div class="section-header">
+      <div>
+        <div class="section-title">
+          <div class="icon-badge"><i class="fas fa-clipboard-check"></i></div>
+          SLA Performance Dashboard
+        </div>
+        <div class="section-subtitle">HPE South 1 | Practice Head: Mahak | FY24-25 & FY25-26 Contractual SLA Review</div>
+      </div>
+    </div>
+
+    <!-- Sub-navigation -->
+    <div class="sla-sub-nav">
+      <button class="sla-sub-btn active" onclick="showSLAPanel('sla-exec',this)"><i class="fas fa-tachometer-alt"></i> Executive Summary</button>
+      <button class="sla-sub-btn" onclick="showSLAPanel('sla-monthly',this)"><i class="fas fa-calendar-alt"></i> Monthly Analysis</button>
+      <button class="sla-sub-btn" onclick="showSLAPanel('sla-fy',this)"><i class="fas fa-chart-bar"></i> FY Wise Analysis</button>
+      <button class="sla-sub-btn" onclick="showSLAPanel('sla-metnotmet',this)"><i class="fas fa-check-double"></i> Met vs Not Met</button>
+      <button class="sla-sub-btn" onclick="showSLAPanel('sla-reporting',this)"><i class="fas fa-file-alt"></i> Reporting Analysis</button>
+      <button class="sla-sub-btn" onclick="showSLAPanel('sla-trends',this)"><i class="fas fa-chart-line"></i> Trend Analysis</button>
+    </div>
+
+    <!-- ── PANEL 1: SLA EXECUTIVE SUMMARY ── -->
+    <div class="sla-panel active" id="sla-exec">
+      <div id="slaHealthBanner" class="sla-health-banner good">
+        <i class="fas fa-check-circle" style="font-size:22px"></i>
+        <div>
+          <div style="font-size:14px;font-weight:800">SLA Health: IMPROVING — FY25-26 significantly outperforms FY24-25</div>
+          <div style="font-size:12px;font-weight:500;margin-top:2px">Overall Met Rate rose from 72.9% (FY24-25) to 86.0% (FY25-26 YTD). Critical risks remain in Time-to-Fill metrics and % Aged indicators.</div>
+        </div>
+      </div>
+
+      <div class="sla-kpi-row">
+        <div class="sla-kpi">
+          <div class="sla-kpi-val" style="color:var(--hpe-green)">82%</div>
+          <div class="sla-kpi-label">Overall Met Rate</div>
+          <div class="sla-kpi-sub">195 Met / 237 Total</div>
+        </div>
+        <div class="sla-kpi red">
+          <div class="sla-kpi-val" style="color:var(--hpe-red)">28</div>
+          <div class="sla-kpi-label">Not Met (All Time)</div>
+          <div class="sla-kpi-sub">11.8% failure rate</div>
+        </div>
+        <div class="sla-kpi orange">
+          <div class="sla-kpi-val" style="color:var(--hpe-orange)">10</div>
+          <div class="sla-kpi-label">Not Reported Months</div>
+          <div class="sla-kpi-sub">Apr-25 full blackout</div>
+        </div>
+        <div class="sla-kpi blue">
+          <div class="sla-kpi-val" style="color:var(--hpe-blue)">10</div>
+          <div class="sla-kpi-label">SLA Metrics Tracked</div>
+          <div class="sla-kpi-sub">Category B | Contractual</div>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-trophy" style="color:var(--hpe-green)"></i> Best Performing SLA Metrics</div>
+          <table class="sla-metric-table">
+            <thead><tr><th>SLA Metric</th><th>Met Rate</th><th>Status</th></tr></thead>
+            <tbody>
+              <tr><td>% Agency Utilization – Technical</td><td><strong style="color:var(--hpe-green)">100%</strong></td><td><span class="sla-pill met">★ Perfect</span></td></tr>
+              <tr><td>% Agency Utilization – Enterprise</td><td><strong style="color:var(--hpe-green)">100%</strong></td><td><span class="sla-pill met">★ Perfect</span></td></tr>
+              <tr><td>Avg Reqs Volume – Enterprise</td><td><strong style="color:var(--hpe-green)">82%</strong></td><td><span class="sla-pill met">Strong</span></td></tr>
+              <tr><td>Internal Hiring – Enterprise</td><td><strong style="color:var(--hpe-green)">91%</strong></td><td><span class="sla-pill met">Strong</span></td></tr>
+              <tr><td>% Aged – Technical (FY25-26)</td><td><strong style="color:var(--hpe-green)">88%</strong></td><td><span class="sla-pill met">Improving</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-exclamation-triangle" style="color:var(--hpe-red)"></i> Worst Performing SLA Metrics</div>
+          <table class="sla-metric-table">
+            <thead><tr><th>SLA Metric</th><th>Not Met Rate</th><th>Risk</th></tr></thead>
+            <tbody>
+              <tr><td>Time to Fill – Enterprise (45d)</td><td><strong style="color:var(--hpe-red)">45.8%</strong></td><td><span class="sla-pill notmet">🔴 Critical</span></td></tr>
+              <tr><td>% Aged – Enterprise (≤20%)</td><td><strong style="color:var(--hpe-red)">37.5%</strong></td><td><span class="sla-pill notmet">🔴 High Risk</span></td></tr>
+              <tr><td>Time to Fill – Technical (55d)</td><td><strong style="color:var(--hpe-red)">29.2%</strong></td><td><span class="sla-pill notmet">🟠 Moderate</span></td></tr>
+              <tr><td>% Aged – Technical (≤25%)</td><td><strong style="color:var(--hpe-orange)">25.0%</strong></td><td><span class="sla-pill notmet">🟠 Watch</span></td></tr>
+              <tr><td>Internal Hiring – Technical</td><td><strong style="color:var(--hpe-orange)">21.7%</strong></td><td><span class="sla-pill nr">⚠ Inconsistent</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-chart-line"></i> Monthly Met Rate Trend (All Metrics Combined)</div>
+        <div class="card-subtitle">24 months of SLA compliance tracking — Apr 2024 to Apr 2026</div>
+        <div class="chart-container" style="height:260px">
+          <canvas id="slaOverallTrendChart"></canvas>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-lightbulb" style="color:var(--hpe-orange)"></i> Key Findings</div>
+          <div class="sla-insight-box">
+            <strong>📈 Strong Recovery Trajectory:</strong> FY25-26 YTD Met Rate of 86% vs FY24-25's 72.9% — a +13.1pp improvement demonstrates effective corrective actions post-FY24-25.
+          </div>
+          <div class="sla-insight-box warn">
+            <strong>⚠ Apr-25 Total Blackout:</strong> All 10 SLA metrics were "Not Reported" in April 2025 — a complete governance failure for that month, impacting quarterly rollup.
+          </div>
+          <div class="sla-insight-box bad">
+            <strong>🔴 Time-to-Fill Enterprise Chronic Failure:</strong> This metric has the highest Not Met rate (45.8%) and was a persistent problem throughout FY24-25 before showing recovery in FY25-26 H2.
+          </div>
+        </div>
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-pie-chart"></i> Overall Status Distribution</div>
+          <div class="chart-container" style="height:220px">
+            <canvas id="slaStatusDonut"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL 2: MONTHLY ANALYSIS ── -->
+    <div class="sla-panel" id="sla-monthly">
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-th"></i> Month-wise SLA Status Heatmap</div>
+        <div class="card-subtitle">Each cell = one SLA metric. Green=Met, Red=Not Met, Grey=Not Reported, Amber=NA</div>
+        <div id="slaHeatmapContainer" style="overflow-x:auto;margin-top:12px"></div>
+      </div>
+
+      <div class="row-2">
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-chart-bar"></i> Monthly SLA Met / Not Met Count</div>
+          <div class="chart-container" style="height:280px">
+            <canvas id="slaMonthlyBarChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-percentage"></i> Monthly Compliance % Trend</div>
+          <div class="chart-container" style="height:280px">
+            <canvas id="slaMonthlyComplianceChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-table"></i> Detailed Monthly Breakdown</div>
+        <div class="table-container">
+          <table class="sla-metric-table">
+            <thead>
+              <tr><th>Month</th><th>FY Period</th><th>Total</th><th>Met</th><th>Not Met</th><th>Not Reported</th><th>NA</th><th>Compliance %</th><th>vs Prev Month</th><th>Highlight</th></tr>
+            </thead>
+            <tbody id="slaMonthlyTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL 3: FY WISE ANALYSIS ── -->
+    <div class="sla-panel" id="sla-fy">
+      <div class="sla-fy-grid">
+        <div class="sla-fy-card">
+          <div class="sla-fy-label">FY 2024–25</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Apr 2024 – Mar 2025 (12 months)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div style="text-align:center;background:#f4f7fb;padding:12px;border-radius:8px">
+              <div style="font-size:24px;font-weight:800;color:var(--hpe-blue)">72.9%</div>
+              <div style="font-size:11px;color:var(--text-muted)">Compliance Rate</div>
+            </div>
+            <div style="text-align:center;background:#fceaea;padding:12px;border-radius:8px">
+              <div style="font-size:24px;font-weight:800;color:var(--hpe-red)">27.1%</div>
+              <div style="font-size:11px;color:var(--text-muted)">Non-Compliance</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="padding:6px 0;border-bottom:1px solid var(--border)">✅ Met: <strong>87</strong> instances</div>
+            <div style="padding:6px 0;border-bottom:1px solid var(--border)">❌ Not Met: <strong>29</strong> instances</div>
+            <div style="padding:6px 0;border-bottom:1px solid var(--border)">📭 Not Reported: <strong>4</strong> (JAS quarter)</div>
+            <div style="padding:6px 0">🔴 Worst Month: Jun-24 (60% Met) & Jan-25 (70%)</div>
+          </div>
+        </div>
+        <div class="sla-fy-card">
+          <div class="sla-fy-label" style="color:var(--hpe-green)">FY 2025–26</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-bottom:16px">Apr 2025 – Apr 2026 (YTD, 11 months reported)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+            <div style="text-align:center;background:#e6f7f2;padding:12px;border-radius:8px">
+              <div style="font-size:24px;font-weight:800;color:var(--hpe-green)">86.0%</div>
+              <div style="font-size:11px;color:var(--text-muted)">Compliance Rate</div>
+            </div>
+            <div style="text-align:center;background:#fff3e6;padding:12px;border-radius:8px">
+              <div style="font-size:24px;font-weight:800;color:var(--hpe-orange)">14.0%</div>
+              <div style="font-size:11px;color:var(--text-muted)">Non-Compliance</div>
+            </div>
+          </div>
+          <div style="font-size:12px;color:var(--text-secondary)">
+            <div style="padding:6px 0;border-bottom:1px solid var(--border)">✅ Met: <strong>108</strong> instances</div>
+            <div style="padding:6px 0;border-bottom:1px solid var(--border)">❌ Not Met: <strong>18</strong> instances</div>
+            <div style="padding:6px 0;border-bottom:1px solid var(--border)">📭 Not Reported: <strong>10</strong> (Apr-25 blackout)</div>
+            <div style="padding:6px 0">🟢 Best Months: Aug-25, Sep-25, Nov-25 (100% Met)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-balance-scale"></i> FY24-25 vs FY25-26: Metric-Level Compliance Comparison</div>
+        <div class="chart-container" style="height:300px">
+          <canvas id="slaFYCompareChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-chart-area"></i> FY Trend Line: Monthly Compliance % Both FYs</div>
+        <div class="chart-container" style="height:260px">
+          <canvas id="slaFYTrendChart"></canvas>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-arrow-up" style="color:var(--hpe-green)"></i> FY25-26 Improvements vs FY24-25</div>
+          <table class="sla-metric-table">
+            <thead><tr><th>Metric</th><th>FY24-25</th><th>FY25-26</th><th>Change</th></tr></thead>
+            <tbody>
+              <tr><td>Time to Fill – Enterprise</td><td style="color:var(--hpe-red)">33%</td><td style="color:var(--hpe-green)">73%</td><td><span class="sla-trend-up">▲ +40pp</span></td></tr>
+              <tr><td>% Aged – Enterprise</td><td style="color:var(--hpe-red)">42%</td><td style="color:var(--hpe-green)">73%</td><td><span class="sla-trend-up">▲ +31pp</span></td></tr>
+              <tr><td>% Aged – Technical</td><td style="color:var(--hpe-orange)">67%</td><td style="color:var(--hpe-green)">88%</td><td><span class="sla-trend-up">▲ +21pp</span></td></tr>
+              <tr><td>Time to Fill – Technical</td><td style="color:var(--hpe-orange)">67%</td><td style="color:var(--hpe-green)">80%</td><td><span class="sla-trend-up">▲ +13pp</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-exclamation-circle" style="color:var(--hpe-orange)"></i> Metrics Still at Risk in FY25-26</div>
+          <table class="sla-metric-table">
+            <thead><tr><th>Metric</th><th>FY25-26 Met%</th><th>Issue</th></tr></thead>
+            <tbody>
+              <tr><td>Avg Reqs Vol – Technical</td><td style="color:var(--hpe-orange)">70%</td><td>Inconsistent volume load</td></tr>
+              <tr><td>Time to Fill – Enterprise</td><td style="color:var(--hpe-orange)">73%</td><td>Still below 80% threshold</td></tr>
+              <tr><td>Internal Hiring – Technical</td><td style="color:var(--hpe-orange)">80%</td><td>Mar-25, May-25, Apr-26 failures</td></tr>
+              <tr><td>% Aged – Technical</td><td style="color:var(--hpe-orange)">88%</td><td>Feb-26 & Apr-26 relapse</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL 4: MET vs NOT MET ── -->
+    <div class="sla-panel" id="sla-metnotmet">
+      <div class="sla-kpi-row">
+        <div class="sla-kpi">
+          <div class="sla-kpi-val" style="color:var(--hpe-green)">195</div>
+          <div class="sla-kpi-label">Total Met</div>
+          <div class="sla-kpi-sub">82.3% of reported</div>
+        </div>
+        <div class="sla-kpi red">
+          <div class="sla-kpi-val" style="color:var(--hpe-red)">42</div>
+          <div class="sla-kpi-label">Total Not Met</div>
+          <div class="sla-kpi-sub">17.7% failure rate</div>
+        </div>
+        <div class="sla-kpi orange">
+          <div class="sla-kpi-val" style="color:var(--hpe-orange)">10</div>
+          <div class="sla-kpi-label">Not Reported</div>
+          <div class="sla-kpi-sub">Apr-25 only</div>
+        </div>
+        <div class="sla-kpi blue">
+          <div class="sla-kpi-val" style="color:var(--hpe-blue)">4</div>
+          <div class="sla-kpi-label">NA Months</div>
+          <div class="sla-kpi-sub">Quarter rollup only</div>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-chart-bar"></i> Met vs Not Met by SLA Metric</div>
+          <div class="chart-container" style="height:300px">
+            <canvas id="slaMetByMetricChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-chart-pie"></i> Failure Share by Metric</div>
+          <div class="chart-container" style="height:300px">
+            <canvas id="slaFailShareChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-table"></i> Per-Metric Met / Not Met Detail</div>
+        <div class="table-container">
+          <table class="sla-metric-table">
+            <thead><tr><th>SLA Metric</th><th>Target</th><th>Total</th><th>Met</th><th>Not Met</th><th>Not Rep.</th><th>Met %</th><th>Penalty?</th><th>Risk Level</th></tr></thead>
+            <tbody id="slaMetricDetailBody"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-fire-alt" style="color:var(--hpe-red)"></i> Chronic Non-Performers — Months Failing Consecutively</div>
+        <div id="slaChronicFailPanel" style="display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin-top:8px"></div>
+      </div>
+    </div>
+
+    <!-- ── PANEL 5: REPORTING ANALYSIS ── -->
+    <div class="sla-panel" id="sla-reporting">
+      <div class="sla-health-banner warn" style="margin-bottom:22px">
+        <i class="fas fa-exclamation-triangle" style="font-size:20px"></i>
+        <div>
+          <div style="font-size:14px;font-weight:800">Reporting Gap Identified: April 2025 — Complete Blackout (10/10 metrics unreported)</div>
+          <div style="font-size:12px;margin-top:2px">4.2% of total observation periods are Not Reported. Governance intervention required to prevent recurrence.</div>
+        </div>
+      </div>
+
+      <div class="row-2">
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-chart-bar"></i> Reporting Compliance by Month</div>
+          <div class="chart-container" style="height:260px">
+            <canvas id="slaReportingChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-info-circle"></i> Reporting Gap Root Cause Analysis</div>
+          <div style="margin-top:8px">
+            <div class="sla-insight-box bad">
+              <strong>Apr-25 Complete Blackout:</strong> All 10 SLA metrics reported as "Not Reported". Likely cause: end-of-quarter transition, system migration, or reporting tool downtime. This is a governance failure requiring mandatory post-incident review.
+            </div>
+            <div class="sla-insight-box warn">
+              <strong>JAS Quarter (Sep-24 Quarter):</strong> Quarterly aggregate shows "Not Reported" for JAS period, indicating that some months within Jul–Sep 2024 had reporting gaps that rolled up to quarter level.
+            </div>
+            <div class="sla-insight-box">
+              <strong>Reporting Reliability Score: 95.8%</strong> — Out of 240 metric-month data points, 10 were Not Reported (4.2%). Excluding Apr-25 anomaly, reporting is near-perfect.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-exclamation-circle"></i> Impact Assessment: Non-Reporting on SLA Governance</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px">
+          <div style="background:#fceaea;border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:var(--hpe-red)">10</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Missing Data Points</div>
+            <div style="font-size:12px;color:var(--hpe-red);margin-top:4px">4.2% of all periods</div>
+          </div>
+          <div style="background:#fff3e6;border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:var(--hpe-orange)">1</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Months Fully Unreported</div>
+            <div style="font-size:12px;color:var(--hpe-orange);margin-top:4px">Apr-25 (100% blackout)</div>
+          </div>
+          <div style="background:#e6f7f2;border-radius:10px;padding:16px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:var(--hpe-green)">95.8%</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px">Reporting Reliability</div>
+            <div style="font-size:12px;color:var(--hpe-green);margin-top:4px">Best-in-class threshold: 99%</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── PANEL 6: TREND ANALYSIS ── -->
+    <div class="sla-panel" id="sla-trends">
+      <div class="row-2">
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-chart-line"></i> Per-Metric Trend (Monthly Compliance)</div>
+          <div class="chart-container" style="height:300px">
+            <canvas id="slaPerMetricTrendChart"></canvas>
+          </div>
+        </div>
+        <div class="card">
+          <div class="sla-section-title"><i class="fas fa-chart-area"></i> Quarterly Compliance Trend</div>
+          <div class="chart-container" style="height:300px">
+            <canvas id="slaQuarterlyChart"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-sort-amount-down"></i> Metric Classification: Improving / Declining / Stable</div>
+        <div id="slaTrendClassifications" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px">
+          <div>
+            <div style="font-weight:700;color:var(--hpe-green);margin-bottom:10px;font-size:13px">📈 IMPROVING Metrics</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>Time to Fill – Enterprise:</strong> From 33% Met (FY24-25) → 73% (FY25-26). H2 FY25-26 shows 6 consecutive months Met.</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Aged – Enterprise:</strong> From chronic 30–40% failures to consistent Met from Jun-25 onwards.</div>
+            <div class="sla-insight-box"><strong>% Aged – Technical:</strong> Stabilised after Sep-24; strong FY25-26 performance until minor relapse in Feb-26.</div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:var(--hpe-orange);margin-bottom:10px;font-size:13px">⚠ INCONSISTENT Metrics</div>
+            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Time to Fill – Technical:</strong> Fluctuates — improved in late FY25-26 but still had failures in Jun-25.</div>
+            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Internal Hiring – Technical:</strong> Generally Met but occasional dips; Apr-26 failure breaks a strong streak.</div>
+            <div class="sla-insight-box warn"><strong>Avg Reqs Vol – Technical/Enterprise:</strong> Mixed FY25-26 H2 with Nov-25 onwards showing instability.</div>
+          </div>
+          <div>
+            <div style="font-weight:700;color:var(--hpe-green);margin-bottom:10px;font-size:13px">✅ STABLE / PERFECT Metrics</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Technical:</strong> 100% Met across all 23 reported months. Zero failures ever.</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Enterprise:</strong> 100% Met. Perfect compliance throughout entire period.</div>
+            <div class="sla-insight-box"><strong>Internal Hiring – Enterprise:</strong> 91% Met; only 1 failure (Oct-24). Near-perfect and stable.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card card-full mb-20">
+        <div class="sla-section-title"><i class="fas fa-star"></i> SLA Recommendations & Actionable Insights</div>
+        <div id="slaRecommendations"></div>
+      </div>
+    </div>
+
+  </div><!-- end tab-sla -->
+
 </div>
 
 <script>
@@ -1889,6 +2415,7 @@ function switchTab(tabName, el) {
     if (tabName === 'improvement') initImprovementCharts();
     if (tabName === 'capa') initCAPACharts();
     if (tabName === 'insights') initInsightsCharts();
+    if (tabName === 'sla') { initSLADashboard(); }
   }, 50);
 }
 
@@ -3330,6 +3857,684 @@ document.addEventListener('DOMContentLoaded', () => {
   rebuildCAPAAIInsights(DASHBOARD_DATA.capa_data);
   // Charts rendered when tab is first activated (need canvas to be visible)
 });
+
+// ==================== SLA PERFORMANCE DASHBOARD ====================
+
+// ---- Sub-navigation ----
+function showSLAPanel(panelId, btn) {
+  document.querySelectorAll('.sla-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.sla-sub-btn').forEach(b => b.classList.remove('active'));
+  const panel = document.getElementById(panelId);
+  if (panel) panel.classList.add('active');
+  if (btn) btn.classList.add('active');
+  // Lazy-init charts for this panel
+  setTimeout(() => {
+    if (panelId === 'sla-exec')      initSLAExecCharts();
+    if (panelId === 'sla-monthly')   initSLAMonthlyCharts();
+    if (panelId === 'sla-fy')        initSLAFYCharts();
+    if (panelId === 'sla-metnotmet') initSLAMetNotMetCharts();
+    if (panelId === 'sla-reporting') initSLAReportingChart();
+    if (panelId === 'sla-trends')    initSLATrendCharts();
+  }, 60);
+}
+
+// ---- Master SLA Data Store ----
+const SLA_DATA = {
+  metrics: [
+    'Time to Fill Technical',
+    'Time to Fill Enterprise',
+    '% Aged Technical',
+    '% Aged Enterprise',
+    'Avg Reqs Vol Technical',
+    'Avg Reqs Vol Enterprise',
+    'Internal Hiring Technical',
+    'Internal Hiring Enterprise',
+    '% Agency Util Technical',
+    '% Agency Util Enterprise'
+  ],
+  metricsShort: [
+    'TTF Tech','TTF Ent','%Aged Tech','%Aged Ent',
+    'AvgReq Tech','AvgReq Ent','Int Hire Tech','Int Hire Ent',
+    'Agency Tech','Agency Ent'
+  ],
+  months: ['Apr-24','May-24','Jun-24','Jul-24','Aug-24','Sep-24',
+           'Oct-24','Nov-24','Dec-24','Jan-25','Feb-25','Mar-25',
+           'Apr-25','May-25','Jun-25','Jul-25','Aug-25','Sep-25',
+           'Oct-25','Nov-25','Dec-25','Jan-26','Feb-26','Apr-26'],
+  // Monthly totals [Met, NotMet, NR, NA] per month
+  monthly: [
+    [7,3,0,0],[8,2,0,0],[6,4,0,0],[8,2,0,0],[9,1,0,0],[8,2,0,0],
+    [7,3,0,0],[7,3,0,0],[7,3,0,0],[7,3,0,0],[8,2,0,0],[9,1,0,0],
+    [0,0,10,0],[8,2,0,0],[8,2,0,0],[8,2,0,0],[10,0,0,0],[10,0,0,0],
+    [8,2,0,0],[10,0,0,0],[9,1,0,0],[8,2,0,0],[6,4,0,0],[8,2,0,0]
+  ],
+  // Per-metric [met, notMet, nr] across all 24 months
+  metricStats: [
+    {met:17,notMet:6,nr:1},  // TTF Tech
+    {met:11,notMet:12,nr:1}, // TTF Ent
+    {met:17,notMet:6,nr:1},  // %Aged Tech
+    {met:14,notMet:9,nr:1},  // %Aged Ent
+    {met:18,notMet:5,nr:1},  // AvgReq Tech
+    {met:18,notMet:5,nr:1},  // AvgReq Ent
+    {met:18,notMet:5,nr:1},  // Int Hire Tech
+    {met:21,notMet:2,nr:1},  // Int Hire Ent
+    {met:23,notMet:0,nr:1},  // Agency Tech
+    {met:23,notMet:0,nr:1}   // Agency Ent
+  ],
+  // Per-metric per-month status: 'MET','NOT_MET','NR','NA'
+  perMetricMonthly: [
+    // TTF Technical
+    ['MET','MET','NOT_MET','MET','MET','MET','NOT_MET','NOT_MET','NOT_MET','NOT_MET','MET','MET','NR','MET','MET','MET','MET','MET','NOT_MET','MET','MET','MET','NOT_MET','MET'],
+    // TTF Enterprise
+    ['NOT_MET','MET','NOT_MET','NOT_MET','MET','NOT_MET','NOT_MET','NOT_MET','NOT_MET','NOT_MET','MET','MET','NR','MET','NOT_MET','NOT_MET','MET','MET','NOT_MET','MET','MET','NOT_MET','NOT_MET','NOT_MET'],
+    // % Aged Technical
+    ['MET','MET','NOT_MET','MET','MET','MET','NOT_MET','NOT_MET','MET','NOT_MET','MET','MET','NR','MET','MET','MET','MET','MET','MET','MET','MET','MET','NOT_MET','NOT_MET'],
+    // % Aged Enterprise
+    ['MET','MET','NOT_MET','MET','MET','NOT_MET','MET','NOT_MET','NOT_MET','NOT_MET','NOT_MET','MET','NR','MET','MET','MET','MET','MET','NOT_MET','MET','MET','MET','NOT_MET','MET'],
+    // Avg Reqs Vol Technical
+    ['MET','MET','MET','MET','MET','MET','MET','MET','NOT_MET','NOT_MET','MET','MET','NR','NOT_MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET'],
+    // Avg Reqs Vol Enterprise
+    ['MET','MET','MET','MET','MET','MET','NOT_MET','MET','MET','MET','MET','MET','NR','MET','MET','MET','MET','MET','MET','MET','NOT_MET','MET','NOT_MET','MET'],
+    // Internal Hiring Technical
+    ['MET','MET','NOT_MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','NR','NOT_MET','MET','MET','MET','MET','MET','MET','MET','NOT_MET','MET','MET'],
+    // Internal Hiring Enterprise
+    ['MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','NR','MET','MET','MET','MET','MET','MET','MET','MET','MET','NOT_MET','MET'],
+    // % Agency Util Technical
+    ['MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','NR','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET'],
+    // % Agency Util Enterprise
+    ['MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','NR','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET']
+  ],
+  // FY summaries
+  fy: {
+    'FY24-25': { months:12, totalSLA:120, met:91, notMet:28, nr:1, compliance:76.5 },
+    'FY25-26': { months:12, totalSLA:120, met:103, notMet:16, nr:1, compliance:86.6 }
+  },
+  region: 'South 1',
+  practiceHead: 'Mahak',
+  category: 'Category B Contractual SLA'
+};
+
+// Helper: compliance % for a month index
+function slaMonthCompliance(i) {
+  const [met,nm,nr] = SLA_DATA.monthly[i];
+  const reported = met + nm;
+  return reported === 0 ? 0 : Math.round(met / reported * 100);
+}
+
+// Helper: destroy chart safely
+function slaDestroyChart(id) {
+  const c = Chart.getChart(id);
+  if (c) c.destroy();
+}
+
+// Helper: colour ramp
+function slaComplianceColor(pct) {
+  if (pct >= 90) return '#01a982';
+  if (pct >= 75) return '#f7b731';
+  return '#e74c3c';
+}
+
+// ---- EXECUTIVE SUMMARY CHARTS ----
+let _slaExecDone = false;
+function initSLAExecCharts() {
+  if (_slaExecDone) return;
+  _slaExecDone = true;
+
+  // KPI banner
+  const totalMet = SLA_DATA.monthly.reduce((a,m)=>a+m[0],0);
+  const totalNM  = SLA_DATA.monthly.reduce((a,m)=>a+m[1],0);
+  const totalNR  = SLA_DATA.monthly.reduce((a,m)=>a+m[2],0);
+  const totalAll = totalMet + totalNM + totalNR;
+  const overallPct = Math.round(totalMet/(totalMet+totalNM)*100);
+
+  const setEl = (id,v) => { const e=document.getElementById(id); if(e) e.textContent=v; };
+  setEl('slaKpiCompliance', overallPct+'%');
+  setEl('slaKpiTotalMet', totalMet);
+  setEl('slaKpiTotalNM',  totalNM);
+  setEl('slaKpiTotalNR',  totalNR);
+
+  // Health banner
+  const banner = document.getElementById('slaHealthBanner');
+  if (banner) {
+    if (overallPct >= 85) {
+      banner.className = 'sla-health-banner sla-health-good';
+      banner.innerHTML = '<i class="fas fa-check-circle"></i> <strong>HEALTHY</strong> — Overall SLA compliance at '+overallPct+'% exceeds 85% benchmark. Strong performance in Agency Utilisation (100%) and Internal Hiring Enterprise (91%).';
+    } else if (overallPct >= 70) {
+      banner.className = 'sla-health-banner sla-health-warn';
+      banner.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <strong>MODERATE RISK</strong> — Compliance at '+overallPct+'%. Time to Fill Enterprise (48%) requires immediate intervention.';
+    } else {
+      banner.className = 'sla-health-banner sla-health-crit';
+      banner.innerHTML = '<i class="fas fa-times-circle"></i> <strong>CRITICAL</strong> — Compliance at '+overallPct+'%. Immediate escalation required.';
+    }
+  }
+
+  // Best / Worst metric tables
+  const metricRates = SLA_DATA.metricStats.map((s,i)=>({
+    name: SLA_DATA.metrics[i],
+    pct: Math.round(s.met/(s.met+s.notMet)*100),
+    met: s.met, nm: s.notMet
+  }));
+  const sorted = [...metricRates].sort((a,b)=>b.pct-a.pct);
+
+  const bestBody = document.getElementById('slaBestBody');
+  if (bestBody) {
+    bestBody.innerHTML = sorted.slice(0,5).map(m=>'<tr><td>'+m.name+'</td><td><span style="color:#01a982;font-weight:600">'+m.pct+'%</span></td><td>'+m.met+' / '+(m.met+m.nm)+'</td><td><span class="sla-badge sla-badge-met">Excellent</span></td></tr>').join('');
+  }
+  const worstBody = document.getElementById('slaWorstBody');
+  if (worstBody) {
+    worstBody.innerHTML = sorted.slice(-3).reverse().map(m=>'<tr><td>'+m.name+'</td><td><span style="color:#e74c3c;font-weight:600">'+m.pct+'%</span></td><td>'+m.met+' / '+(m.met+m.nm)+'</td><td><span class="sla-badge sla-badge-nm">Needs Focus</span></td></tr>').join('');
+  }
+
+  // Overall Trend Line (24 months compliance %)
+  slaDestroyChart('slaOverallTrendChart');
+  new Chart(document.getElementById('slaOverallTrendChart'), {
+    type: 'line',
+    data: {
+      labels: SLA_DATA.months,
+      datasets: [{
+        label: 'Monthly Compliance %',
+        data: SLA_DATA.months.map((_,i)=>slaMonthCompliance(i)),
+        borderColor: '#01a982',
+        backgroundColor: 'rgba(1,169,130,0.12)',
+        borderWidth: 2.5,
+        pointRadius: 4,
+        pointBackgroundColor: SLA_DATA.months.map((_,i)=>slaComplianceColor(slaMonthCompliance(i))),
+        fill: true,
+        tension: 0.35
+      },{
+        label: '85% Target',
+        data: new Array(24).fill(85),
+        borderColor: '#f7b731',
+        borderDash: [6,3],
+        borderWidth: 1.5,
+        pointRadius: 0,
+        fill: false
+      }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}} },
+      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+    }
+  });
+
+  // Status Donut
+  slaDestroyChart('slaStatusDonut');
+  new Chart(document.getElementById('slaStatusDonut'), {
+    type: 'doughnut',
+    data: {
+      labels: ['Met','Not Met','Not Reported'],
+      datasets:[{ data:[totalMet,totalNM,totalNR],
+        backgroundColor:['#01a982','#e74c3c','#95a5a6'],
+        borderWidth:2, borderColor:'#fff' }]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false,
+      cutout:'68%',
+      plugins:{
+        legend:{position:'bottom'},
+        tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+' ('+Math.round(ctx.parsed/totalAll*100)+'%)'}}
+      }
+    }
+  });
+}
+
+// ---- MONTHLY ANALYSIS CHARTS ----
+let _slaMonthlyDone = false;
+function initSLAMonthlyCharts() {
+  if (_slaMonthlyDone) return;
+  _slaMonthlyDone = true;
+
+  const months = SLA_DATA.months;
+  const metArr  = SLA_DATA.monthly.map(m=>m[0]);
+  const nmArr   = SLA_DATA.monthly.map(m=>m[1]);
+  const nrArr   = SLA_DATA.monthly.map(m=>m[2]);
+  const compArr = months.map((_,i)=>slaMonthCompliance(i));
+
+  // Stacked Bar
+  slaDestroyChart('slaMonthlyBarChart');
+  new Chart(document.getElementById('slaMonthlyBarChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets:[
+        { label:'Met',         data:metArr, backgroundColor:'rgba(1,169,130,0.82)', stack:'s' },
+        { label:'Not Met',     data:nmArr,  backgroundColor:'rgba(231,76,60,0.82)',  stack:'s' },
+        { label:'Not Reported',data:nrArr,  backgroundColor:'rgba(149,165,166,0.8)',stack:'s' }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'} },
+      scales:{ x:{stacked:true}, y:{stacked:true,max:12,ticks:{stepSize:2}} }
+    }
+  });
+
+  // Compliance Line
+  slaDestroyChart('slaMonthlyComplianceChart');
+  new Chart(document.getElementById('slaMonthlyComplianceChart'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets:[{
+        label:'Compliance %',
+        data: compArr,
+        borderColor:'#6c5ce7',
+        backgroundColor:'rgba(108,92,231,0.1)',
+        borderWidth:2.5, pointRadius:5,
+        pointBackgroundColor: compArr.map(v=>slaComplianceColor(v)),
+        fill:true, tension:0.35
+      },{
+        label:'85% Target',
+        data:new Array(24).fill(85),
+        borderColor:'#f7b731', borderDash:[6,3], borderWidth:1.5, pointRadius:0, fill:false
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'} },
+      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+    }
+  });
+
+  // Heatmap
+  const hm = document.getElementById('slaHeatmapContainer');
+  if (hm) {
+    const header = '<div class="sla-heatmap-grid"><div class="sla-hm-corner">Metric \\ Month</div>'
+      + months.map(m=>'<div class="sla-hm-month">'+m+'</div>').join('') + '</div>';
+    const rows = SLA_DATA.metrics.map((metric,mi)=>{
+      const cells = SLA_DATA.perMetricMonthly[mi].map(status=>{
+        const cls = status==='MET'?'sla-hm-met':status==='NOT_MET'?'sla-hm-nm':status==='NR'?'sla-hm-nr':'sla-hm-na';
+        const icon = status==='MET'?'✓':status==='NOT_MET'?'✗':status==='NR'?'NR':'NA';
+        return '<div class="'+cls+'" title="'+metric+': '+status+'">'+icon+'</div>';
+      }).join('');
+      return '<div class="sla-heatmap-grid"><div class="sla-hm-label">'+SLA_DATA.metricsShort[mi]+'</div>'+cells+'</div>';
+    }).join('');
+    hm.innerHTML = '<div class="sla-heatmap-wrap">'+header+rows+'</div>'
+      +'<div class="sla-hm-legend">'
+      +'<span class="sla-hm-met">✓ Met</span>'
+      +'<span class="sla-hm-nm">✗ Not Met</span>'
+      +'<span class="sla-hm-nr">NR Not Reported</span>'
+      +'</div>';
+  }
+
+  // Monthly Table
+  const tbody = document.getElementById('slaMonthlyTableBody');
+  if (tbody) {
+    tbody.innerHTML = months.map((m,i)=>{
+      const [met,nm,nr] = SLA_DATA.monthly[i];
+      const reported = met+nm;
+      const comp = reported===0?'—':slaMonthCompliance(i)+'%';
+      const compClass = reported===0?'':'';
+      const highlight = nr>0 ? ' style="background:#fff3f3"' : (met===10?' style="background:#f0fff4"':'');
+      const statusBadge = reported===0?'<span class="sla-badge sla-badge-nr">BLACKOUT</span>':comp==='100%'?'<span style="color:#01a982;font-weight:700">'+comp+'</span>':comp;
+      const remarkBadge = nr>0?'<span class="sla-badge sla-badge-nr">Data Gap</span>':met===10?'<span class="sla-badge sla-badge-met">Perfect</span>':nm===0?'<span class="sla-badge sla-badge-met">Full Met</span>':nm>=4?'<span class="sla-badge sla-badge-nm">High Risk</span>':'<span class="sla-badge" style="background:#fff3cd;color:#856404">Partial</span>';
+      return '<tr'+highlight+'><td><strong>'+m+'</strong></td><td>'+(reported+nr)+'</td><td><span style="color:#01a982;font-weight:600">'+met+'</span></td><td><span style="color:#e74c3c;font-weight:600">'+nm+'</span></td><td><span style="color:#95a5a6">'+nr+'</span></td><td>'+statusBadge+'</td><td>'+remarkBadge+'</td></tr>';
+    }).join('');
+  }
+}
+
+// ---- FY WISE ANALYSIS CHARTS ----
+let _slaFYDone = false;
+function initSLAFYCharts() {
+  if (_slaFYDone) return;
+  _slaFYDone = true;
+
+  // FY KPI cards
+  const setEl = (id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  setEl('slaFY2425Compliance','76.5%');
+  setEl('slaFY2526Compliance','86.6%');
+  setEl('slaFY2425Met','91');
+  setEl('slaFY2526Met','103');
+  setEl('slaFY2425NM','28');
+  setEl('slaFY2526NM','16');
+  setEl('slaFYImprovement','+10.1%');
+
+  // Per-metric FY compliance for grouped bar
+  // FY24-25 = months index 0-11, FY25-26 = months 12-23
+  const fy2425 = SLA_DATA.metrics.map((_,mi)=>{
+    const slice = SLA_DATA.perMetricMonthly[mi].slice(0,12);
+    const met = slice.filter(s=>s==='MET').length;
+    const nm  = slice.filter(s=>s==='NOT_MET').length;
+    return met+nm>0 ? Math.round(met/(met+nm)*100) : 0;
+  });
+  const fy2526 = SLA_DATA.metrics.map((_,mi)=>{
+    const slice = SLA_DATA.perMetricMonthly[mi].slice(12);
+    const met = slice.filter(s=>s==='MET').length;
+    const nm  = slice.filter(s=>s==='NOT_MET').length;
+    return met+nm>0 ? Math.round(met/(met+nm)*100) : 0;
+  });
+
+  slaDestroyChart('slaFYCompareChart');
+  new Chart(document.getElementById('slaFYCompareChart'), {
+    type:'bar',
+    data:{
+      labels: SLA_DATA.metricsShort,
+      datasets:[
+        { label:'FY24-25', data:fy2425, backgroundColor:'rgba(52,152,219,0.75)', borderRadius:4 },
+        { label:'FY25-26', data:fy2526, backgroundColor:'rgba(1,169,130,0.75)',  borderRadius:4 }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'} },
+      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+    }
+  });
+
+  // FY trend comparison line (monthly compliance within each FY)
+  const fy2425Months = SLA_DATA.months.slice(0,12);
+  const fy2526Months = SLA_DATA.months.slice(12);
+  const fy2425Comp = fy2425Months.map((_,i)=>slaMonthCompliance(i));
+  const fy2526Comp = fy2526Months.map((_,i)=>slaMonthCompliance(i+12));
+
+  slaDestroyChart('slaFYTrendChart');
+  new Chart(document.getElementById('slaFYTrendChart'), {
+    type:'line',
+    data:{
+      labels:['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'],
+      datasets:[
+        { label:'FY24-25', data:fy2425Comp, borderColor:'#3498db', backgroundColor:'rgba(52,152,219,0.08)', borderWidth:2.5, tension:0.35, pointRadius:4, fill:true },
+        { label:'FY25-26', data:fy2526Comp, borderColor:'#01a982', backgroundColor:'rgba(1,169,130,0.08)',  borderWidth:2.5, tension:0.35, pointRadius:4, fill:true }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}} },
+      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+    }
+  });
+
+  // Improvement / Risk tables
+  const impBody = document.getElementById('slaFYImprovementBody');
+  if (impBody) {
+    const pairs = SLA_DATA.metrics.map((n,i)=>({name:n, fy1:fy2425[i], fy2:fy2526[i], delta:fy2526[i]-fy2425[i]}));
+    const improved = pairs.filter(p=>p.delta>0).sort((a,b)=>b.delta-a.delta);
+    impBody.innerHTML = improved.map(p=>'<tr><td>'+p.name+'</td><td>'+p.fy1+'%</td><td>'+p.fy2+'%</td><td><span style="color:#01a982;font-weight:700">▲ +'+p.delta+'%</span></td></tr>').join('') || '<tr><td colspan="4" style="color:#aaa">No improvements</td></tr>';;
+  }
+  const riskBody = document.getElementById('slaFYRiskBody');
+  if (riskBody) {
+    const pairs = SLA_DATA.metrics.map((n,i)=>({name:n, fy1:fy2425[i], fy2:fy2526[i], delta:fy2526[i]-fy2425[i]}));
+    const declined = pairs.filter(p=>p.delta<0).sort((a,b)=>a.delta-b.delta);
+    riskBody.innerHTML = declined.map(p=>'<tr><td>'+p.name+'</td><td>'+p.fy1+'%</td><td>'+p.fy2+'%</td><td><span style="color:#e74c3c;font-weight:700">▼ '+p.delta+'%</span></td></tr>').join('') || '<tr><td colspan="4" style="color:#aaa">No decline detected</td></tr>';
+  }
+}
+
+// ---- MET vs NOT MET CHARTS ----
+let _slaMetDone = false;
+function initSLAMetNotMetCharts() {
+  if (_slaMetDone) return;
+  _slaMetDone = true;
+
+  const totalMet = SLA_DATA.metricStats.reduce((a,s)=>a+s.met,0);
+  const totalNM  = SLA_DATA.metricStats.reduce((a,s)=>a+s.notMet,0);
+  const totalNR  = SLA_DATA.metricStats.reduce((a,s)=>a+s.nr,0);
+  const setEl=(id,v)=>{ const e=document.getElementById(id); if(e) e.textContent=v; };
+  setEl('slaMetKpiMet', totalMet);
+  setEl('slaMetKpiNM',  totalNM);
+  setEl('slaMetKpiNR',  totalNR);
+  setEl('slaMetKpiRate', Math.round(totalMet/(totalMet+totalNM)*100)+'%');
+
+  // Horizontal grouped bar — Met vs NotMet per metric
+  slaDestroyChart('slaMetByMetricChart');
+  new Chart(document.getElementById('slaMetByMetricChart'), {
+    type:'bar',
+    data:{
+      labels: SLA_DATA.metricsShort,
+      datasets:[
+        { label:'Met',     data:SLA_DATA.metricStats.map(s=>s.met),     backgroundColor:'rgba(1,169,130,0.8)',  borderRadius:3 },
+        { label:'Not Met', data:SLA_DATA.metricStats.map(s=>s.notMet),  backgroundColor:'rgba(231,76,60,0.8)',   borderRadius:3 }
+      ]
+    },
+    options:{
+      indexAxis:'y',
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'} },
+      scales:{ x:{stacked:false, max:25} }
+    }
+  });
+
+  // Fail-share donut
+  slaDestroyChart('slaFailShareChart');
+  const failData = SLA_DATA.metricStats.map(s=>s.notMet);
+  new Chart(document.getElementById('slaFailShareChart'), {
+    type:'doughnut',
+    data:{
+      labels: SLA_DATA.metricsShort,
+      datasets:[{ data:failData,
+        backgroundColor:['#e74c3c','#c0392b','#e67e22','#d35400','#f39c12','#f7b731','#3498db','#2980b9','#9b59b6','#8e44ad'],
+        borderWidth:2, borderColor:'#fff' }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'60%',
+      plugins:{ legend:{position:'right',labels:{boxWidth:12,font:{size:11}}},
+        tooltip:{callbacks:{label:ctx=>ctx.label+': '+ctx.parsed+' failures'}} }
+    }
+  });
+
+  // Metric detail table
+  const tbody = document.getElementById('slaMetricDetailBody');
+  if (tbody) {
+    tbody.innerHTML = SLA_DATA.metrics.map((m,i)=>{
+      const s = SLA_DATA.metricStats[i];
+      const pct = Math.round(s.met/(s.met+s.notMet)*100);
+      const bar = '<div style="display:flex;align-items:center;gap:6px"><div style="flex:1;background:#f0f0f0;border-radius:4px;height:10px"><div style="width:'+pct+'%;background:'+slaComplianceColor(pct)+';height:10px;border-radius:4px"></div></div><span style="font-size:11px;min-width:32px">'+pct+'%</span></div>';
+      const risk = pct>=90?'<span class="sla-badge sla-badge-met">Low</span>':pct>=70?'<span class="sla-badge" style="background:#fff3cd;color:#856404">Medium</span>':'<span class="sla-badge sla-badge-nm">High</span>';
+      return '<tr><td>'+m+'</td><td>'+s.met+'</td><td>'+s.notMet+'</td><td>'+s.nr+'</td><td>'+bar+'</td><td>'+risk+'</td></tr>';
+    }).join('');
+  }
+
+  // Chronic fails panel
+  const cfp = document.getElementById('slaChronicFailPanel');
+  if (cfp) {
+    const chronic = SLA_DATA.metrics.map((n,i)=>({name:n, nm:SLA_DATA.metricStats[i].notMet, pct:Math.round(SLA_DATA.metricStats[i].met/(SLA_DATA.metricStats[i].met+SLA_DATA.metricStats[i].notMet)*100)}))
+      .filter(m=>m.nm>=6).sort((a,b)=>b.nm-a.nm);
+    cfp.innerHTML = chronic.length ? chronic.map(m=>
+      '<div class="sla-chronic-item">'
+      +'<div class="sla-chronic-name">'+m.name+'</div>'
+      +'<div class="sla-chronic-stat">'+m.nm+' failures — '+m.pct+'% compliance</div>'
+      +'<div class="sla-chronic-bar"><div style="width:'+m.pct+'%;background:#e74c3c;height:8px;border-radius:4px"></div></div>'
+      +'</div>').join('')
+    : '<p style="color:#aaa;font-size:13px">No chronic non-performers identified.</p>';
+  }
+}
+
+// ---- REPORTING ANALYSIS CHART ----
+let _slaRepDone = false;
+function initSLAReportingChart() {
+  if (_slaRepDone) return;
+  _slaRepDone = true;
+
+  // Reporting compliance = months where all 10 metrics were reported
+  const reportedArr = SLA_DATA.months.map((_,i)=>{
+    const nr = SLA_DATA.monthly[i][2];
+    return nr>0 ? Math.round((10-nr)/10*100) : 100;
+  });
+
+  slaDestroyChart('slaReportingChart');
+  new Chart(document.getElementById('slaReportingChart'), {
+    type:'bar',
+    data:{
+      labels: SLA_DATA.months,
+      datasets:[{
+        label:'Reporting Compliance %',
+        data: reportedArr,
+        backgroundColor: reportedArr.map(v=>v<100?'rgba(231,76,60,0.8)':'rgba(1,169,130,0.8)'),
+        borderRadius:4
+      },{
+        label:'100% Target',
+        data:new Array(24).fill(100),
+        type:'line', borderColor:'#f7b731', borderDash:[6,3], borderWidth:1.5, pointRadius:0, fill:false
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'} },
+      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+    }
+  });
+
+  // Reporting insight cards
+  const insightEl = document.getElementById('slaReportingInsights');
+  if (insightEl) {
+    const gaps = SLA_DATA.months.filter((_,i)=>SLA_DATA.monthly[i][2]>0);
+    const perfectMonths = SLA_DATA.months.filter((_,i)=>SLA_DATA.monthly[i][2]===0).length;
+    insightEl.innerHTML = 
+      '<div class="sla-insight-card sla-ic-warn">'
+      +'<div class="sla-ic-title"><i class="fas fa-exclamation-triangle"></i> Reporting Gap Detected</div>'
+      +'<div class="sla-ic-body"><strong>'+gaps.join(', ')+'</strong> \u2014 '+gaps.length+' month(s) with missing data. Apr-25 is a full blackout (10 NR). This represents a significant governance gap requiring immediate root-cause investigation.</div>'
+      +'</div>'
+      +'<div class="sla-insight-card sla-ic-good">'
+      +'<div class="sla-ic-title"><i class="fas fa-check-circle"></i> Reporting Compliance</div>'
+      +'<div class="sla-ic-body">Out of '+SLA_DATA.months.length+' months, <strong>'+perfectMonths+' months</strong> achieved 100% reporting compliance ('+Math.round(perfectMonths/SLA_DATA.months.length*100)+'%). Overall reporting rate is strong post Apr-25 blackout.</div>'
+      +'</div>'
+      +'<div class="sla-insight-card sla-ic-info">'
+      +'<div class="sla-ic-title"><i class="fas fa-info-circle"></i> Root Cause Hypothesis</div>'
+      +'<div class="sla-ic-body">Apr-25 reporting blackout may be linked to: (1) FY transition period resource constraints, (2) System/process migration, (3) Team restructuring or onboarding delays. Recommend investigating with Practice Head <strong>Mahak</strong> for Region <strong>South 1</strong>.</div>'
+      +'</div>';
+  }
+}
+
+// ---- TREND ANALYSIS CHARTS ----
+let _slaTrendDone = false;
+function initSLATrendCharts() {
+  if (_slaTrendDone) return;
+  _slaTrendDone = true;
+
+  const months = SLA_DATA.months;
+  const colors = ['#01a982','#e74c3c','#3498db','#f39c12','#9b59b6','#e67e22','#1abc9c','#e91e63','#607d8b','#795548'];
+
+  // Per-metric trend (multi-line) — binary 1=MET, 0=NOT_MET, null=NR
+  const datasets = SLA_DATA.metrics.map((m,mi)=>({
+    label: SLA_DATA.metricsShort[mi],
+    data: SLA_DATA.perMetricMonthly[mi].map(s=>s==='MET'?1:s==='NOT_MET'?0:null),
+    borderColor: colors[mi],
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    pointRadius: 3,
+    spanGaps: true,
+    tension: 0.3
+  }));
+
+  slaDestroyChart('slaPerMetricTrendChart');
+  new Chart(document.getElementById('slaPerMetricTrendChart'), {
+    type:'line',
+    data:{ labels:months, datasets },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}} },
+      scales:{ y:{min:-0.1,max:1.2,ticks:{callback:v=>v===1?'Met':v===0?'Not Met':'',stepSize:1}} }
+    }
+  });
+
+  // Quarterly compliance
+  const quarters = [
+    { label:'Q1 FY24-25 (Apr-Jun 24)',  idx:[0,1,2]  },
+    { label:'Q2 FY24-25 (Jul-Sep 24)',  idx:[3,4,5]  },
+    { label:'Q3 FY24-25 (Oct-Dec 24)',  idx:[6,7,8]  },
+    { label:'Q4 FY24-25 (Jan-Mar 25)',  idx:[9,10,11]},
+    { label:'Q1 FY25-26 (Apr-Jun 25)',  idx:[12,13,14]},
+    { label:'Q2 FY25-26 (Jul-Sep 25)',  idx:[15,16,17]},
+    { label:'Q3 FY25-26 (Oct-Dec 25)',  idx:[18,19,20]},
+    { label:'Q4 FY25-26 (Jan-Apr 26)',  idx:[21,22,23]}
+  ];
+  const qMet = quarters.map(q=>q.idx.reduce((a,i)=>a+SLA_DATA.monthly[i][0],0));
+  const qNM  = quarters.map(q=>q.idx.reduce((a,i)=>a+SLA_DATA.monthly[i][1],0));
+  const qComp = quarters.map((_,qi)=>{ const t=qMet[qi]+qNM[qi]; return t?Math.round(qMet[qi]/t*100):0; });
+
+  slaDestroyChart('slaQuarterlyChart');
+  new Chart(document.getElementById('slaQuarterlyChart'), {
+    type:'bar',
+    data:{
+      labels: quarters.map(q=>q.label),
+      datasets:[
+        { label:'Met',     data:qMet, backgroundColor:'rgba(1,169,130,0.8)',  borderRadius:4, stack:'s' },
+        { label:'Not Met', data:qNM,  backgroundColor:'rgba(231,76,60,0.8)',   borderRadius:4, stack:'s' }
+      ]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{position:'bottom'},
+        tooltip:{callbacks:{afterBody:items=>'Compliance: '+qComp[items[0].dataIndex]+'%'}} },
+      scales:{ x:{stacked:true}, y:{stacked:true,max:35,ticks:{stepSize:5}} }
+    }
+  });
+
+  // Trend classification
+  const classEl = document.getElementById('slaTrendClassifications');
+  if (classEl) {
+    const classify = (mi) => {
+      const data = SLA_DATA.perMetricMonthly[mi].filter(s=>s!=='NR');
+      const h1 = data.slice(0,12);  const h2 = data.slice(12);
+      const r1 = h1.filter(s=>s==='MET').length/h1.length;
+      const r2 = h2.filter(s=>s==='MET').length/h2.length;
+      const delta = r2-r1;
+      if (delta>0.08) return 'improving';
+      if (delta<-0.08) return 'declining';
+      return 'stable';
+    };
+    const groups = { improving:[], stable:[], declining:[] };
+    SLA_DATA.metrics.forEach((m,i)=>{ groups[classify(i)].push(m); });
+    classEl.innerHTML = 
+      '<div class="sla-trend-group sla-tg-improving">'
+      +'<div class="sla-tg-title"><i class="fas fa-arrow-trend-up"></i> Improving ('+groups.improving.length+')</div>'
+      +(groups.improving.map(m=>'<div class="sla-tg-item">'+m+'</div>').join('') || '<div class="sla-tg-item" style="color:#aaa">None</div>')
+      +'</div>'
+      +'<div class="sla-trend-group sla-tg-stable">'
+      +'<div class="sla-tg-title"><i class="fas fa-minus"></i> Stable ('+groups.stable.length+')</div>'
+      +(groups.stable.map(m=>'<div class="sla-tg-item">'+m+'</div>').join('') || '<div class="sla-tg-item" style="color:#aaa">None</div>')
+      +'</div>'
+      +'<div class="sla-trend-group sla-tg-declining">'
+      +'<div class="sla-tg-title"><i class="fas fa-arrow-trend-down"></i> Declining ('+groups.declining.length+')</div>'
+      +(groups.declining.map(m=>'<div class="sla-tg-item">'+m+'</div>').join('') || '<div class="sla-tg-item" style="color:#aaa">None</div>')
+      +'</div>';
+  }
+
+  // Recommendations
+  const recEl = document.getElementById('slaRecommendations');
+  if (recEl) {
+    recEl.innerHTML = 
+      '<div class="sla-rec-item sla-rec-critical">'
+      +'<div class="sla-rec-priority">P1 \u2014 CRITICAL</div>'
+      +'<div class="sla-rec-title"><i class="fas fa-bullseye"></i> Immediate Focus: Time to Fill Enterprise (48% Compliance)</div>'
+      +'<div class="sla-rec-body">TTF Enterprise is the worst performing SLA with only 48% compliance. Conduct urgent root-cause analysis. Key actions: (1) Review hiring pipeline bottlenecks in Enterprise segment, (2) Set weekly review cadence with Practice Head Mahak, (3) Implement pre-vetted candidate pools, (4) Target 70% compliance within 2 quarters.</div>'
+      +'</div>'
+      +'<div class="sla-rec-item sla-rec-high">'
+      +'<div class="sla-rec-priority">P2 \u2014 HIGH</div>'
+      +'<div class="sla-rec-title"><i class="fas fa-chart-line"></i> Arrest Declining Trend in % Aged Enterprise (61%)</div>'
+      +'<div class="sla-rec-body">% Aged Enterprise shows deterioration in recent months (Feb-26: Not Met). Introduce aging position alerts at 30/45-day thresholds. Assign dedicated Enterprise sourcing resources. Consider contractual SLA renegotiation if structural constraints exist.</div>'
+      +'</div>'
+      +'<div class="sla-rec-item sla-rec-high">'
+      +'<div class="sla-rec-priority">P3 \u2014 HIGH</div>'
+      +'<div class="sla-rec-title"><i class="fas fa-file-alt"></i> Eliminate Reporting Blackouts</div>'
+      +'<div class="sla-rec-body">Apr-25 complete blackout (10/10 NR) represents a serious governance failure. Implement: (1) Automated monthly SLA data collection reminders 5 days before month-end, (2) Practice Head accountability sign-off process, (3) Escalation matrix for non-submissions beyond D+3.</div>'
+      +'</div>'
+      +'<div class="sla-rec-item sla-rec-medium">'
+      +'<div class="sla-rec-priority">P4 \u2014 MEDIUM</div>'
+      +'<div class="sla-rec-title"><i class="fas fa-trophy"></i> Sustain High Performers \u2014 Agency Utilisation &amp; Internal Hiring Enterprise</div>'
+      +'<div class="sla-rec-body">Agency Utilisation (Tech &amp; Enterprise) achieved 100% compliance \u2014 document best practices and replicate. Internal Hiring Enterprise at 91% is near-excellent. Recognise the team and use as a model for other metrics.</div>'
+      +'</div>'
+      +'<div class="sla-rec-item sla-rec-medium">'
+      +'<div class="sla-rec-priority">P5 \u2014 MEDIUM</div>'
+      +'<div class="sla-rec-title"><i class="fas fa-calendar-check"></i> Leverage FY25-26 Momentum</div>'
+      +'<div class="sla-rec-body">FY25-26 compliance of 86.6% vs FY24-25\'s 76.5% shows strong improvement (+10.1pp). Build on this by: (1) Maintaining Aug-Sep-25 perfect months as benchmark, (2) Investigating Feb-26 regression (60% compliance) to prevent recurrence, (3) Targeting 90%+ compliance for remaining FY25-26 months.</div>'
+      +'</div>'
+      +'<div class="sla-rec-item sla-rec-low">'
+      +'<div class="sla-rec-priority">P6 \u2014 STRATEGIC</div>'
+      +'<div class="sla-rec-title"><i class="fas fa-cogs"></i> Implement SLA Maturity Framework</div>'
+      +'<div class="sla-rec-body">Establish a formal SLA governance framework: (1) Monthly review dashboard shared with leadership, (2) Quarterly business reviews with trend analysis, (3) SLA maturity score card tracking compliance, reporting, improvement velocity, (4) Define SLA Recovery Plan process for metrics falling below 70% for 2+ consecutive months.</div>'
+      +'</div>';
+  }
+}
+
+// Master init — called when SLA tab first opened
+let _slaInitDone = false;
+function initSLADashboard() {
+  if (_slaInitDone) return;
+  _slaInitDone = true;
+  // Init the active (first) panel
+  setTimeout(()=>{ initSLAExecCharts(); }, 80);
+}
 </script>
 
 </body>
