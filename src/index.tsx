@@ -263,6 +263,8 @@ function getDashboardHTML(): string {
     .kpi-card.slate::before { background: var(--hpe-slate); }
     .kpi-card.yellow::before { background: var(--hpe-yellow); }
     .kpi-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+    .kpi-card[onclick]:hover { transform: translateY(-3px); box-shadow: var(--shadow-hover); outline: 2px solid rgba(1,169,130,0.3); }
+    .kpi-card[onclick] { transition: all 0.2s; }
     .kpi-icon {
       width: 40px;
       height: 40px;
@@ -2504,26 +2506,41 @@ function getDashboardHTML(): string {
     <!-- PANEL 1: PREDICTIVE RISK ENGINE -->
     <div class="perf-panel active" id="perfPanel-risk">
       <!-- KPI row -->
+      <!-- KPI row — each card is clickable for drill-down -->
       <div class="kpi-grid" style="margin-bottom:18px">
-        <div class="kpi-card">
-          <div class="kpi-label"><i class="fas fa-users"></i> Recruiters at Risk</div>
+        <div class="kpi-card" style="cursor:pointer" onclick="showRiskDrill('atRisk')" id="riskCard-atRisk" title="Click to see at-risk recruiters">
+          <div class="kpi-label"><i class="fas fa-users"></i> Recruiters at Risk <i class="fas fa-chevron-right" style="float:right;font-size:10px;color:var(--text-muted);margin-top:2px"></i></div>
           <div class="kpi-value" id="riskCount" style="color:var(--hpe-red)">—</div>
           <div class="kpi-delta delta-down" id="riskCountSub">Critical zone</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-label"><i class="fas fa-exclamation-circle"></i> High-Risk Parameters</div>
+        <div class="kpi-card" style="cursor:pointer" onclick="showRiskDrill('highParams')" id="riskCard-highParams" title="Click to see high-risk parameters">
+          <div class="kpi-label"><i class="fas fa-exclamation-circle"></i> High-Risk Parameters <i class="fas fa-chevron-right" style="float:right;font-size:10px;color:var(--text-muted);margin-top:2px"></i></div>
           <div class="kpi-value" id="riskParamCount" style="color:var(--hpe-orange)">—</div>
           <div class="kpi-delta delta-neutral" id="riskParamSub">Likely to breach next week</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-label"><i class="fas fa-chart-line"></i> Predicted Next-Month Acc.</div>
+        <div class="kpi-card" style="cursor:pointer" onclick="showRiskDrill('forecast')" id="riskCard-forecast" title="Click to see per-recruiter forecast">
+          <div class="kpi-label"><i class="fas fa-chart-line"></i> Predicted Next-Month Acc. <i class="fas fa-chevron-right" style="float:right;font-size:10px;color:var(--text-muted);margin-top:2px"></i></div>
           <div class="kpi-value" id="riskForecastAcc">—</div>
           <div class="kpi-delta delta-neutral" id="riskForecastSub">Linear regression forecast</div>
         </div>
-        <div class="kpi-card">
-          <div class="kpi-label"><i class="fas fa-fire"></i> Consecutive Drops</div>
+        <div class="kpi-card" style="cursor:pointer" onclick="showRiskDrill('drops')" id="riskCard-drops" title="Click to see month-by-month drop analysis">
+          <div class="kpi-label"><i class="fas fa-fire"></i> Consecutive Drops <i class="fas fa-chevron-right" style="float:right;font-size:10px;color:var(--text-muted);margin-top:2px"></i></div>
           <div class="kpi-value" id="riskDropCount" style="color:var(--hpe-red)">—</div>
           <div class="kpi-delta delta-down" id="riskDropSub">Months accuracy declined</div>
+        </div>
+      </div>
+
+      <!-- Risk Drill-Down Panel — shown when a KPI card is clicked -->
+      <div id="riskDrillPanel" style="display:none;margin-bottom:18px">
+        <div class="card card-full" style="border:2px solid var(--hpe-green);border-radius:12px">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+            <div>
+              <div class="card-title" id="riskDrillTitle" style="margin-bottom:2px"><i class="fas fa-search"></i> Drill-Down Detail</div>
+              <div class="card-subtitle" id="riskDrillSubtitle" style="margin-top:0"></div>
+            </div>
+            <button onclick="closeRiskDrill()" style="border:none;background:var(--bg-secondary);border-radius:8px;padding:6px 14px;font-size:12px;cursor:pointer;font-weight:600;color:var(--text-secondary)"><i class="fas fa-times"></i> Close</button>
+          </div>
+          <div id="riskDrillContent"></div>
         </div>
       </div>
 
@@ -4899,6 +4916,207 @@ function trendArrow(slope) {
   return '<span class="trend-flat">\u2192 Stable</span>';
 }
 
+// ==================== PANEL 1: RISK ENGINE — DRILL-DOWN ====================
+
+function closeRiskDrill() {
+  var panel = document.getElementById('riskDrillPanel');
+  if (panel) panel.style.display = 'none';
+  // Remove active highlight from all risk KPI cards
+  ['atRisk','highParams','forecast','drops'].forEach(function(t){
+    var c = document.getElementById('riskCard-' + t);
+    if (c) { c.style.border = '1px solid var(--border)'; c.style.background = 'var(--card-bg)'; }
+  });
+}
+
+function showRiskDrill(type) {
+  var panel = document.getElementById('riskDrillPanel');
+  var titleEl = document.getElementById('riskDrillTitle');
+  var subtitleEl = document.getElementById('riskDrillSubtitle');
+  var contentEl = document.getElementById('riskDrillContent');
+  if (!panel || !contentEl) return;
+
+  // Highlight active card, reset others
+  ['atRisk','highParams','forecast','drops'].forEach(function(t){
+    var c = document.getElementById('riskCard-' + t);
+    if (!c) return;
+    if (t === type) {
+      c.style.border = '2px solid var(--hpe-green)';
+      c.style.background = 'rgba(1,169,130,0.06)';
+    } else {
+      c.style.border = '1px solid var(--border)';
+      c.style.background = 'var(--card-bg)';
+    }
+  });
+
+  panel.style.display = 'block';
+
+  var allMonths = DASHBOARD_DATA.month_stats.slice().sort(function(a,b){ return a.Month_Number-b.Month_Number; });
+  var accs = allMonths.map(function(m){ return m.Accuracy; });
+  var recs = PERF_DATA.recruiter_monthly;
+  var risks = recs.map(function(r){ return { rec:r, risk:computeRiskScore(r) }; });
+  risks.sort(function(a,b){ return b.risk.score - a.risk.score; });
+
+  if (type === 'atRisk') {
+    // ── Recruiters at Risk ──────────────────────────────────────────────────
+    if (titleEl) titleEl.innerHTML = '<i class="fas fa-users"></i> Recruiters at Risk — Detail View';
+    if (subtitleEl) subtitleEl.textContent = 'Recruiters with predictive risk score \u226545 or 2+ consecutive accuracy drops';
+
+    var atRiskRecs = risks.filter(function(x){ return x.risk.score >= 45; });
+    if (!atRiskRecs.length) {
+      contentEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--hpe-green);font-weight:600"><i class="fas fa-check-circle" style="font-size:28px;display:block;margin-bottom:8px"></i>No recruiters currently in the at-risk zone</div>';
+    } else {
+      var rows = atRiskRecs.map(function(x){
+        var r = x.rec, rs = x.risk;
+        var latestAcc = r.apr || r.mar || r.feb || r.jan || 0;
+        var predNext = rs.reg.predict(rs.months.length);
+        var rl = riskLevel(rs.score);
+        var barCol = rs.score >= 70 ? '#C54E4B' : '#FF8300';
+        return '<tr>'
+          + '<td><strong>' + r.name + '</strong>' + (rs.drops >= 2 ? ' <span style="background:#fde;color:#c00;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700">At Risk</span>' : '') + '</td>'
+          + '<td>' + getAccBadge(latestAcc) + '</td>'
+          + '<td style="font-weight:600;color:' + (predNext >= 97 ? 'var(--hpe-green)' : predNext >= 95 ? 'var(--hpe-orange)' : 'var(--hpe-red)') + '">' + predNext + '%</td>'
+          + '<td>' + trendArrow(rs.slope) + '</td>'
+          + '<td><span style="display:inline-block;width:' + rs.score + 'px;max-width:100px;height:8px;background:' + barCol + ';border-radius:4px;vertical-align:middle;margin-right:5px"></span>' + rs.score + '/100</td>'
+          + '<td><span class="risk-badge ' + rl.cls + '">' + rl.label + '</span></td>'
+          + '<td style="font-size:11px;color:var(--text-muted)">' + rs.drops + ' drop(s)</td>'
+          + '</tr>';
+      }).join('');
+      contentEl.innerHTML = '<div class="table-container" style="max-height:320px;overflow-y:auto">'
+        + '<table style="width:100%"><thead><tr><th>Recruiter</th><th>Latest Acc.</th><th>Predicted Next</th><th>Trend</th><th>Risk Score</th><th>Level</th><th>Drops</th></tr></thead>'
+        + '<tbody>' + rows + '</tbody></table></div>'
+        + '<div style="margin-top:12px;padding:10px 14px;background:#fff8f0;border-radius:8px;border-left:3px solid var(--hpe-orange);font-size:12px">'
+        + '<strong>\u26a0 Recommended Action:</strong> Schedule 1:1 coaching sessions for recruiters with Risk Score \u226570. '
+        + 'Focus on parameters with highest breach probability. Monitor weekly until score drops below 30.</div>';
+    }
+
+  } else if (type === 'highParams') {
+    // ── High-Risk Parameters ────────────────────────────────────────────────
+    if (titleEl) titleEl.innerHTML = '<i class="fas fa-exclamation-circle"></i> High-Risk Parameters — Breach Detail';
+    if (subtitleEl) subtitleEl.textContent = 'Parameters with \u22653% fail rate — likely to breach 5% threshold next week';
+
+    var highPs = DASHBOARD_DATA.top_errors.filter(function(e){ return e.Fail_Pct >= 3.0; });
+    if (!highPs.length) {
+      contentEl.innerHTML = '<div style="text-align:center;padding:30px;color:var(--hpe-green);font-weight:600"><i class="fas fa-check-circle" style="font-size:28px;display:block;margin-bottom:8px"></i>No parameters currently above 3% fail rate</div>';
+    } else {
+      var pRows = highPs.map(function(p){
+        var prob = Math.min(99, Math.round(p.Fail_Pct > 5 ? 80 + p.Fail_Pct : p.Fail_Pct > 3 ? 50 + p.Fail_Pct * 5 : p.Fail_Pct * 8));
+        var probCol = prob >= 60 ? '#C54E4B' : prob >= 30 ? '#FF8300' : '#01A982';
+        var sevLabel = p.Fail_Pct >= 20 ? '<span style="background:#fde;color:#c00;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700">Critical</span>'
+                     : p.Fail_Pct >= 5  ? '<span style="background:#fff0e0;color:#c55;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700">High</span>'
+                     : '<span style="background:#fff8e1;color:#f57c00;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700">Medium</span>';
+        return '<tr>'
+          + '<td style="max-width:200px;word-wrap:break-word"><strong>' + p.Parameter + '</strong></td>'
+          + '<td style="text-align:center">' + p.Opportunity_Fail + '</td>'
+          + '<td style="text-align:center">' + p.Opportunity_Count + '</td>'
+          + '<td style="color:' + (p.Fail_Pct >= 10 ? '#C54E4B' : p.Fail_Pct >= 5 ? '#FF8300' : '#f0ad4e') + ';font-weight:700">' + p.Fail_Pct + '%</td>'
+          + '<td><span style="display:inline-block;width:' + Math.min(100, prob) + 'px;height:8px;background:' + probCol + ';border-radius:4px;vertical-align:middle;margin-right:5px"></span>' + prob + '%</td>'
+          + '<td>' + sevLabel + '</td>'
+          + '</tr>';
+      }).join('');
+      contentEl.innerHTML = '<div class="table-container" style="max-height:320px;overflow-y:auto">'
+        + '<table style="width:100%"><thead><tr><th>Parameter</th><th>Failures</th><th>Audits</th><th>Fail Rate</th><th>Breach Prob.</th><th>Severity</th></tr></thead>'
+        + '<tbody>' + pRows + '</tbody></table></div>'
+        + '<div style="margin-top:12px;padding:10px 14px;background:#fff8f0;border-radius:8px;border-left:3px solid var(--hpe-orange);font-size:12px">'
+        + '<strong>\u26a0 Recommended Action:</strong> Conduct parameter-level training for top failing criteria. '
+        + 'Target start date (89.83% fail rate) requires immediate process review. Schedule refresher sessions focused on high-breach-probability parameters.</div>';
+    }
+
+  } else if (type === 'forecast') {
+    // ── Predicted Next-Month Accuracy ───────────────────────────────────────
+    if (titleEl) titleEl.innerHTML = '<i class="fas fa-chart-line"></i> Predicted Next-Month Accuracy — Per Recruiter';
+    if (subtitleEl) subtitleEl.textContent = 'Linear regression forecast for each recruiter based on Jan–Apr 2026 trend';
+
+    var regRows = risks.map(function(x){
+      var r = x.rec, rs = x.risk;
+      var latestAcc = r.apr || r.mar || r.feb || r.jan || 0;
+      var predNext = rs.reg.predict(rs.months.length);
+      var delta = +(predNext - latestAcc).toFixed(2);
+      var deltaStr = (delta >= 0 ? '+' : '') + delta + '%';
+      var deltaCol = delta > 0 ? 'var(--hpe-green)' : delta < 0 ? 'var(--hpe-red)' : 'var(--text-muted)';
+      var confLevel = rs.months.length >= 4 ? 'High' : rs.months.length >= 3 ? 'Medium' : 'Low';
+      var confCol   = rs.months.length >= 4 ? 'var(--hpe-green)' : rs.months.length >= 3 ? 'var(--hpe-orange)' : 'var(--text-muted)';
+      return '<tr>'
+        + '<td><strong>' + r.name + '</strong></td>'
+        + '<td>' + r.audits.toLocaleString() + '</td>'
+        + '<td>' + getAccBadge(latestAcc) + '</td>'
+        + '<td style="font-weight:700;color:' + (predNext >= 97 ? 'var(--hpe-green)' : predNext >= 95 ? 'var(--hpe-orange)' : 'var(--hpe-red)') + '">' + predNext + '%</td>'
+        + '<td style="font-weight:600;color:' + deltaCol + '">' + deltaStr + '</td>'
+        + '<td style="font-size:11px;color:var(--text-muted)">' + rs.slope.toFixed(3) + ' /mo</td>'
+        + '<td style="color:' + confCol + ';font-size:11px;font-weight:600">' + confLevel + '</td>'
+        + '</tr>';
+    }).join('');
+
+    // Overall regression line
+    var overallReg = linearRegression(accs);
+    var overallNext = overallReg.predict(accs.length);
+    contentEl.innerHTML = '<div style="background:var(--bg-secondary);border-radius:10px;padding:12px 16px;margin-bottom:14px;display:flex;gap:24px;flex-wrap:wrap">'
+      + '<div><div style="font-size:11px;color:var(--text-muted);font-weight:600">TEAM REGRESSION SLOPE</div><div style="font-size:18px;font-weight:800;color:' + (overallReg.slope >= 0 ? 'var(--hpe-green)' : 'var(--hpe-red)') + '">' + (overallReg.slope >= 0 ? '▲' : '▼') + ' ' + Math.abs(overallReg.slope).toFixed(3) + '%/mo</div></div>'
+      + '<div><div style="font-size:11px;color:var(--text-muted);font-weight:600">PREDICTED TEAM ACC. (MAY 2026)</div><div style="font-size:18px;font-weight:800;color:' + (overallNext >= 97 ? 'var(--hpe-green)' : 'var(--hpe-orange)') + '">' + overallNext + '%</div></div>'
+      + '<div><div style="font-size:11px;color:var(--text-muted);font-weight:600">DATA POINTS</div><div style="font-size:18px;font-weight:800">' + accs.length + ' months</div></div>'
+      + '</div>'
+      + '<div class="table-container" style="max-height:300px;overflow-y:auto">'
+      + '<table style="width:100%"><thead><tr><th>Recruiter</th><th>Audits</th><th>Latest Acc.</th><th>Predicted Next</th><th>Delta</th><th>Slope</th><th>Confidence</th></tr></thead>'
+      + '<tbody>' + regRows + '</tbody></table></div>'
+      + '<div style="margin-top:12px;padding:10px 14px;background:#f0f8ff;border-radius:8px;border-left:3px solid var(--hpe-blue);font-size:11px;color:var(--text-secondary)">'
+      + '<strong>ℹ Methodology:</strong> Linear regression on Jan–Apr 2026 monthly accuracy (y = slope·x + intercept). Confidence is based on number of data points. Predictions assume current trajectory continues.</div>';
+
+  } else if (type === 'drops') {
+    // ── Consecutive Accuracy Drops ──────────────────────────────────────────
+    if (titleEl) titleEl.innerHTML = '<i class="fas fa-fire"></i> Consecutive Drop Analysis — Month-by-Month';
+    if (subtitleEl) subtitleEl.textContent = 'Every accuracy decline point Jan–Apr 2026 with recruiter-level drop breakdown';
+
+    // Team-level month-over-month table
+    var mRows = allMonths.map(function(m, i){
+      var prev = i > 0 ? allMonths[i-1].Accuracy : null;
+      var delta = prev !== null ? +(m.Accuracy - prev).toFixed(2) : null;
+      var deltaHtml = delta === null ? '<span style="color:var(--text-muted)">—</span>'
+        : delta < 0 ? '<span style="color:var(--hpe-red);font-weight:700">▼ ' + Math.abs(delta) + '%</span>'
+        : delta > 0 ? '<span style="color:var(--hpe-green);font-weight:700">▲ ' + delta + '%</span>'
+        : '<span style="color:var(--text-muted)">→ Flat</span>';
+      var dropBadge = (i > 0 && prev !== null && m.Accuracy < prev) ? '<span style="background:#fde;color:#c00;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700;margin-left:6px">Drop</span>' : '';
+      return '<tr' + (i > 0 && prev !== null && m.Accuracy < prev ? ' style="background:rgba(197,78,75,0.05)"' : '') + '>'
+        + '<td><strong>' + m.Month + ' 2026</strong>' + dropBadge + '</td>'
+        + '<td>' + m.Opportunity_Count.toLocaleString() + '</td>'
+        + '<td>' + m.Opportunity_Fail + '</td>'
+        + '<td>' + getAccBadge(m.Accuracy) + '</td>'
+        + '<td>' + deltaHtml + '</td>'
+        + '</tr>';
+    }).join('');
+
+    // Per-recruiter consecutive drop count
+    var recDropRows = risks.slice().sort(function(a,b){ return b.risk.drops - a.risk.drops; }).filter(function(x){ return x.risk.drops >= 1; }).map(function(x){
+      var r = x.rec, rs = x.risk;
+      var latestAcc = r.apr || r.mar || r.feb || r.jan || 0;
+      return '<div style="display:flex;align-items:center;justify-content:space-between;padding:8px 12px;border-radius:7px;border:1px solid var(--border);margin-bottom:5px;' + (rs.drops >= 2 ? 'background:rgba(197,78,75,0.05)' : '') + '">'
+        + '<div><strong style="font-size:12px">' + r.name + '</strong>'
+        + (rs.drops >= 2 ? ' <span style="background:#fde;color:#c00;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:700">🔴 ' + rs.drops + ' drops</span>' : ' <span style="background:#fff8e1;color:#f57c00;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:600">🟡 1 drop</span>') + '</div>'
+        + '<div style="text-align:right"><span style="font-size:15px;font-weight:800;color:' + (latestAcc >= 97 ? 'var(--hpe-green)' : latestAcc >= 95 ? 'var(--hpe-orange)' : 'var(--hpe-red)') + '">' + latestAcc + '%</span></div>'
+        + '</div>';
+    }).join('');
+
+    var totalDrops = 0;
+    for (var di = 1; di < accs.length; di++) { if (accs[di] < accs[di-1]) totalDrops++; }
+
+    contentEl.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">'
+      + '<div>'
+        + '<div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px">TEAM ACCURACY — MONTH-OVER-MONTH</div>'
+        + '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+        + '<thead><tr style="border-bottom:2px solid #eee"><th style="padding:5px 8px;text-align:left">Month</th><th style="padding:5px 8px">Audits</th><th style="padding:5px 8px">Fails</th><th style="padding:5px 8px">Accuracy</th><th style="padding:5px 8px">MoM Change</th></tr></thead>'
+        + '<tbody>' + mRows + '</tbody></table>'
+        + '<div style="margin-top:10px;padding:8px 12px;background:' + (totalDrops >= 2 ? 'rgba(197,78,75,0.07)' : '#f0fff4') + ';border-radius:8px;font-size:12px;font-weight:600;color:' + (totalDrops >= 2 ? '#c00' : 'var(--hpe-green)') + '">'
+        + (totalDrops >= 2 ? '\u26a0 ' + totalDrops + ' consecutive month(s) with accuracy decline — immediate review recommended' : '\u2713 No sustained consecutive decline detected') + '</div>'
+      + '</div>'
+      + '<div>'
+        + '<div style="font-size:12px;font-weight:700;color:var(--text-secondary);margin-bottom:8px">RECRUITER-LEVEL DROP COUNT</div>'
+        + (recDropRows || '<div style="color:var(--hpe-green);font-weight:600;padding:20px;text-align:center"><i class="fas fa-check-circle"></i> No recruiter with consecutive drops</div>')
+      + '</div>'
+      + '</div>';
+  }
+
+  // Scroll into view
+  setTimeout(function(){ panel.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 80);
+}
+
 // ==================== PANEL 1: RISK ENGINE ====================
 function buildRiskPanel() {
   var allMonths = DASHBOARD_DATA.month_stats.sort(function(a,b){ return a.Month_Number-b.Month_Number; });
@@ -5222,15 +5440,16 @@ function buildPMPanel() {
   var pmData = DASHBOARD_DATA.pm_stats;
   var teamAvg = DASHBOARD_DATA.overall.overall_accuracy;
 
-  // KPI cards
+  // KPI cards — clickable to drill down
   var kpiRow = document.getElementById('pmKpiRow');
   if (kpiRow) {
     kpiRow.innerHTML = pmData.map(function(pm){
       var diff = +(pm.Avg_Accuracy - teamAvg).toFixed(2);
       var diffStr = (diff >= 0 ? '+' : '') + diff + '%';
       var col = diff >= 0 ? 'var(--hpe-green)' : 'var(--hpe-red)';
-      return '<div class="kpi-card">'
-        + '<div class="kpi-label"><i class="fas fa-user-tie"></i> ' + pm.PM + '</div>'
+      var safePM = pm.PM.replace(/'/g, "\\'");
+      return '<div class="kpi-card" style="cursor:pointer" onclick="drillPM(\'' + safePM + '\')" title="Click to see recruiter breakdown">'
+        + '<div class="kpi-label"><i class="fas fa-user-tie"></i> ' + pm.PM + ' <i class="fas fa-chevron-right" style="float:right;font-size:10px;color:var(--text-muted);margin-top:2px"></i></div>'
         + '<div class="kpi-value" style="color:' + (pm.Avg_Accuracy>=99?'var(--hpe-green)':pm.Avg_Accuracy>=97?'var(--hpe-blue)':'var(--hpe-orange)') + '">' + pm.Avg_Accuracy + '%</div>'
         + '<div class="kpi-delta" style="color:'+col+'"><i class="fas fa-arrow-'+(diff>=0?'up':'down')+'"></i> ' + diffStr + ' vs avg</div>'
         + '<div style="font-size:11px;color:var(--text-muted);margin-top:3px">' + pm.Audit_Count.toLocaleString() + ' audits</div>'
@@ -5255,9 +5474,21 @@ function buildPMPanel() {
         ]
       },
       options:{ responsive:true, maintainAspectRatio:false,
-        onClick:function(e, els){ if(els.length){ drillPM(pmSorted[els[0].index].PM); } },
+        onClick:function(e, els){
+          var barEls = els.filter(function(el){ return el.datasetIndex === 0; });
+          if (barEls.length) { drillPM(pmSorted[barEls[0].index].PM); }
+        },
+        onHover:function(e, els){
+          var barEls = els.filter(function(el){ return el.datasetIndex === 0; });
+          if (e.native && e.native.target) {
+            e.native.target.style.cursor = barEls.length ? 'pointer' : 'default';
+          }
+        },
         plugins:{ legend:{position:'top',labels:{font:{size:10},boxWidth:10}},
-          tooltip:{callbacks:{afterLabel:function(ctx){ return 'Audits: '+pmSorted[ctx.dataIndex].Audit_Count.toLocaleString(); }}}
+          tooltip:{callbacks:{
+            afterLabel:function(ctx){ return ctx.datasetIndex===0 ? 'Audits: '+pmSorted[ctx.dataIndex].Audit_Count.toLocaleString() : ''; },
+            footer:function(){ return 'Click bar to see recruiter breakdown'; }
+          }}
         },
         scales:{ y:{ min:96, max:101, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
           x:{ ticks:{font:{size:11}} } }
@@ -5283,7 +5514,8 @@ function buildPMPanel() {
       var status = base >= 99 ? '<span class="status-pill status-closed">\u2713 Excellent</span>'
                  : base >= 97 ? '<span class="status-pill" style="background:#e3f2fd;color:#0D5DBF">\u2192 On Track</span>'
                  : '<span class="status-pill status-open">\u26a0 Watch</span>';
-      return '<tr>'
+      var safePM2 = pm.PM.replace(/'/g, "\\'");
+      return '<tr style="cursor:pointer" onclick="drillPM(\'' + safePM2 + '\')" title="Click to see recruiter breakdown">'
         + '<td><strong>' + pm.PM + '</strong></td>'
         + '<td>' + recs + '</td>'
         + mAccs.map(function(a){ return '<td>' + getAccBadge(a) + '</td>'; }).join('')
@@ -5300,6 +5532,36 @@ function drillPM(pmName) {
   var subEl = document.getElementById('pmDrillSubtitle');
   if (!contentEl) return;
   if (subEl) subEl.textContent = pmName + ' — Recruiter breakdown';
+
+  // Highlight active PM card
+  var pmKpiRow = document.getElementById('pmKpiRow');
+  if (pmKpiRow) {
+    Array.prototype.forEach.call(pmKpiRow.querySelectorAll('.kpi-card'), function(c){
+      c.style.border = '1px solid var(--border)';
+      c.style.background = 'var(--card-bg)';
+    });
+    Array.prototype.forEach.call(pmKpiRow.querySelectorAll('.kpi-card'), function(c){
+      if (c.querySelector('.kpi-label') && c.querySelector('.kpi-label').textContent.indexOf(pmName) !== -1) {
+        c.style.border = '2px solid var(--hpe-green)';
+        c.style.background = 'rgba(1,169,130,0.06)';
+      }
+    });
+  }
+
+  // Highlight active row in MoM table
+  var momBody = document.getElementById('pmMomBody');
+  if (momBody) {
+    Array.prototype.forEach.call(momBody.querySelectorAll('tr'), function(row){
+      var td = row.querySelector('td strong');
+      if (td && td.textContent === pmName) {
+        row.style.background = 'rgba(1,169,130,0.08)';
+        row.style.fontWeight = '600';
+      } else {
+        row.style.background = '';
+        row.style.fontWeight = '';
+      }
+    });
+  }
 
   var recs = (PERF_DATA.pm_recruiters[pmName] || []);
   var recData = recs.map(function(rName){
@@ -5324,6 +5586,9 @@ function drillPM(pmName) {
       + '</div>'
       + '</div>';
   }).join('');
+
+  // Scroll drill panel into view
+  setTimeout(function(){ contentEl.scrollIntoView({ behavior:'smooth', block:'nearest' }); }, 80);
 }
 
 // ==================== PANEL 5: GOAL TRACKER ====================
