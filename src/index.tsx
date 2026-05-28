@@ -4517,7 +4517,7 @@ function initSLATrendCharts() {
       +'<div class="sla-rec-item sla-rec-medium">'
       +'<div class="sla-rec-priority">P5 \u2014 MEDIUM</div>'
       +'<div class="sla-rec-title"><i class="fas fa-calendar-check"></i> Leverage FY25-26 Momentum</div>'
-      +'<div class="sla-rec-body">FY25-26 compliance of 86.6% vs FY24-25\'s 76.5% shows strong improvement (+10.1pp). Build on this by: (1) Maintaining Aug-Sep-25 perfect months as benchmark, (2) Investigating Feb-26 regression (60% compliance) to prevent recurrence, (3) Targeting 90%+ compliance for remaining FY25-26 months.</div>'
+      +'<div class="sla-rec-body">FY25-26 compliance of 86.6% vs FY24-25 (76.5%) shows strong improvement (+10.1pp). Build on this by: (1) Maintaining Aug-Sep-25 perfect months as benchmark, (2) Investigating Feb-26 regression (60% compliance) to prevent recurrence, (3) Targeting 90%+ compliance for remaining FY25-26 months.</div>'
       +'</div>'
       +'<div class="sla-rec-item sla-rec-low">'
       +'<div class="sla-rec-priority">P6 \u2014 STRATEGIC</div>'
