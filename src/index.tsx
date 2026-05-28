@@ -80,18 +80,12 @@ function getDashboardHTML(): string {
       align-items: center;
       gap: 10px;
     }
-    .logo-box {
-      width: 36px;
+    .hpe-logo-img {
       height: 36px;
-      background: var(--hpe-green);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 800;
-      color: white;
-      font-size: 14px;
-      letter-spacing: -0.5px;
+      width: auto;
+      border-radius: 6px;
+      object-fit: contain;
+      display: block;
     }
     .logo-text {
       color: white;
@@ -1020,7 +1014,7 @@ function getDashboardHTML(): string {
 <header>
   <div class="header-left">
     <div class="hpe-logo">
-      <div class="logo-box">HPE</div>
+      <img src="/static/hpe-logo.jpg" alt="HPE" class="hpe-logo-img">
       <span class="logo-text">Hewlett Packard Enterprise</span>
     </div>
     <div class="logo-divider"></div>
