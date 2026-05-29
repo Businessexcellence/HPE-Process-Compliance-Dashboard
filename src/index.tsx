@@ -7832,11 +7832,20 @@ function _buildSearchIndex() {
 
 function _hl(text, q) {
   if (!q) return text;
-  // Avoid regex char-class with {} inside TSX template — use split/replace instead
-  var safe = q.replace(/[-.*+?^|()\\]/g, function(c){ return '\\'+c; });
-  safe = safe.split('{').join('\\{').split('}').join('\\}');
-  var re = new RegExp('(' + safe + ')', 'gi');
-  return text.replace(re, '<span class="search-highlight">$1</span>');
+  // Case-insensitive highlight using split/join to avoid ALL regex backslash issues in TSX template
+  var lowerText = text.toLowerCase();
+  var lowerQ    = q.toLowerCase();
+  var result = '';
+  var idx = 0;
+  var qLen = lowerQ.length;
+  var pos;
+  while ((pos = lowerText.indexOf(lowerQ, idx)) !== -1) {
+    result += text.slice(idx, pos)
+      + '<span class="search-highlight">' + text.slice(pos, pos + qLen) + '</span>';
+    idx = pos + qLen;
+  }
+  result += text.slice(idx);
+  return result;
 }
 
 function doSearch(q) {
@@ -8290,7 +8299,8 @@ function buildCompareModal() {
   }, 120);
 }
 
-
+// ==================== INIT ====================
+document.addEventListener('DOMContentLoaded', function() {
   // ── Restore saved dark-mode preference ──────────────────────────
   try {
     var saved = localStorage.getItem('hpe_dark_mode');
