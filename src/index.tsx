@@ -51,8 +51,299 @@ function getDashboardHTML(): string {
       --shadow-hover: 0 8px 24px rgba(0,0,0,0.14);
       --radius: 12px;
       --radius-sm: 8px;
+      /* Dark mode transition */
+      --dm-transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
     }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ========== DARK MODE VARIABLES ========== */
+    html.dark {
+      --bg: #0f1621;
+      --card-bg: #1a2332;
+      --text-primary: #e8edf2;
+      --text-secondary: #a8b8c8;
+      --text-muted: #6e8090;
+      --border: #2a3a4a;
+      --shadow: 0 2px 12px rgba(0,0,0,0.35);
+      --shadow-hover: 0 8px 24px rgba(0,0,0,0.5);
+      --hpe-green-light: rgba(1,169,130,0.15);
+      --hpe-dark: #e8edf2;
+    }
+    /* ========== DARK MODE TOGGLE PILL ========== */
+    .dm-toggle {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255,255,255,0.08);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: 24px;
+      padding: 5px 10px 5px 6px;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+      font-family: 'Inter', sans-serif;
+    }
+    .dm-toggle:hover { background: rgba(255,255,255,0.14); border-color: rgba(255,255,255,0.28); }
+    .dm-track {
+      width: 36px;
+      height: 20px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 10px;
+      position: relative;
+      transition: background 0.3s;
+      flex-shrink: 0;
+    }
+    html.dark .dm-track { background: var(--hpe-green); }
+    .dm-thumb {
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: white;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+      transition: transform 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    html.dark .dm-thumb { transform: translateX(16px); }
+    .dm-icon {
+      font-size: 13px;
+      line-height: 1;
+      transition: opacity 0.25s, transform 0.25s;
+    }
+    .dm-icon-sun  { color: #FFC627; opacity: 1;  }
+    .dm-icon-moon { color: #a0b4cc; opacity: 0.5; }
+    html.dark .dm-icon-sun  { opacity: 0.4; transform: rotate(-30deg); }
+    html.dark .dm-icon-moon { opacity: 1;   color: #c8d8ea; }
+
+    /* ========== GLOBAL DARK MODE OVERRIDES ========== */
+    /* Apply smooth transition to everything */
+    html.dark body,
+    html.dark .card, html.dark .kpi-card, html.dark .gauge-card,
+    html.dark .nav-tabs, html.dark .nav-tab,
+    html.dark table, html.dark thead tr, html.dark tbody tr,
+    html.dark .modal-box, html.dark .modal-content,
+    html.dark .filter-select, html.dark .export-modal-box,
+    html.dark .perf-sub-btn, html.dark .period-filter {
+      transition: var(--dm-transition);
+    }
+
+    /* Body & Page */
+    html.dark body { background: var(--bg); color: var(--text-primary); }
+
+    /* Nav tabs bar */
+    html.dark .nav-tabs { background: #141e2b; border-bottom-color: var(--border); }
+    html.dark .nav-tab { color: var(--text-muted); }
+    html.dark .nav-tab:hover { background: rgba(1,169,130,0.1); color: var(--hpe-green); }
+    html.dark .nav-tab.active { color: var(--hpe-green); }
+
+    /* Cards */
+    html.dark .card, html.dark .gauge-card,
+    html.dark .kpi-card { background: var(--card-bg); border-color: var(--border); }
+
+    /* KPI icon backgrounds */
+    html.dark .kpi-icon.green  { background: rgba(1,169,130,0.18); }
+    html.dark .kpi-icon.orange { background: rgba(255,131,0,0.15); }
+    html.dark .kpi-icon.red    { background: rgba(197,78,75,0.15); }
+    html.dark .kpi-icon.blue   { background: rgba(13,93,191,0.18); }
+    html.dark .kpi-icon.slate  { background: rgba(66,85,99,0.25); }
+    html.dark .kpi-icon.yellow { background: rgba(255,198,39,0.15); color: #e6b800; }
+
+    /* Tables */
+    html.dark thead tr { background: #0f1621; }
+    html.dark tbody tr:nth-child(even) { background: #1e2d3d; }
+    html.dark tbody tr:hover { background: rgba(1,169,130,0.1); }
+    html.dark tbody td { border-bottom-color: var(--border); color: var(--text-secondary); }
+    html.dark tbody td:first-child { color: var(--text-primary); }
+    html.dark .table-container { border-color: var(--border); }
+
+    /* Section headers */
+    html.dark .section-title { color: var(--text-primary); }
+    html.dark .section-title .icon-badge { background: rgba(1,169,130,0.15); }
+    html.dark .card-title { color: var(--text-primary); }
+
+    /* AI Insights panel */
+    html.dark .ai-insights {
+      background: linear-gradient(135deg, rgba(1,169,130,0.08) 0%, rgba(1,169,130,0.04) 100%);
+      border-color: rgba(1,169,130,0.25);
+    }
+    html.dark .ai-insights-title { color: var(--text-primary); }
+    html.dark .insight-item {
+      background: #1e2d3d;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    }
+    html.dark .insight-icon.green  { background: rgba(1,169,130,0.18); }
+    html.dark .insight-icon.warning{ background: rgba(255,131,0,0.15); }
+    html.dark .insight-icon.alert  { background: rgba(197,78,75,0.15); }
+    html.dark .insight-icon.info   { background: rgba(13,93,191,0.18); }
+    html.dark .insight-text { color: var(--text-secondary); }
+    html.dark .insight-text strong { color: var(--text-primary); }
+
+    /* Gauge */
+    html.dark .gauge-status.good    { background: rgba(1,169,130,0.18); }
+    html.dark .gauge-status.warning { background: rgba(255,131,0,0.18); }
+    html.dark .gauge-status.bad     { background: rgba(197,78,75,0.18); }
+    html.dark .gauge-title { color: var(--text-muted); }
+
+    /* Accuracy badges */
+    html.dark .acc-badge.excellent { background: rgba(1,169,130,0.2); }
+    html.dark .acc-badge.good      { background: rgba(1,169,130,0.15); }
+    html.dark .acc-badge.warning   { background: rgba(255,131,0,0.18); }
+    html.dark .acc-badge.bad       { background: rgba(197,78,75,0.18); }
+
+    /* Forecast / improvement section */
+    html.dark .forecast-section { background: #141e2b; border-color: var(--border); }
+    html.dark .narr-card { background: #1e2d3d; border-color: var(--border); }
+    html.dark .narr-text  { color: var(--text-secondary); }
+
+    /* Alert items */
+    html.dark .alert-item.alert-red    { background: rgba(197,78,75,0.15);  border-color: #C54E4B; }
+    html.dark .alert-item.alert-orange { background: rgba(255,131,0,0.12);  border-color: #FF8300; }
+    html.dark .alert-item.alert-green  { background: rgba(1,169,130,0.12);  border-color: #01A982; }
+
+    /* Modal overlays & boxes */
+    html.dark .modal-box,
+    html.dark .export-modal-box { background: #1a2332; border: 1px solid var(--border); }
+    html.dark .modal-header,
+    html.dark .export-modal-header { background: #141e2b; border-bottom-color: var(--border); }
+    html.dark .modal-title,
+    html.dark .export-modal-title { color: var(--text-primary); }
+    html.dark .modal-body,
+    html.dark .export-modal-body { background: #1a2332; }
+    html.dark .modal-footer,
+    html.dark .export-modal-footer { background: #141e2b; border-top-color: var(--border); }
+    html.dark .modal-drop-title { color: var(--text-primary); }
+    html.dark .modal-close,
+    html.dark .export-modal-close { color: var(--text-muted); }
+    html.dark .modal-close:hover,
+    html.dark .export-modal-close:hover { background: rgba(255,255,255,0.08); color: var(--text-primary); }
+
+    /* Form elements inside modals */
+    html.dark .modal-body input,
+    html.dark .modal-body select,
+    html.dark .modal-body textarea,
+    html.dark .export-modal-body input,
+    html.dark .export-modal-body select {
+      background: #0f1621;
+      border-color: var(--border);
+      color: var(--text-primary);
+    }
+    html.dark .modal-body input:focus,
+    html.dark .modal-body select:focus,
+    html.dark .export-modal-body input:focus,
+    html.dark .export-modal-body select:focus {
+      border-color: var(--hpe-green);
+      box-shadow: 0 0 0 3px rgba(1,169,130,0.2);
+    }
+
+    /* Filter selects & buttons */
+    html.dark .filter-select {
+      background: #1e2d3d;
+      border-color: var(--border);
+      color: var(--text-primary);
+    }
+    html.dark .filter-btn {
+      background: #1e2d3d;
+      border-color: var(--border);
+      color: var(--text-secondary);
+    }
+    html.dark .filter-btn.active {
+      background: var(--hpe-green);
+      color: white;
+      border-color: var(--hpe-green);
+    }
+    html.dark .period-filter { border-color: var(--border); }
+
+    /* Perf sub-buttons */
+    html.dark .perf-sub-btn { background: #1e2d3d; border-color: var(--border); color: var(--text-secondary); }
+    html.dark .perf-sub-btn.active { background: var(--hpe-green); color: white; border-color: var(--hpe-green); }
+    html.dark .perf-sub-btn:hover  { border-color: var(--hpe-green); color: var(--hpe-green); background: rgba(1,169,130,0.1); }
+
+    /* Scorecard cards */
+    html.dark .scorecard-card { background: #1e2d3d; border-color: var(--border); }
+    html.dark .sc-bar { background: #2a3a4a; }
+
+    /* Risk level badges */
+    html.dark .risk-critical { background: rgba(197,78,75,0.18); color: #e57373; border-color: rgba(197,78,75,0.4); }
+    html.dark .risk-high     { background: rgba(255,131,0,0.15); color: #ffb74d; border-color: rgba(255,131,0,0.4); }
+    html.dark .risk-medium   { background: rgba(255,198,39,0.12); color: #ffe082; border-color: rgba(255,198,39,0.4); }
+    html.dark .risk-low      { background: rgba(1,169,130,0.15); color: #4db6ac; border-color: rgba(1,169,130,0.4); }
+
+    /* Coaching / at-risk flags */
+    html.dark .coaching-flag { background: rgba(255,198,39,0.15); color: #ffe082; border-color: rgba(255,198,39,0.4); }
+    html.dark .at-risk-flag  { background: rgba(197,78,75,0.15); color: #e57373; border-color: rgba(197,78,75,0.4); }
+
+    /* SLA panels */
+    html.dark .sla-health-banner.good { background: rgba(1,169,130,0.12); border-color: rgba(1,169,130,0.3); color: #4db6ac; }
+    html.dark .sla-health-banner.warn { background: rgba(255,131,0,0.12); border-color: rgba(255,131,0,0.3); color: #ffb74d; }
+    html.dark .sla-health-banner.bad  { background: rgba(197,78,75,0.12); border-color: rgba(197,78,75,0.3); color: #e57373; }
+    html.dark .sla-pill.notmet { background: rgba(197,78,75,0.18); color: #e57373; }
+    html.dark .sla-pill.nr     { background: rgba(66,85,99,0.25);  color: var(--text-muted); }
+    html.dark .sla-pill.na     { background: rgba(255,131,0,0.15); color: #ffb74d; }
+    html.dark .sla-hm-corner,
+    html.dark .sla-hm-label   { background: #1e2d3d; }
+    html.dark .sla-hm-nm      { background: rgba(197,78,75,0.3); color: #e57373; }
+    html.dark .sla-hm-na      { background: rgba(255,131,0,0.2); color: #ffb74d; }
+    html.dark .sla-metric-table tr:hover td { background: rgba(1,169,130,0.08); }
+    html.dark .sla-badge-nm  { background: rgba(197,78,75,0.18); color: #e57373; }
+    html.dark .sla-badge-nr  { background: rgba(66,85,99,0.2);  color: var(--text-muted); }
+    html.dark .sla-health-warn { background: rgba(255,131,0,0.12); border-color: rgba(255,131,0,0.3); color: #ffb74d; }
+    html.dark .sla-health-crit { background: rgba(197,78,75,0.12); border-color: rgba(197,78,75,0.3); color: #e57373; }
+    html.dark .sla-chronic-bar { background: #2a3a4a; }
+    html.dark .sla-chronic-item{ background: rgba(197,78,75,0.08); border-color: rgba(197,78,75,0.25); }
+    html.dark .sla-ic-good  { background: rgba(1,169,130,0.1);  border-color: rgba(1,169,130,0.25); }
+    html.dark .sla-ic-warn  { background: rgba(255,131,0,0.1);  border-color: rgba(255,131,0,0.25); }
+    html.dark .sla-ic-info  { background: rgba(13,93,191,0.12); border-color: rgba(13,93,191,0.25); }
+    html.dark .sla-tg-improving { background: rgba(1,169,130,0.1);  border-color: rgba(1,169,130,0.25); }
+    html.dark .sla-tg-stable    { background: #1e2d3d; border-color: var(--border); }
+    html.dark .sla-tg-declining { background: rgba(197,78,75,0.08); border-color: rgba(197,78,75,0.25); }
+    html.dark .sla-rec-critical { background: rgba(197,78,75,0.08);  border-left-color: #e74c3c; }
+    html.dark .sla-rec-high     { background: rgba(247,183,49,0.08);  border-left-color: #f7b731; }
+    html.dark .sla-rec-medium   { background: rgba(1,169,130,0.08);   border-left-color: #01a982; }
+    html.dark .sla-rec-low      { background: rgba(52,152,219,0.08);  border-left-color: #3498db; }
+    html.dark .sla-insight-box  { background: #1e2d3d; border-color: var(--border); }
+
+    /* Heatmap cells */
+    html.dark #heatmapContainer .heat-cell-na { background: #1e2d3d !important; }
+
+    /* Progress overlay */
+    html.dark .export-progress-wrap { background: #1a2332; border-color: var(--border); }
+
+    /* Drill-down panel */
+    html.dark #riskDrillPanel { background: #1e2d3d; border-color: var(--border); }
+
+    /* Scrollbar */
+    html.dark ::-webkit-scrollbar-track { background: #141e2b; }
+    html.dark ::-webkit-scrollbar-thumb { background: #2a3a4a; }
+    html.dark ::-webkit-scrollbar-thumb:hover { background: #3a4a5a; }
+
+    /* Status badges */
+    html.dark .status-closed     { background: rgba(1,169,130,0.18); color: #4db6ac; }
+    html.dark .status-inprogress { background: rgba(255,198,39,0.15); color: #ffe082; }
+    html.dark .status-open       { background: rgba(197,78,75,0.18);  color: #e57373; }
+
+    /* Export tabs */
+    html.dark .export-tab { background: #1e2d3d; color: var(--text-muted); border-color: var(--border); }
+    html.dark .export-tab.active { background: var(--hpe-green); color: white; }
+    html.dark .slide-thumb { background: #0f1621; border-color: var(--border); }
+    html.dark .slide-thumb.selected { border-color: var(--hpe-green); }
+
+    /* btn-cancel */
+    html.dark .btn-cancel { background: #1e2d3d; color: var(--text-secondary); border-color: var(--border); }
+    html.dark .btn-cancel:hover { background: #2a3a4a; }
+
+    /* CAPA table status */
+    html.dark .capa-status-closed     { background: rgba(1,169,130,0.18); color: #4db6ac; }
+    html.dark .capa-status-inprogress { background: rgba(255,198,39,0.15); color: #ffe082; }
+    html.dark .capa-status-open       { background: rgba(197,78,75,0.18);  color: #e57373; }
+
+    /* Goals panel */
+    html.dark .goal-card { background: #1e2d3d; border-color: var(--border); }
+
+    /* Narr section */
+    html.dark .narr-section { background: #141e2b; border-color: var(--border); }
+
+    /* Week drill-down table */
+    html.dark #weekDrillTable th { background: #0f1621; color: var(--text-muted); border-bottom-color: var(--border); }
+    html.dark #weekDrillTable td { border-bottom-color: var(--border); }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
       background: var(--bg);
@@ -1179,6 +1470,14 @@ function getDashboardHTML(): string {
       <div class="status-dot"></div>
       <span id="refreshTime">Last refreshed: just now</span>
     </div>
+    <!-- Dark Mode Toggle -->
+    <button class="dm-toggle" id="dmToggle" onclick="toggleDarkMode()" title="Toggle dark / light mode" aria-label="Toggle dark mode">
+      <span class="dm-track">
+        <span class="dm-thumb"></span>
+      </span>
+      <span class="dm-icon dm-icon-sun"><i class="fas fa-sun"></i></span>
+      <span class="dm-icon dm-icon-moon"><i class="fas fa-moon"></i></span>
+    </button>
     <button class="btn-refresh" onclick="refreshDashboard()">
       <i class="fas fa-sync-alt"></i> Refresh
     </button>
@@ -3129,6 +3428,8 @@ function switchTab(tabName, el) {
     if (tabName === 'sla')         { initSLADashboard(); }
     if (tabName === 'data')        { buildWeeklyTable(); }
     if (tabName === 'performance') { if (!_perfDone) { _perfDone = true; initPerformanceTab(); } else { if (_activePerfPanel==='risk') buildRiskPanel(); else if (_activePerfPanel==='scorecard') buildScorecardPanel(); else if (_activePerfPanel==='param') buildParamPanel(); else if (_activePerfPanel==='pm') buildPMPanel(); else if (_activePerfPanel==='goals') buildGoalsPanel(); } }
+    // Re-apply dark/light chart colours after lazy chart builds
+    _redrawChartsForTheme(document.documentElement.classList.contains('dark'));
   }, 150);
 }
 
@@ -7187,8 +7488,82 @@ function runExportPPT() {
   }, 50);
 }
 
+
+// ══════════════════════════════════════════════════════════════════
+// DARK MODE
+// ══════════════════════════════════════════════════════════════════
+
+function applyTheme(dark) {
+  var html = document.documentElement;
+  if (dark) {
+    html.classList.add('dark');
+  } else {
+    html.classList.remove('dark');
+  }
+  // Redraw all visible Chart.js charts with correct grid/label colours
+  _redrawChartsForTheme(dark);
+}
+
+function toggleDarkMode() {
+  var isDark = document.documentElement.classList.toggle('dark');
+  try { localStorage.setItem('hpe_dark_mode', isDark ? '1' : '0'); } catch(e) {}
+  _redrawChartsForTheme(isDark);
+}
+
+function _redrawChartsForTheme(dark) {
+  var gridCol  = dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+  var tickCol  = dark ? '#6e8090' : '#6b7d8c';
+  var legendCol= dark ? '#a8b8c8' : '#425563';
+
+  // Update Chart.js global defaults so new charts pick them up
+  if (window.Chart) {
+    Chart.defaults.color = legendCol;
+    Chart.defaults.borderColor = gridCol;
+    if (Chart.defaults.scale) {
+      Chart.defaults.scale.grid = Chart.defaults.scale.grid || {};
+      Chart.defaults.scale.grid.color = gridCol;
+      Chart.defaults.scale.ticks = Chart.defaults.scale.ticks || {};
+      Chart.defaults.scale.ticks.color = tickCol;
+    }
+  }
+
+  // Patch every live chart instance
+  Object.keys(charts).forEach(function(id) {
+    var ch = charts[id];
+    if (!ch) return;
+    var opts = ch.options;
+    if (!opts) return;
+    // Scales
+    if (opts.scales) {
+      Object.keys(opts.scales).forEach(function(axis) {
+        var sc = opts.scales[axis];
+        if (sc.grid)  sc.grid.color  = gridCol;
+        if (sc.ticks) sc.ticks.color = tickCol;
+        if (sc.border) sc.border.color = gridCol;
+      });
+    }
+    // Legend
+    if (opts.plugins && opts.plugins.legend && opts.plugins.legend.labels) {
+      opts.plugins.legend.labels.color = legendCol;
+    }
+    ch.update('none'); // silent re-render, no animation
+  });
+}
+
 // ==================== INIT ====================
 document.addEventListener('DOMContentLoaded', function() {
+  // ── Restore saved dark-mode preference ──────────────────────────
+  try {
+    var saved = localStorage.getItem('hpe_dark_mode');
+    if (saved === '1') {
+      document.documentElement.classList.add('dark');
+    }
+  } catch(e) {}
+
+  // ── Apply Chart.js colour defaults for active theme ─────────────
+  var _initDark = document.documentElement.classList.contains('dark');
+  _redrawChartsForTheme(_initDark);
+
   // Small delay so browser paints the page before Chart.js measures canvas sizes
   setTimeout(function() {
     _execDone = true;
