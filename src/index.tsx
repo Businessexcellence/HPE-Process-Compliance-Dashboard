@@ -360,6 +360,7 @@ function getDashboardHTML(): string {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 16px;
       height: 64px;
       position: sticky;
       top: 0;
@@ -370,6 +371,7 @@ function getDashboardHTML(): string {
       display: flex;
       align-items: center;
       gap: 16px;
+      flex-shrink: 0;
     }
     .hpe-logo {
       display: flex;
@@ -1451,6 +1453,191 @@ function getDashboardHTML(): string {
     .alert-icon { font-size:18px; margin-top:2px; }
     .alert-title { font-size:13px; font-weight:700; }
     .alert-desc  { font-size:12px; color:var(--text-secondary); margin-top:2px; }
+
+    /* ============================================================
+       FEATURE 1 — GLOBAL SEARCH BAR
+    ============================================================ */
+    .header-search-wrap { position:relative; display:flex; align-items:center; flex:1; max-width:320px; }
+    .header-search-input {
+      width:100%; height:34px; border-radius:18px;
+      border:1.5px solid rgba(255,255,255,0.22); background:rgba(255,255,255,0.10);
+      color:rgba(255,255,255,0.92); font-size:13px; padding:0 36px 0 14px;
+      outline:none; transition:border-color 0.2s, box-shadow 0.2s;
+    }
+    .header-search-input:focus { border-color:var(--hpe-green); background:rgba(255,255,255,0.14); box-shadow:0 0 0 3px rgba(1,169,130,0.22); }
+    .header-search-input::placeholder { color:rgba(255,255,255,0.45); }
+    .header-search-icon { position:absolute; right:12px; top:50%; transform:translateY(-50%); color:rgba(255,255,255,0.4); font-size:13px; pointer-events:none; }
+    .search-results-dropdown {
+      position:absolute; top:calc(100% + 8px); left:0; width:340px;
+      background:var(--card-bg); border:1.5px solid var(--border);
+      border-radius:12px; box-shadow:0 8px 32px rgba(0,0,0,0.15);
+      z-index:9999; max-height:380px; overflow-y:auto; display:none;
+    }
+    .search-results-dropdown.open { display:block; }
+    .search-result-item {
+      display:flex; align-items:center; gap:10px;
+      padding:10px 14px; cursor:pointer; border-bottom:1px solid var(--border);
+      transition:background 0.15s;
+    }
+    .search-result-item:last-child { border-bottom:none; }
+    .search-result-item:hover, .search-result-item.search-focused { background:var(--bg); }
+    .search-result-icon { width:28px; height:28px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
+    .search-result-title { font-size:13px; font-weight:600; color:var(--text-primary); line-height:1.3; }
+    .search-result-meta  { font-size:11px; color:var(--text-muted); margin-top:1px; }
+    .search-result-cat   { font-size:10px; font-weight:700; letter-spacing:0.5px; text-transform:uppercase; }
+    .search-highlight    { background:rgba(1,169,130,0.22); border-radius:3px; padding:0 1px; font-weight:700; }
+    .search-no-results   { padding:18px; text-align:center; font-size:13px; color:var(--text-muted); }
+    .search-section-head { padding:6px 14px 2px; font-size:10px; font-weight:700; letter-spacing:0.8px; text-transform:uppercase; color:var(--text-muted); background:var(--bg); }
+    .search-elem-hl { outline:2.5px solid var(--hpe-green) !important; outline-offset:3px !important; border-radius:6px !important; animation:searchPulse 1.2s ease-out; }
+    @keyframes searchPulse { 0%{box-shadow:0 0 0 0 rgba(1,169,130,0.5)} 70%{box-shadow:0 0 0 12px rgba(1,169,130,0)} 100%{box-shadow:none} }
+
+    /* ============================================================
+       FEATURE 2 — THRESHOLD SETTINGS DRAWER
+    ============================================================ */
+    .settings-btn {
+      width:34px; height:34px; border-radius:50%; border:1.5px solid var(--border);
+      background:var(--card-bg); color:var(--text-secondary); cursor:pointer;
+      display:flex; align-items:center; justify-content:center; font-size:14px;
+      transition:all 0.2s; flex-shrink:0;
+    }
+    .settings-btn:hover { border-color:var(--hpe-green); color:var(--hpe-green); transform:rotate(45deg); }
+    .thresh-drawer-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:10000;
+      opacity:0; pointer-events:none; transition:opacity 0.25s;
+    }
+    .thresh-drawer-overlay.open { opacity:1; pointer-events:all; }
+    .thresh-drawer {
+      position:fixed; top:0; right:-400px; width:380px; height:100vh;
+      background:var(--card-bg); border-left:1.5px solid var(--border);
+      box-shadow:-8px 0 32px rgba(0,0,0,0.18); z-index:10001;
+      transition:right 0.3s cubic-bezier(0.4,0,0.2,1); overflow-y:auto;
+      display:flex; flex-direction:column;
+    }
+    .thresh-drawer.open { right:0; }
+    .thresh-drawer-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:20px 24px 16px; border-bottom:1px solid var(--border);
+      position:sticky; top:0; background:var(--card-bg); z-index:1;
+    }
+    .thresh-drawer-title { font-size:16px; font-weight:700; color:var(--text-primary); }
+    .thresh-drawer-close { background:none; border:none; cursor:pointer; font-size:18px; color:var(--text-muted); padding:4px; border-radius:6px; transition:color 0.15s; }
+    .thresh-drawer-close:hover { color:var(--hpe-red); }
+    .thresh-drawer-body { padding:20px 24px; flex:1; }
+    .thresh-group { margin-bottom:28px; }
+    .thresh-label { font-size:13px; font-weight:700; color:var(--text-primary); margin-bottom:4px; display:flex; justify-content:space-between; align-items:center; }
+    .thresh-value-badge { font-size:15px; font-weight:800; color:var(--hpe-green); min-width:48px; text-align:right; }
+    .thresh-desc { font-size:11px; color:var(--text-muted); margin-bottom:10px; line-height:1.5; }
+    .thresh-slider {
+      -webkit-appearance:none; appearance:none; width:100%; height:6px;
+      border-radius:3px; outline:none; cursor:pointer;
+      background:linear-gradient(to right, var(--hpe-green) 0%, var(--hpe-green) 50%, var(--border) 50%, var(--border) 100%);
+    }
+    .thresh-slider::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; border-radius:50%; background:var(--hpe-green); cursor:pointer; box-shadow:0 2px 6px rgba(1,169,130,0.4); border:2px solid white; }
+    .thresh-slider::-moz-range-thumb { width:18px; height:18px; border-radius:50%; background:var(--hpe-green); cursor:pointer; box-shadow:0 2px 6px rgba(1,169,130,0.4); border:2px solid white; }
+    .thresh-range-labels { display:flex; justify-content:space-between; font-size:10px; color:var(--text-muted); margin-top:4px; }
+    .thresh-apply-btn {
+      width:100%; padding:12px; border-radius:10px; border:none;
+      background:linear-gradient(135deg, var(--hpe-green), #008060); color:white;
+      font-size:14px; font-weight:700; cursor:pointer; transition:opacity 0.2s;
+      margin-top:8px; letter-spacing:0.3px;
+    }
+    .thresh-apply-btn:hover { opacity:0.88; }
+    .thresh-reset-btn {
+      width:100%; padding:10px; border-radius:10px; border:1.5px solid var(--border);
+      background:transparent; color:var(--text-secondary); font-size:13px;
+      font-weight:600; cursor:pointer; transition:all 0.2s; margin-top:8px;
+    }
+    .thresh-reset-btn:hover { border-color:var(--hpe-orange); color:var(--hpe-orange); }
+    .thresh-live-preview {
+      background:var(--bg); border-radius:10px; padding:14px 16px;
+      margin-bottom:20px; border:1px solid var(--border);
+    }
+    .thresh-preview-title { font-size:11px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-muted); margin-bottom:8px; }
+    .thresh-preview-row { display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--text-secondary); padding:3px 0; }
+    .thresh-preview-val { font-weight:700; }
+
+    /* ============================================================
+       FEATURE 3 — RECRUITER COMPARISON TOOL
+    ============================================================ */
+    .compare-btn {
+      position:absolute; bottom:12px; right:12px;
+      font-size:10px; font-weight:700; padding:4px 10px; border-radius:8px;
+      border:1.5px solid var(--border); background:var(--card-bg);
+      color:var(--text-secondary); cursor:pointer; transition:all 0.18s;
+      letter-spacing:0.3px; text-transform:uppercase;
+    }
+    .compare-btn:hover { border-color:var(--hpe-blue); color:var(--hpe-blue); background:#eef4ff; }
+    .compare-btn.selected { border-color:var(--hpe-blue); background:var(--hpe-blue); color:white; }
+    .scorecard-card { position:relative; padding-bottom:44px !important; }
+    .compare-fab {
+      position:fixed; bottom:28px; left:50%; transform:translateX(-50%) translateY(60px);
+      background:linear-gradient(135deg, #0D5DBF, #0a47a0); color:white;
+      border:none; border-radius:30px; padding:12px 28px; font-size:14px; font-weight:700;
+      cursor:pointer; box-shadow:0 6px 24px rgba(13,93,191,0.45); z-index:8000;
+      transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s;
+      opacity:0; pointer-events:none; white-space:nowrap;
+    }
+    .compare-fab.visible { transform:translateX(-50%) translateY(0); opacity:1; pointer-events:all; }
+    .compare-fab:hover { filter:brightness(1.1); }
+    .compare-modal-overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.55); z-index:10000;
+      display:none; align-items:center; justify-content:center; padding:16px;
+    }
+    .compare-modal-overlay.open { display:flex; }
+    .compare-modal {
+      background:var(--card-bg); border:1.5px solid var(--border);
+      border-radius:16px; box-shadow:0 16px 60px rgba(0,0,0,0.3);
+      width:100%; max-width:900px; max-height:90vh; overflow-y:auto;
+      animation:compareModalIn 0.28s cubic-bezier(0.34,1.56,0.64,1);
+    }
+    @keyframes compareModalIn { from{opacity:0;transform:scale(0.92)} to{opacity:1;transform:scale(1)} }
+    .compare-modal-header {
+      display:flex; align-items:center; justify-content:space-between;
+      padding:20px 24px 16px; border-bottom:1px solid var(--border);
+      position:sticky; top:0; background:var(--card-bg); z-index:2; border-radius:16px 16px 0 0;
+    }
+    .compare-modal-title { font-size:17px; font-weight:700; color:var(--text-primary); }
+    .compare-modal-close { background:none; border:none; cursor:pointer; font-size:20px; color:var(--text-muted); padding:4px 8px; border-radius:6px; transition:color 0.15s; }
+    .compare-modal-close:hover { color:var(--hpe-red); }
+    .compare-modal-body { padding:20px 24px 24px; }
+    .compare-cols { display:grid; gap:16px; }
+    .compare-col-header {
+      padding:12px 14px; border-radius:10px; text-align:center;
+      border-top:4px solid var(--hpe-blue);
+    }
+    .compare-col-name { font-size:15px; font-weight:700; color:var(--text-primary); }
+    .compare-col-tier { font-size:11px; font-weight:700; margin-top:4px; }
+    .compare-section-title { font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:0.6px; color:var(--text-muted); margin:16px 0 8px; }
+    .compare-metric-grid { display:grid; gap:12px; }
+    .compare-metric-card { background:var(--bg); border-radius:10px; padding:12px 14px; border:1px solid var(--border); }
+    .compare-metric-label { font-size:11px; color:var(--text-muted); margin-bottom:4px; font-weight:600; text-transform:uppercase; letter-spacing:0.4px; }
+    .compare-metric-value { font-size:18px; font-weight:800; color:var(--text-primary); }
+    .compare-metric-sub { font-size:11px; color:var(--text-muted); margin-top:2px; }
+    .compare-chart-wrap { position:relative; height:200px; margin:8px 0; }
+    .compare-month-row { display:grid; gap:6px; margin-bottom:6px; }
+    .compare-month-cell { background:var(--bg); border-radius:8px; padding:8px 12px; border:1px solid var(--border); text-align:center; }
+    .compare-month-label { font-size:10px; color:var(--text-muted); font-weight:600; }
+    .compare-month-val   { font-size:15px; font-weight:800; margin-top:2px; }
+
+    /* Dark mode overrides for new features */
+    html.dark .search-results-dropdown { background:#1a2332; border-color:#2a3a4a; box-shadow:0 8px 32px rgba(0,0,0,0.5); }
+    html.dark .search-result-item:hover, html.dark .search-result-item.search-focused { background:#0f1621; }
+    html.dark .settings-btn { background:#1a2332; border-color:#2a3a4a; }
+    html.dark .thresh-drawer { background:#1a2332; border-color:#2a3a4a; }
+    html.dark .thresh-drawer-header { background:#1a2332; }
+    html.dark .thresh-live-preview { background:#0f1621; border-color:#2a3a4a; }
+    html.dark .thresh-reset-btn { border-color:#2a3a4a; color:#a8b8c8; }
+    html.dark .compare-btn { background:#1a2332; border-color:#2a3a4a; color:#a8b8c8; }
+    html.dark .compare-btn:hover { background:#0d2a5e; }
+    html.dark .compare-modal { background:#1a2332; border-color:#2a3a4a; }
+    html.dark .compare-modal-header { background:#1a2332; }
+    html.dark .compare-col-header { background:#0f1621; }
+    html.dark .compare-metric-card { background:#0f1621; border-color:#2a3a4a; }
+    html.dark .compare-month-cell { background:#0f1621; border-color:#2a3a4a; }
+    html.dark .param-drill-item:hover { background:#1a2332; }
+    html.dark .param-drill-item.active { background:#0d2a1f; border-color:var(--hpe-green); }
+    html.dark .search-section-head { background:#0f1621; }
+    html.dark .scorecard-card { background:#1a2332; }
   </style>
 </head>
 <body>
@@ -1465,11 +1652,25 @@ function getDashboardHTML(): string {
     <div class="logo-divider"></div>
     <span class="header-title"><i class="fas fa-chart-line" style="color:var(--hpe-green);margin-right:6px"></i>Audit Performance Dashboard</span>
   </div>
+  <!-- Global Search Bar -->
+  <div class="header-search-wrap" id="headerSearchWrap">
+    <input type="text" class="header-search-input" id="globalSearchInput"
+      placeholder="&#xF002;  Search KPIs, recruiters, errors…"
+      autocomplete="off" aria-label="Global dashboard search"
+      oninput="doSearch(this.value)" onkeydown="searchKeyNav(event)" onfocus="searchOnFocus()" />
+    <i class="fas fa-search header-search-icon"></i>
+    <div class="search-results-dropdown" id="searchDropdown" role="listbox"></div>
+  </div>
+
   <div class="header-right">
     <div class="last-refresh">
       <div class="status-dot"></div>
       <span id="refreshTime">Last refreshed: just now</span>
     </div>
+    <!-- Threshold Settings Button -->
+    <button class="settings-btn" id="settingsBtn" onclick="openSettingsDrawer()" title="Configure alert thresholds" aria-label="Threshold settings">
+      <i class="fas fa-sliders-h"></i>
+    </button>
     <!-- Dark Mode Toggle -->
     <button class="dm-toggle" id="dmToggle" onclick="toggleDarkMode()" title="Toggle dark / light mode" aria-label="Toggle dark mode">
       <span class="dm-track">
@@ -5888,7 +6089,7 @@ function buildScorecardPanel() {
         var c = v>=99?'#01A982':v>=97?'#0D5DBF':v>=95?'#FF8300':'#C54E4B';
         return '<span style="font-size:10px;font-weight:600;color:'+c+'">'+v+'%</span>';
       }).join('<span style="color:#ccc;margin:0 2px">|</span>');
-      return '<div class="scorecard-card ' + tier.cls + '">'
+      return '<div class="scorecard-card ' + tier.cls + '" id="sc-card-' + r.name.replace(/ /g,'_') + '">'
         + '<div style="display:flex;justify-content:space-between;align-items:flex-start">'
         + '<div><div class="sc-name">' + r.name + '</div>'
         + '<div style="font-size:11px;color:var(--text-muted)">' + (r.pm||'') + '</div></div>'
@@ -5902,6 +6103,9 @@ function buildScorecardPanel() {
         + '<div class="sc-meta" style="margin-top:8px">'+monthBars+'</div>'
         + '<div class="sc-meta" style="margin-top:4px">' + r.audits.toLocaleString() + ' audits &nbsp;·&nbsp; ' + r.errors + ' errors</div>'
         + '<div style="margin-top:6px">' + coachFlag + atRisk + '</div>'
+        + '<button class="compare-btn" id="cmpr-' + r.name.replace(/ /g,'_') + '" data-recname="' + r.name + '" onclick="toggleCompare(this)">'
+        + '<i class="fas fa-plus" style="margin-right:3px;font-size:8px"></i>Compare'
+        + '</button>'
         + '</div>';
     }).join('');
   }
@@ -7550,8 +7754,543 @@ function _redrawChartsForTheme(dark) {
   });
 }
 
-// ==================== INIT ====================
-document.addEventListener('DOMContentLoaded', function() {
+// ==================== FEATURE 1: GLOBAL SEARCH ====================
+var _searchIndex = null;
+var _searchFocusIdx = -1;
+var _searchResults = [];
+
+function _buildSearchIndex() {
+  if (_searchIndex) return _searchIndex;
+  var idx = [];
+
+  // Tabs
+  var tabs = [
+    { tab:'executive',   label:'Executive Summary',          icon:'fa-tachometer-alt', iconColor:'#0D5DBF', meta:'Overview dashboard' },
+    { tab:'trends',      label:'Accuracy Trends',            icon:'fa-chart-line',     iconColor:'#01A982', meta:'Monthly & weekly trends' },
+    { tab:'improvement', label:'Improvement & Scope',        icon:'fa-arrow-trend-up', iconColor:'#FF8300', meta:'Pareto, recruiter, PM charts' },
+    { tab:'capa',        label:'CAPA — Bot Undo',            icon:'fa-clipboard-check',iconColor:'#9b59b6', meta:'Corrective actions' },
+    { tab:'insights',    label:'AI Insights',                icon:'fa-brain',          iconColor:'#e74c3c', meta:'Radar, heatmap' },
+    { tab:'data',        label:'Data Management',            icon:'fa-database',       iconColor:'#2ecc71', meta:'Weekly audit table' },
+    { tab:'sla',         label:'SLA Performance',            icon:'fa-clipboard-check',iconColor:'#3498db', meta:'SLA compliance metrics' },
+    { tab:'performance', label:'Performance Intelligence',   icon:'fa-user-chart',     iconColor:'#FF8300', meta:'Scorecard, risk, PM panel' }
+  ];
+  tabs.forEach(function(t) {
+    idx.push({ type:'tab', tab:t.tab, label:t.label, meta:t.meta, icon:t.icon, iconColor:t.iconColor,
+      keywords:(t.label+' '+t.meta).toLowerCase() });
+  });
+
+  // Recruiters
+  PERF_DATA.recruiter_monthly.forEach(function(r) {
+    var latestAcc = r.apr||r.mar||r.feb||r.jan||0;
+    idx.push({ type:'recruiter', tab:'performance', label:r.name,
+      meta:'PM: '+(r.pm||'—')+' · Accuracy: '+latestAcc+'% · '+r.audits+' audits',
+      icon:'fa-user', iconColor:'#0D5DBF', scrollTo:'sc-card-'+r.name.replace(/ /g,'_'),
+      keywords:(r.name+' '+(r.pm||'')).toLowerCase() });
+  });
+
+  // Error parameters
+  DASHBOARD_DATA.top_errors.forEach(function(p) {
+    idx.push({ type:'parameter', tab:'performance', label:p.Parameter,
+      meta:'Error rate: '+p.Fail_Pct+'% · '+p.Opportunity_Fail+' failures',
+      icon:'fa-exclamation-circle', iconColor: p.Fail_Pct>=5?'#C54E4B':p.Fail_Pct>=2?'#FF8300':'#01A982',
+      scrollTo:'perfPanel-param',
+      keywords:p.Parameter.toLowerCase() });
+  });
+
+  // PMs
+  Object.keys(PERF_DATA.pm_recruiters).forEach(function(pm) {
+    idx.push({ type:'pm', tab:'performance', label:pm,
+      meta:'PM · Team: '+PERF_DATA.pm_recruiters[pm].join(', '),
+      icon:'fa-user-tie', iconColor:'#9b59b6',
+      scrollTo:'perfPanel-pm',
+      keywords:pm.toLowerCase() });
+  });
+
+  // KPI metric labels
+  var kpis = [
+    { label:'Overall FY Accuracy', tab:'executive', meta:'Key performance indicator', scrollTo:'tab-executive' },
+    { label:'Total Audits Conducted', tab:'executive', meta:'Audit volume metric', scrollTo:'tab-executive' },
+    { label:'Total Errors Identified', tab:'executive', meta:'Error count metric', scrollTo:'tab-executive' },
+    { label:'Accuracy Trend Slope', tab:'trends', meta:'Regression line direction', scrollTo:'tab-trends' },
+    { label:'Risk Intelligence Panel', tab:'performance', meta:'Recruiter risk scores & drops', scrollTo:'perfPanel-risk' },
+    { label:'Recruiter Scorecard', tab:'performance', meta:'Tiered recruiter rankings', scrollTo:'perfPanel-scorecard' },
+    { label:'Parameter Deep-Dive', tab:'performance', meta:'Error parameter breakdown', scrollTo:'perfPanel-param' },
+    { label:'PM Performance Matrix', tab:'performance', meta:'Per-PM performance analysis', scrollTo:'perfPanel-pm' },
+    { label:'Goal Tracker & Alerts', tab:'performance', meta:'Active alerts and thresholds', scrollTo:'perfPanel-goals' },
+    { label:'SLA Compliance', tab:'sla', meta:'Service level agreement metrics', scrollTo:'tab-sla' },
+    { label:'CAPA Actions', tab:'capa', meta:'Corrective and preventive actions', scrollTo:'tab-capa' }
+  ];
+  kpis.forEach(function(k) {
+    idx.push({ type:'kpi', tab:k.tab, label:k.label, meta:k.meta,
+      icon:'fa-chart-bar', iconColor:'#01A982', scrollTo:k.scrollTo,
+      keywords:k.label.toLowerCase()+' '+k.meta.toLowerCase() });
+  });
+
+  _searchIndex = idx;
+  return idx;
+}
+
+function _hl(text, q) {
+  if (!q) return text;
+  // Avoid regex char-class with {} inside TSX template — use split/replace instead
+  var safe = q.replace(/[-.*+?^|()\\]/g, function(c){ return '\\'+c; });
+  safe = safe.split('{').join('\\{').split('}').join('\\}');
+  var re = new RegExp('(' + safe + ')', 'gi');
+  return text.replace(re, '<span class="search-highlight">$1</span>');
+}
+
+function doSearch(q) {
+  var dropdown = document.getElementById('searchDropdown');
+  if (!dropdown) return;
+  var raw = (q||'').trim();
+  if (raw.length < 2) { dropdown.classList.remove('open'); _searchResults=[]; _searchFocusIdx=-1; return; }
+  var idx = _buildSearchIndex();
+  var lower = raw.toLowerCase();
+  var results = idx.filter(function(item) { return item.keywords.indexOf(lower) !== -1; });
+  results = results.slice(0, 12);
+  _searchResults = results;
+  _searchFocusIdx = -1;
+
+  if (!results.length) {
+    dropdown.innerHTML = '<div class="search-no-results"><i class="fas fa-search" style="margin-right:6px;opacity:0.4"></i>No results for "'+raw+'"</div>';
+    dropdown.classList.add('open');
+    return;
+  }
+
+  // Group by type
+  var groups = {};
+  var typeOrder = ['tab','recruiter','parameter','pm','kpi'];
+  var typeLabels = { tab:'Tabs', recruiter:'Recruiters', parameter:'Error Parameters', pm:'Project Managers', kpi:'KPI Metrics' };
+  results.forEach(function(r) { if (!groups[r.type]) groups[r.type]=[];  groups[r.type].push(r); });
+
+  var html = '';
+  typeOrder.forEach(function(type) {
+    if (!groups[type] || !groups[type].length) return;
+    html += '<div class="search-section-head">'+typeLabels[type]+'</div>';
+    groups[type].forEach(function(item, gi) {
+      var globalIdx = results.indexOf(item);
+      html += '<div class="search-result-item" role="option" data-idx="'+globalIdx+'" onclick="searchNavigate('+globalIdx+')">'
+        + '<div class="search-result-icon" style="background:'+item.iconColor+'22;color:'+item.iconColor+'">'
+        + '<i class="fas '+item.icon+'"></i></div>'
+        + '<div style="flex:1;min-width:0">'
+        + '<div class="search-result-title">'+_hl(item.label, raw)+'</div>'
+        + '<div class="search-result-meta">'+item.meta+'</div>'
+        + '</div>'
+        + '<div class="search-result-cat" style="color:'+item.iconColor+';flex-shrink:0">'+typeLabels[type]+'</div>'
+        + '</div>';
+    });
+  });
+
+  dropdown.innerHTML = html;
+  dropdown.classList.add('open');
+}
+
+function searchOnFocus() {
+  var q = (document.getElementById('globalSearchInput')||{}).value||'';
+  if (q.trim().length >= 2) doSearch(q);
+}
+
+function searchKeyNav(e) {
+  var dropdown = document.getElementById('searchDropdown');
+  if (!dropdown || !dropdown.classList.contains('open')) { if(e.key==='Escape') closeSearch(); return; }
+  var items = dropdown.querySelectorAll('.search-result-item');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    e.preventDefault();
+    _searchFocusIdx = Math.min(_searchFocusIdx + 1, items.length - 1);
+  } else if (e.key === 'ArrowUp') {
+    e.preventDefault();
+    _searchFocusIdx = Math.max(_searchFocusIdx - 1, 0);
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (_searchFocusIdx >= 0 && _searchFocusIdx < _searchResults.length) searchNavigate(_searchFocusIdx);
+    else if (_searchResults.length > 0) searchNavigate(0);
+    return;
+  } else if (e.key === 'Escape') {
+    closeSearch(); return;
+  }
+  items.forEach(function(it, i) { it.classList.toggle('search-focused', i === _searchFocusIdx); });
+  if (_searchFocusIdx >= 0) items[_searchFocusIdx].scrollIntoView({ block:'nearest' });
+}
+
+function searchNavigate(idx) {
+  var item = _searchResults[idx];
+  if (!item) return;
+  closeSearch();
+
+  // Switch to target tab
+  var navTabs = document.querySelectorAll('.nav-tab');
+  var targetNav = null;
+  navTabs.forEach(function(nt) {
+    if (nt.getAttribute('onclick') && nt.getAttribute('onclick').indexOf("'"+item.tab+"'") !== -1) targetNav = nt;
+  });
+  if (targetNav) switchTab(item.tab, targetNav);
+
+  // Scroll to + highlight element
+  if (item.scrollTo) {
+    setTimeout(function() {
+      var el = document.getElementById(item.scrollTo);
+      if (!el) {
+        // For performance sub-panels, trigger the panel switch
+        if (item.scrollTo && item.scrollTo.indexOf('perfPanel-') === 0) {
+          var panelId = item.scrollTo.replace('perfPanel-','');
+          var subBtn = document.querySelector('.perf-sub-btn[onclick*="'+panelId+'"]');
+          if (subBtn) showPerfPanel(panelId, subBtn);
+          setTimeout(function() {
+            var el2 = document.getElementById(item.scrollTo);
+            if (el2) { el2.scrollIntoView({behavior:'smooth',block:'start'}); _hlEl(el2); }
+          }, 250);
+        }
+        return;
+      }
+      el.scrollIntoView({ behavior:'smooth', block:'start' });
+      _hlEl(el);
+    }, 220);
+  }
+}
+
+function _hlEl(el) {
+  el.classList.add('search-elem-hl');
+  setTimeout(function() { el.classList.remove('search-elem-hl'); }, 2200);
+}
+
+function closeSearch() {
+  var dropdown = document.getElementById('searchDropdown');
+  if (dropdown) dropdown.classList.remove('open');
+  var inp = document.getElementById('globalSearchInput');
+  if (inp) { inp.value = ''; inp.blur(); }
+  _searchFocusIdx = -1;
+  _searchResults = [];
+}
+
+// Close search when clicking outside
+document.addEventListener('click', function(e) {
+  var wrap = document.getElementById('headerSearchWrap');
+  if (wrap && !wrap.contains(e.target)) {
+    var dropdown = document.getElementById('searchDropdown');
+    if (dropdown) dropdown.classList.remove('open');
+  }
+});
+
+// ==================== FEATURE 2: THRESHOLD SETTINGS DRAWER ====================
+function openSettingsDrawer() {
+  // Sync sliders to current PERF_DATA values
+  var t = PERF_DATA.thresholds;
+  var sMA = document.getElementById('slider_minAccuracy');
+  var sME = document.getElementById('slider_maxErrorRate');
+  var sMC = document.getElementById('slider_maxConsecDrops');
+  if (sMA) sMA.value = t.minAccuracy;
+  if (sME) sME.value = t.maxErrorRate;
+  if (sMC) sMC.value = t.maxConsecDrops;
+  _syncThreshBadges();
+  _syncThreshPreview();
+  _updateSliderBackground(document.getElementById('slider_minAccuracy'), 90, 100);
+  _updateSliderBackground(document.getElementById('slider_maxErrorRate'), 1, 15);
+  _updateSliderBackground(document.getElementById('slider_maxConsecDrops'), 1, 5);
+
+  document.getElementById('threshOverlay').classList.add('open');
+  document.getElementById('threshDrawer').classList.add('open');
+}
+
+function closeSettingsDrawer() {
+  document.getElementById('threshOverlay').classList.remove('open');
+  document.getElementById('threshDrawer').classList.remove('open');
+}
+
+function _updateSliderBackground(slider, min, max) {
+  if (!slider) return;
+  var val = parseFloat(slider.value);
+  var pct = ((val - min) / (max - min)) * 100;
+  slider.style.background = 'linear-gradient(to right, var(--hpe-green) 0%, var(--hpe-green) '
+    + pct + '%, var(--border) ' + pct + '%, var(--border) 100%)';
+}
+
+function onThreshSlider(key, val) {
+  val = parseFloat(val);
+  var badge = document.getElementById('badge_' + key);
+  if (badge) badge.textContent = (key === 'maxConsecDrops') ? val : val.toFixed(1) + '%';
+  // Update slider gradient
+  var slider = document.getElementById('slider_' + key);
+  var ranges = { minAccuracy:[90,100], maxErrorRate:[1,15], maxConsecDrops:[1,5] };
+  var r = ranges[key];
+  if (r) _updateSliderBackground(slider, r[0], r[1]);
+}
+
+function _syncThreshBadges() {
+  var t = PERF_DATA.thresholds;
+  var bMA = document.getElementById('badge_minAccuracy');
+  var bME = document.getElementById('badge_maxErrorRate');
+  var bMC = document.getElementById('badge_maxConsecDrops');
+  if (bMA) bMA.textContent = t.minAccuracy.toFixed(1) + '%';
+  if (bME) bME.textContent = t.maxErrorRate.toFixed(1) + '%';
+  if (bMC) bMC.textContent = t.maxConsecDrops;
+}
+
+function _syncThreshPreview() {
+  var t = PERF_DATA.thresholds;
+  var pMA = document.getElementById('prev_minAccuracy');
+  var pME = document.getElementById('prev_maxErrorRate');
+  var pMC = document.getElementById('prev_maxConsecDrops');
+  if (pMA) pMA.textContent = t.minAccuracy.toFixed(1) + '%';
+  if (pME) pME.textContent = t.maxErrorRate.toFixed(1) + '%';
+  if (pMC) pMC.textContent = t.maxConsecDrops;
+}
+
+function applyThresholds() {
+  var sMA = document.getElementById('slider_minAccuracy');
+  var sME = document.getElementById('slider_maxErrorRate');
+  var sMC = document.getElementById('slider_maxConsecDrops');
+  if (sMA) PERF_DATA.thresholds.minAccuracy   = parseFloat(sMA.value);
+  if (sME) PERF_DATA.thresholds.maxErrorRate  = parseFloat(sME.value);
+  if (sMC) PERF_DATA.thresholds.maxConsecDrops= parseInt(sMC.value);
+
+  _syncThreshPreview();
+
+  // Re-render Risk + Alerts
+  if (typeof buildRiskPanel === 'function') buildRiskPanel();
+  if (typeof buildAlerts   === 'function') buildAlerts();
+
+  // Visual feedback on button
+  var btn = document.querySelector('.thresh-apply-btn');
+  if (btn) {
+    var orig = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-check" style="margin-right:6px"></i>Applied!';
+    btn.style.background = 'linear-gradient(135deg,#01A982,#008060)';
+    setTimeout(function() {
+      btn.innerHTML = orig;
+      btn.style.background = '';
+    }, 1600);
+  }
+
+  // Auto-navigate to performance tab if not already there
+  var perfTab = document.querySelector('.nav-tab[onclick*="performance"]');
+  if (perfTab && !document.getElementById('tab-performance').classList.contains('active')) {
+    // Don't force-navigate; just let user know
+  }
+}
+
+function resetThresholds() {
+  PERF_DATA.thresholds = { maxErrorRate: 5.0, minAccuracy: 95.0, maxConsecDrops: 2 };
+  openSettingsDrawer(); // re-sync sliders
+  applyThresholds();    // re-render
+}
+
+// ==================== FEATURE 3: RECRUITER COMPARISON TOOL ====================
+var _compareSet = new Set();
+var _compareCharts = {};
+
+function toggleCompare(btn) {
+  var name = btn.getAttribute('data-recname');
+  if (!name) return;
+  if (_compareSet.has(name)) {
+    _compareSet.delete(name);
+    btn.classList.remove('selected');
+    btn.innerHTML = '<i class="fas fa-plus" style="margin-right:3px;font-size:8px"></i>Compare';
+  } else {
+    if (_compareSet.size >= 3) {
+      // max 3 — flash warning
+      btn.style.borderColor = '#e74c3c';
+      btn.style.color = '#e74c3c';
+      setTimeout(function() { btn.style.borderColor = ''; btn.style.color = ''; }, 800);
+      return;
+    }
+    _compareSet.add(name);
+    btn.classList.add('selected');
+    btn.innerHTML = '<i class="fas fa-check" style="margin-right:3px;font-size:8px"></i>Selected';
+  }
+  _updateCompareFab();
+}
+
+function _updateCompareFab() {
+  var fab = document.getElementById('compareFab');
+  var lbl = document.getElementById('compareFabLabel');
+  if (!fab || !lbl) return;
+  var n = _compareSet.size;
+  lbl.textContent = 'Compare Selected (' + n + ')';
+  if (n >= 2) {
+    fab.classList.add('visible');
+  } else {
+    fab.classList.remove('visible');
+  }
+}
+
+function openCompareModal() {
+  if (_compareSet.size < 2) return;
+  buildCompareModal();
+  document.getElementById('compareModalOverlay').classList.add('open');
+}
+
+function closeCompareModal() {
+  document.getElementById('compareModalOverlay').classList.remove('open');
+  // Destroy compare charts to free memory
+  Object.keys(_compareCharts).forEach(function(k) {
+    try { _compareCharts[k].destroy(); } catch(e) {}
+    delete _compareCharts[k];
+  });
+}
+
+function buildCompareModal() {
+  var names = Array.from(_compareSet);
+  var recs = names.map(function(n) {
+    return PERF_DATA.recruiter_monthly.find(function(r) { return r.name === n; });
+  }).filter(Boolean);
+
+  var n = recs.length;
+  var body = document.getElementById('compareModalBody');
+  if (!body) return;
+
+  // Tier helper
+  function getTierLocal(acc) {
+    if (acc >= 99) return { label:'Tier 1', color:'#01A982' };
+    if (acc >= 97) return { label:'Tier 2', color:'#0D5DBF' };
+    if (acc >= 95) return { label:'Tier 3', color:'#FF8300' };
+    return { label:'Critical', color:'#C54E4B' };
+  }
+
+  var tierColors = ['#0D5DBF','#01A982','#FF8300','#9b59b6'];
+
+  // Column headers
+  var colHeadersHtml = recs.map(function(r, i) {
+    var acc = r.apr||r.mar||r.feb||r.jan||0;
+    var tier = getTierLocal(acc);
+    return '<div class="compare-col-header" style="background:'+tierColors[i]+'14;border-top-color:'+tierColors[i]+'">'
+      + '<div class="compare-col-name">'+r.name+'</div>'
+      + '<div class="compare-col-tier" style="color:'+tier.color+'">'+tier.label+' · PM: '+(r.pm||'—')+'</div>'
+      + '</div>';
+  }).join('');
+
+  // Key metrics grid
+  var metricHtml = '';
+  var metricKeys = [
+    { label:'Latest Accuracy', fn:function(r){ var v=r.apr||r.mar||r.feb||r.jan||0; return {val:v+'%',color:getTierLocal(v).color}; } },
+    { label:'Total Audits',    fn:function(r){ return {val:r.audits.toLocaleString(),color:'var(--text-primary)'}; } },
+    { label:'Total Errors',    fn:function(r){ return {val:r.errors,color:r.errors>20?'#C54E4B':r.errors>10?'#FF8300':'#01A982'}; } },
+    { label:'Error Rate',      fn:function(r){ var er=(r.audits>0?(r.errors/r.audits*100).toFixed(2):0); return {val:er+'%',color:parseFloat(er)>5?'#C54E4B':parseFloat(er)>2?'#FF8300':'#01A982'}; } }
+  ];
+  metricHtml += '<div style="display:grid;grid-template-columns:repeat('+n+',1fr);gap:10px;margin-bottom:4px">';
+  metricKeys.forEach(function(mk) {
+    recs.forEach(function(r) {
+      var mv = mk.fn(r);
+      metricHtml += '<div class="compare-metric-card">'
+        + '<div class="compare-metric-label">'+mk.label+'</div>'
+        + '<div class="compare-metric-value" style="color:'+mv.color+'">'+mv.val+'</div>'
+        + '</div>';
+    });
+  });
+  metricHtml += '</div>';
+
+  // Monthly accuracy breakdown (grid: months × recruiters)
+  var months = ['Jan','Feb','Mar','Apr'];
+  var monthlyHtml = '<div style="display:grid;grid-template-columns:60px repeat('+n+',1fr);gap:6px;margin-bottom:4px">'
+    + '<div></div>'
+    + recs.map(function(r,i){ return '<div style="text-align:center;font-size:11px;font-weight:700;color:'+tierColors[i]+'">'+r.name.split(' ')[0]+'</div>'; }).join('')
+    + '</div>';
+  months.forEach(function(m) {
+    monthlyHtml += '<div style="display:grid;grid-template-columns:60px repeat('+n+',1fr);gap:6px;margin-bottom:6px">'
+      + '<div style="font-size:11px;font-weight:700;color:var(--text-muted);padding:8px 0;text-align:right;padding-right:10px">'+m+'</div>'
+      + recs.map(function(r) {
+          var val = r[m.toLowerCase()];
+          if (val === null) return '<div class="compare-month-cell"><div class="compare-month-val" style="color:var(--text-muted);font-size:12px">N/A</div></div>';
+          var tier = getTierLocal(val);
+          return '<div class="compare-month-cell">'
+            + '<div class="compare-month-val" style="color:'+tier.color+'">'+val+'%</div>'
+            + '<div class="compare-month-label">'+tier.label+'</div>'
+            + '</div>';
+        }).join('')
+      + '</div>';
+  });
+
+  // Trend chart canvas
+  var chartId = 'compareLineChart_' + Date.now();
+
+  // Parameter failures — show top 5 params with failures per recruiter
+  var paramHtml = '';
+  var topParams = DASHBOARD_DATA.top_errors.slice(0, 6);
+  paramHtml += '<div style="display:grid;grid-template-columns:auto repeat('+n+',1fr);gap:6px">';
+  paramHtml += '<div style="font-size:10px;font-weight:700;color:var(--text-muted)">Parameter</div>';
+  recs.forEach(function(r,i) {
+    paramHtml += '<div style="font-size:10px;font-weight:700;color:'+tierColors[i]+';text-align:center">'+r.name.split(' ')[0]+'</div>';
+  });
+  topParams.forEach(function(p) {
+    paramHtml += '<div style="font-size:11px;color:var(--text-secondary);padding:4px 0;border-top:1px solid var(--border)">'+p.Parameter+'</div>';
+    recs.forEach(function(r) {
+      // Use recruiter error heatmap data if available, else show overall fail pct
+      var heatKey = p.Parameter;
+      var heatMap = PERF_DATA.error_heatmap || {};
+      var recRow = heatMap[heatKey];
+      var recNames = PERF_DATA.recruiter_monthly.map(function(x){ return x.name; });
+      var rIdx = recNames.indexOf(r.name);
+      var heatVal = (recRow && rIdx >= 0) ? recRow[rIdx] : null;
+      var disp = (heatVal !== null && heatVal !== undefined && heatVal > 0) ? heatVal.toFixed(2)+'%' : p.Fail_Pct+'%';
+      var col = p.Fail_Pct >= 5 ? '#C54E4B' : p.Fail_Pct >= 2 ? '#FF8300' : '#01A982';
+      paramHtml += '<div style="text-align:center;font-size:12px;font-weight:700;color:'+col+';padding:4px 0;border-top:1px solid var(--border)">'+disp+'</div>';
+    });
+  });
+  paramHtml += '</div>';
+
+  body.innerHTML = ''
+    + '<div style="margin-bottom:16px">'
+    + '<div style="display:grid;grid-template-columns:repeat('+n+',1fr);gap:12px">'
+    + colHeadersHtml
+    + '</div>'
+    + '</div>'
+
+    + '<div class="compare-section-title"><i class="fas fa-chart-bar" style="margin-right:6px"></i>Key Performance Metrics</div>'
+    + metricHtml
+
+    + '<div class="compare-section-title"><i class="fas fa-calendar-alt" style="margin-right:6px"></i>Monthly Accuracy (Jan–Apr)</div>'
+    + monthlyHtml
+
+    + '<div class="compare-section-title"><i class="fas fa-chart-line" style="margin-right:6px"></i>Accuracy Trend Chart</div>'
+    + '<div class="compare-chart-wrap"><canvas id="'+chartId+'"></canvas></div>'
+
+    + '<div class="compare-section-title"><i class="fas fa-exclamation-circle" style="margin-right:6px"></i>Parameter Error Rates</div>'
+    + paramHtml
+
+    + '<div style="margin-top:20px;text-align:right">'
+    + '<button onclick="closeCompareModal()" style="padding:10px 20px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--text-secondary);font-size:13px;font-weight:600;cursor:pointer">Close</button>'
+    + '</div>';
+
+  // Build Chart.js trend line
+  setTimeout(function() {
+    var canvas = document.getElementById(chartId);
+    if (!canvas) return;
+    var monthLabels = ['Jan','Feb','Mar','Apr'];
+    var datasets = recs.map(function(r, i) {
+      var data = [r.jan, r.feb, r.mar, r.apr].map(function(v){ return v === null ? null : v; });
+      return {
+        label: r.name,
+        data: data,
+        borderColor: tierColors[i],
+        backgroundColor: tierColors[i] + '22',
+        borderWidth: 2.5,
+        pointRadius: 5,
+        pointBackgroundColor: tierColors[i],
+        tension: 0.35,
+        spanGaps: true
+      };
+    });
+    var isDark = document.documentElement.classList.contains('dark');
+    var gridCol = isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
+    var tickCol  = isDark ? '#a8b8c8' : '#666';
+    _compareCharts[chartId] = new Chart(canvas.getContext('2d'), {
+      type: 'line',
+      data: { labels: monthLabels, datasets: datasets },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { position:'top', labels:{ font:{size:11}, boxWidth:12, color: tickCol } } },
+        scales: {
+          y: { min:84, max:101,
+            ticks:{ callback:function(v){ return v+'%'; }, font:{size:10}, color:tickCol },
+            grid:{ color:gridCol } },
+          x: { ticks:{ font:{size:10}, color:tickCol }, grid:{ color:gridCol } }
+        }
+      }
+    });
+  }, 120);
+}
+
+
   // ── Restore saved dark-mode preference ──────────────────────────
   try {
     var saved = localStorage.getItem('hpe_dark_mode');
@@ -8296,6 +9035,117 @@ function initSLADashboard() {
   setTimeout(function() { initSLAExecCharts(); }, 200);
 }
 </script>
+
+<!-- ===== THRESHOLD SETTINGS DRAWER ===== -->
+<div class="thresh-drawer-overlay" id="threshOverlay" onclick="closeSettingsDrawer()"></div>
+<div class="thresh-drawer" id="threshDrawer" role="dialog" aria-label="Alert threshold settings">
+  <div class="thresh-drawer-header">
+    <div style="display:flex;align-items:center;gap:10px">
+      <i class="fas fa-sliders-h" style="color:var(--hpe-green);font-size:18px"></i>
+      <span class="thresh-drawer-title">Alert Threshold Configuration</span>
+    </div>
+    <button class="thresh-drawer-close" onclick="closeSettingsDrawer()" aria-label="Close settings"><i class="fas fa-times"></i></button>
+  </div>
+  <div class="thresh-drawer-body">
+    <p style="font-size:12px;color:var(--text-muted);margin:0 0 18px;line-height:1.6">
+      Adjust these thresholds to personalise when Risk &amp; Alerts are triggered.
+      Changes take effect immediately — no page reload required.
+    </p>
+
+    <!-- Live preview -->
+    <div class="thresh-live-preview" id="threshPreview">
+      <div class="thresh-preview-title"><i class="fas fa-eye" style="margin-right:5px"></i>Current Active Thresholds</div>
+      <div class="thresh-preview-row">
+        <span>Minimum Accuracy Target</span>
+        <span class="thresh-preview-val" id="prev_minAccuracy">95.0%</span>
+      </div>
+      <div class="thresh-preview-row">
+        <span>Max Error Rate (per parameter)</span>
+        <span class="thresh-preview-val" id="prev_maxErrorRate">5.0%</span>
+      </div>
+      <div class="thresh-preview-row">
+        <span>Max Consecutive Drops</span>
+        <span class="thresh-preview-val" id="prev_maxConsecDrops">2</span>
+      </div>
+    </div>
+
+    <!-- Slider 1: minAccuracy -->
+    <div class="thresh-group">
+      <div class="thresh-label">
+        <span><i class="fas fa-bullseye" style="color:var(--hpe-green);margin-right:6px"></i>Minimum Accuracy Target</span>
+        <span class="thresh-value-badge" id="badge_minAccuracy">95.0%</span>
+      </div>
+      <div class="thresh-desc">Flag the system when overall accuracy drops below this level. Default: 95.0%</div>
+      <input type="range" class="thresh-slider" id="slider_minAccuracy"
+        min="90" max="100" step="0.5" value="95"
+        oninput="onThreshSlider('minAccuracy', this.value)" />
+      <div class="thresh-range-labels"><span>90%</span><span>100%</span></div>
+    </div>
+
+    <!-- Slider 2: maxErrorRate -->
+    <div class="thresh-group">
+      <div class="thresh-label">
+        <span><i class="fas fa-exclamation-triangle" style="color:var(--hpe-orange);margin-right:6px"></i>Max Error Rate (per parameter)</span>
+        <span class="thresh-value-badge" id="badge_maxErrorRate">5.0%</span>
+      </div>
+      <div class="thresh-desc">Raise an alert when any single parameter's error rate exceeds this percentage. Default: 5.0%</div>
+      <input type="range" class="thresh-slider" id="slider_maxErrorRate"
+        min="1" max="15" step="0.5" value="5"
+        oninput="onThreshSlider('maxErrorRate', this.value)" />
+      <div class="thresh-range-labels"><span>1%</span><span>15%</span></div>
+    </div>
+
+    <!-- Slider 3: maxConsecDrops -->
+    <div class="thresh-group">
+      <div class="thresh-label">
+        <span><i class="fas fa-chart-line" style="color:var(--hpe-red);margin-right:6px"></i>Max Consecutive Accuracy Drops</span>
+        <span class="thresh-value-badge" id="badge_maxConsecDrops">2</span>
+      </div>
+      <div class="thresh-desc">Alert when a recruiter records this many consecutive monthly accuracy declines. Default: 2</div>
+      <input type="range" class="thresh-slider" id="slider_maxConsecDrops"
+        min="1" max="5" step="1" value="2"
+        oninput="onThreshSlider('maxConsecDrops', this.value)" />
+      <div class="thresh-range-labels"><span>1</span><span>5</span></div>
+    </div>
+
+    <button class="thresh-apply-btn" onclick="applyThresholds()">
+      <i class="fas fa-check-circle" style="margin-right:6px"></i>Apply &amp; Re-render Alerts
+    </button>
+    <button class="thresh-reset-btn" onclick="resetThresholds()">
+      <i class="fas fa-undo" style="margin-right:6px"></i>Reset to Defaults
+    </button>
+
+    <div style="margin-top:20px;padding:12px 14px;background:var(--bg);border-radius:8px;border:1px dashed var(--border)">
+      <div style="font-size:11px;color:var(--text-muted);line-height:1.6">
+        <i class="fas fa-info-circle" style="color:var(--hpe-blue);margin-right:5px"></i>
+        Threshold changes update the <strong>Risk Intelligence</strong> panel and <strong>Goal Tracker Alerts</strong> in real time.
+        Settings persist for this session. Navigate to the <strong>Performance Intelligence</strong> tab to see results.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== RECRUITER COMPARISON MODAL ===== -->
+<div class="compare-modal-overlay" id="compareModalOverlay">
+  <div class="compare-modal" id="compareModal" role="dialog" aria-label="Recruiter Comparison">
+    <div class="compare-modal-header">
+      <div style="display:flex;align-items:center;gap:10px">
+        <i class="fas fa-columns" style="color:var(--hpe-blue);font-size:18px"></i>
+        <span class="compare-modal-title">Recruiter Head-to-Head Comparison</span>
+      </div>
+      <button class="compare-modal-close" onclick="closeCompareModal()" aria-label="Close comparison"><i class="fas fa-times"></i></button>
+    </div>
+    <div class="compare-modal-body" id="compareModalBody">
+      <!-- Populated dynamically by buildCompareModal() -->
+    </div>
+  </div>
+</div>
+
+<!-- Floating Compare Action Bar -->
+<button class="compare-fab" id="compareFab" onclick="openCompareModal()">
+  <i class="fas fa-columns" style="margin-right:8px"></i>
+  <span id="compareFabLabel">Compare Selected (0)</span>
+</button>
 
 </body>
 </html>`;
