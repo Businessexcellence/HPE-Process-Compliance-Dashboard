@@ -3643,9 +3643,10 @@ function getDashboardHTML(): string {
     </div>
     <div class="export-progress-pct" id="exportProgressPct">0%</div>
   </div>
+</div><!-- end exportProgressWrap -->
 
-  <!-- ===== TAB: GLOSSARY ===== -->
-  <div class="tab-content" id="tab-glossary">
+<!-- ===== TAB: GLOSSARY ===== -->
+<div class="tab-content" id="tab-glossary">
     <div class="section-header">
       <div>
         <div class="section-title">
