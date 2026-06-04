@@ -1638,6 +1638,145 @@ function getDashboardHTML(): string {
     html.dark .param-drill-item.active { background:#0d2a1f; border-color:var(--hpe-green); }
     html.dark .search-section-head { background:#0f1621; }
     html.dark .scorecard-card { background:#1a2332; }
+
+    /* ============================================================
+       GLOSSARY TAB STYLES
+    ============================================================ */
+    .glossary-hero {
+      background: linear-gradient(135deg, var(--hpe-dark) 0%, #1a3a52 100%);
+      border-radius: 14px; padding: 28px 32px; margin-bottom: 24px;
+      display: flex; align-items: center; justify-content: space-between; gap: 20px;
+      flex-wrap: wrap;
+    }
+    .glossary-hero-left { flex: 1; }
+    .glossary-hero-title { font-size: 22px; font-weight: 800; color: white; margin-bottom: 6px; }
+    .glossary-hero-sub { font-size: 13px; color: rgba(255,255,255,0.65); line-height: 1.6; }
+    .glossary-hero-stats { display: flex; gap: 24px; flex-wrap: wrap; }
+    .glossary-hero-stat { text-align: center; }
+    .glossary-hero-stat-val { font-size: 26px; font-weight: 800; color: var(--hpe-green); }
+    .glossary-hero-stat-lbl { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+
+    .glossary-search-bar {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 20px;
+    }
+    .glossary-search-input {
+      flex: 1; max-width: 420px; height: 38px; border-radius: 20px;
+      border: 1.5px solid var(--border); background: var(--card-bg);
+      color: var(--text-primary); font-size: 13px; padding: 0 16px 0 40px;
+      outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    .glossary-search-input:focus { border-color: var(--hpe-green); box-shadow: 0 0 0 3px rgba(1,169,130,0.12); }
+    .glossary-search-wrap { position: relative; flex: 1; max-width: 420px; }
+    .glossary-search-ico { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 13px; pointer-events: none; }
+    .glossary-filter-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .glossary-filter-btn {
+      padding: 6px 14px; border-radius: 20px; border: 1.5px solid var(--border);
+      background: var(--card-bg); color: var(--text-secondary); font-size: 12px;
+      font-weight: 600; cursor: pointer; transition: all 0.18s; white-space: nowrap;
+    }
+    .glossary-filter-btn:hover { border-color: var(--hpe-green); color: var(--hpe-green); }
+    .glossary-filter-btn.active { border-color: var(--hpe-green); background: var(--hpe-green); color: white; }
+
+    .glossary-section { margin-bottom: 32px; }
+    .glossary-section-header {
+      display: flex; align-items: center; gap: 10px; margin-bottom: 14px;
+      padding-bottom: 10px; border-bottom: 2px solid var(--border);
+    }
+    .glossary-section-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 16px; flex-shrink: 0;
+    }
+    .glossary-section-title { font-size: 16px; font-weight: 800; color: var(--text-primary); }
+    .glossary-section-sub { font-size: 12px; color: var(--text-muted); margin-top: 1px; }
+    .glossary-section-badge {
+      margin-left: auto; font-size: 10px; font-weight: 700; padding: 3px 10px;
+      border-radius: 12px; background: var(--bg); color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .glossary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 14px;
+    }
+    .glossary-card {
+      background: var(--card-bg); border: 1.5px solid var(--border);
+      border-radius: 12px; padding: 16px 18px; transition: box-shadow 0.18s, border-color 0.18s;
+      border-left: 4px solid transparent;
+    }
+    .glossary-card:hover { box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-color: var(--hpe-green); }
+    .glossary-card.gc-green  { border-left-color: #01A982; }
+    .glossary-card.gc-blue   { border-left-color: #0D5DBF; }
+    .glossary-card.gc-orange { border-left-color: #FF8300; }
+    .glossary-card.gc-red    { border-left-color: #C54E4B; }
+    .glossary-card.gc-purple { border-left-color: #9b59b6; }
+    .glossary-card.gc-teal   { border-left-color: #17a2b8; }
+    .glossary-card.glossary-hidden { display: none; }
+
+    .gc-term {
+      font-size: 14px; font-weight: 800; color: var(--text-primary);
+      margin-bottom: 6px; display: flex; align-items: flex-start; gap: 8px;
+    }
+    .gc-abbr {
+      font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 6px;
+      background: var(--bg); color: var(--text-muted); border: 1px solid var(--border);
+      white-space: nowrap; margin-top: 1px; flex-shrink: 0;
+    }
+    .gc-definition {
+      font-size: 12px; color: var(--text-secondary); line-height: 1.65; margin-bottom: 10px;
+    }
+    .gc-formula-box {
+      background: var(--bg); border-radius: 8px; padding: 10px 12px;
+      border: 1px dashed var(--border); margin-bottom: 8px;
+    }
+    .gc-formula-label {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.6px;
+      color: var(--text-muted); margin-bottom: 5px;
+    }
+    .gc-formula {
+      font-family: 'Courier New', monospace; font-size: 12px;
+      color: var(--hpe-green); font-weight: 700; line-height: 1.5;
+    }
+    .gc-example {
+      font-size: 11px; color: var(--text-muted); line-height: 1.55;
+      background: var(--bg); border-radius: 6px; padding: 8px 10px;
+      border-left: 3px solid var(--hpe-blue);
+    }
+    .gc-example strong { color: var(--text-secondary); }
+    .gc-tags { display: flex; gap: 5px; flex-wrap: wrap; margin-top: 8px; }
+    .gc-tag {
+      font-size: 10px; padding: 2px 8px; border-radius: 10px;
+      background: rgba(1,169,130,0.10); color: var(--hpe-green);
+      font-weight: 600; border: 1px solid rgba(1,169,130,0.2);
+    }
+    .gc-tag.blue   { background: rgba(13,93,191,0.10); color: var(--hpe-blue);   border-color: rgba(13,93,191,0.2); }
+    .gc-tag.orange { background: rgba(255,131,0,0.10); color: var(--hpe-orange); border-color: rgba(255,131,0,0.2); }
+    .gc-tag.red    { background: rgba(197,78,75,0.10);  color: var(--hpe-red);   border-color: rgba(197,78,75,0.2); }
+    .gc-tag.purple { background: rgba(155,89,182,0.10); color: #9b59b6;          border-color: rgba(155,89,182,0.2); }
+
+    .glossary-toc {
+      display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+    }
+    .glossary-toc-item {
+      display: flex; align-items: center; gap: 6px; padding: 8px 14px;
+      border-radius: 10px; border: 1.5px solid var(--border); background: var(--card-bg);
+      cursor: pointer; font-size: 12px; font-weight: 600; color: var(--text-secondary);
+      transition: all 0.18s; text-decoration: none;
+    }
+    .glossary-toc-item:hover { border-color: var(--hpe-green); color: var(--hpe-green); background: rgba(1,169,130,0.06); }
+    .glossary-toc-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .glossary-no-results {
+      text-align: center; padding: 48px 20px; color: var(--text-muted); font-size: 14px;
+    }
+
+    /* Dark mode */
+    html.dark .glossary-search-input { background: #1a2332; border-color: #2a3a4a; }
+    html.dark .glossary-filter-btn   { background: #1a2332; border-color: #2a3a4a; }
+    html.dark .glossary-card         { background: #1a2332; }
+    html.dark .gc-formula-box        { background: #0f1621; }
+    html.dark .gc-example            { background: #0f1621; }
+    html.dark .glossary-toc-item     { background: #1a2332; border-color: #2a3a4a; }
   </style>
 </head>
 <body>
@@ -1710,6 +1849,9 @@ function getDashboardHTML(): string {
   </div>
   <div class="nav-tab" onclick="switchTab('performance', this)">
     <i class="fas fa-user-chart"></i> Performance Intelligence
+  </div>
+  <div class="nav-tab" onclick="switchTab('glossary', this)">
+    <i class="fas fa-book-open"></i> Glossary
   </div>
 </nav>
 
@@ -3501,6 +3643,761 @@ function getDashboardHTML(): string {
     </div>
     <div class="export-progress-pct" id="exportProgressPct">0%</div>
   </div>
+
+  <!-- ===== TAB: GLOSSARY ===== -->
+  <div class="tab-content" id="tab-glossary">
+    <div class="section-header">
+      <div>
+        <div class="section-title">
+          <div class="icon-badge"><i class="fas fa-book-open"></i></div>
+          Glossary of Performance Measures
+        </div>
+        <div class="section-subtitle">Definitions, formulas, and worked examples for every metric across all dashboard tabs</div>
+      </div>
+    </div>
+
+    <!-- Hero banner -->
+    <div class="glossary-hero">
+      <div class="glossary-hero-left">
+        <div class="glossary-hero-title"><i class="fas fa-book-open" style="color:var(--hpe-green);margin-right:10px"></i>HPE Audit Performance — Complete Metric Reference</div>
+        <div class="glossary-hero-sub">Every KPI, ratio, score, and index used in this dashboard — their meaning, how they are calculated, and how to interpret the result. Use the search box or category filter to find a term quickly.</div>
+      </div>
+      <div class="glossary-hero-stats">
+        <div class="glossary-hero-stat">
+          <div class="glossary-hero-stat-val">42</div>
+          <div class="glossary-hero-stat-lbl">Terms defined</div>
+        </div>
+        <div class="glossary-hero-stat">
+          <div class="glossary-hero-stat-val">8</div>
+          <div class="glossary-hero-stat-lbl">Tab categories</div>
+        </div>
+        <div class="glossary-hero-stat">
+          <div class="glossary-hero-stat-val">100%</div>
+          <div class="glossary-hero-stat-lbl">Formula coverage</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Search + filter bar -->
+    <div class="glossary-search-bar">
+      <div class="glossary-search-wrap">
+        <i class="fas fa-search glossary-search-ico"></i>
+        <input type="text" class="glossary-search-input" id="glossarySearchInput"
+          placeholder="Search terms, abbreviations, formulas…"
+          oninput="filterGlossary(this.value)" autocomplete="off" />
+      </div>
+      <div class="glossary-filter-btns" id="glossaryFilterBtns">
+        <button class="glossary-filter-btn active" onclick="filterGlossaryCategory('all',this)">All</button>
+        <button class="glossary-filter-btn" onclick="filterGlossaryCategory('executive',this)"><i class="fas fa-tachometer-alt" style="margin-right:4px"></i>Executive</button>
+        <button class="glossary-filter-btn" onclick="filterGlossaryCategory('trends',this)"><i class="fas fa-chart-line" style="margin-right:4px"></i>Trends</button>
+        <button class="glossary-filter-btn" onclick="filterGlossaryCategory('improvement',this)"><i class="fas fa-arrow-trend-up" style="margin-right:4px"></i>Improvement</button>
+        <button class="glossary-filter-btn" onclick="filterGlossaryCategory('capa',this)"><i class="fas fa-clipboard-check" style="margin-right:4px"></i>CAPA</button>
+        <button class="glossary-filter-btn" onclick="filterGlossaryCategory('sla',this)"><i class="fas fa-handshake" style="margin-right:4px"></i>SLA</button>
+        <button class="glossary-filter-btn" onclick="filterGlossaryCategory('performance',this)"><i class="fas fa-user-chart" style="margin-right:4px"></i>Performance</button>
+        <button class="glossary-filter-btn" onclick="filterGlossaryCategory('formula',this)"><i class="fas fa-calculator" style="margin-right:4px"></i>Has Formula</button>
+      </div>
+    </div>
+
+    <!-- Quick-jump TOC -->
+    <div class="glossary-toc" id="glossaryTOC">
+      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-executive')"><span class="glossary-toc-dot" style="background:#0D5DBF"></span>Executive Summary</a>
+      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-trends')"><span class="glossary-toc-dot" style="background:#01A982"></span>Accuracy Trends</a>
+      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-improvement')"><span class="glossary-toc-dot" style="background:#FF8300"></span>Improvement &amp; Scope</a>
+      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-capa')"><span class="glossary-toc-dot" style="background:#9b59b6"></span>CAPA</a>
+      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-insights')"><span class="glossary-toc-dot" style="background:#e74c3c"></span>AI Insights</a>
+      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-sla')"><span class="glossary-toc-dot" style="background:#17a2b8"></span>SLA Performance</a>
+      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-performance')"><span class="glossary-toc-dot" style="background:#FF8300"></span>Performance Intelligence</a>
+    </div>
+
+    <div id="glossaryNoResults" class="glossary-no-results" style="display:none">
+      <i class="fas fa-search" style="font-size:28px;opacity:0.3;display:block;margin-bottom:10px"></i>
+      No terms match your search. Try a shorter keyword or clear the filter.
+    </div>
+
+    <!-- ── SECTION 1: EXECUTIVE SUMMARY ── -->
+    <div class="glossary-section" id="gls-executive">
+      <div class="glossary-section-header">
+        <div class="glossary-section-icon" style="background:rgba(13,93,191,0.12);color:#0D5DBF"><i class="fas fa-tachometer-alt"></i></div>
+        <div>
+          <div class="glossary-section-title">Executive Summary</div>
+          <div class="glossary-section-sub">Top-level KPIs and gauge metrics shown on the first tab</div>
+        </div>
+        <div class="glossary-section-badge">8 terms</div>
+      </div>
+      <div class="glossary-grid">
+
+        <div class="glossary-card gc-green" data-category="executive" data-terms="overall accuracy audit accuracy">
+          <div class="gc-term"><i class="fas fa-bullseye" style="color:#01A982;margin-top:2px"></i>Overall Accuracy<span class="gc-abbr">OA</span></div>
+          <div class="gc-definition">The headline FY audit accuracy percentage. Measures the proportion of audit checkpoints that passed out of the total checkpoints evaluated. N/A checkpoints (where the parameter was not applicable for that hire) are <em>excluded</em> from both numerator and denominator so they do not artificially inflate the score.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">OA (%) = (Passed Checkpoints / (Total Checkpoints − N/A Checkpoints)) × 100</div>
+          </div>
+          <div class="gc-example"><strong>FY2026 example:</strong> 8,400 passed out of (8,599 − 71 N/A) = 8,528 applicable → <strong>98.50%</strong></div>
+          <div class="gc-tags"><span class="gc-tag">Executive</span><span class="gc-tag blue">KPI</span><span class="gc-tag">Target: 95%</span></div>
+        </div>
+
+        <div class="glossary-card gc-red" data-category="executive" data-terms="error rate fail rate parameter error">
+          <div class="gc-term"><i class="fas fa-exclamation-triangle" style="color:#C54E4B;margin-top:2px"></i>Error Rate<span class="gc-abbr">ER</span></div>
+          <div class="gc-definition">The complement of Overall Accuracy. Represents the percentage of applicable checkpoints that failed. A single audit record can fail on multiple parameters, each counting as a separate failure against the parameter's opportunity count.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">ER (%) = (Failed Checkpoints / Applicable Checkpoints) × 100
+  = 100 − Overall Accuracy (%)</div>
+          </div>
+          <div class="gc-example"><strong>FY2026 example:</strong> 128 failures / 8,528 applicable = <strong>1.50%</strong> (displayed as 1.49% due to rounding)</div>
+          <div class="gc-tags"><span class="gc-tag red">Executive</span><span class="gc-tag blue">KPI</span></div>
+        </div>
+
+        <div class="glossary-card gc-blue" data-category="executive" data-terms="total audits opportunity count volume">
+          <div class="gc-term"><i class="fas fa-clipboard-list" style="color:#0D5DBF;margin-top:2px"></i>Total Audits / Opportunity Count<span class="gc-abbr">OC</span></div>
+          <div class="gc-definition">The total number of individual audit checkpoints evaluated in a given period. One hiring record may be audited against 10–15 parameters, so Opportunity Count is always much larger than the number of hires. Each parameter check on each hire = one opportunity.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">Opportunity Count = Passed + Failed + N/A checkpoints</div>
+          </div>
+          <div class="gc-example"><strong>FY2026:</strong> 8,400 pass + 128 fail + 71 N/A = <strong>8,599</strong> total checkpoints</div>
+          <div class="gc-tags"><span class="gc-tag blue">Executive</span><span class="gc-tag blue">Volume</span></div>
+        </div>
+
+        <div class="glossary-card gc-green" data-category="executive" data-terms="passed audits pass rate">
+          <div class="gc-term"><i class="fas fa-check-circle" style="color:#01A982;margin-top:2px"></i>Passed Audits<span class="gc-abbr">PP</span></div>
+          <div class="gc-definition">Count of checkpoints where the recruiter complied fully with the audited parameter. A checkpoint is "Passed" when the field, date, form, or process step was completed correctly and on time according to HPE's audit standards.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Pass Rate</div>
+            <div class="gc-formula">Pass Rate (%) = (Passed / (Total − N/A)) × 100</div>
+          </div>
+          <div class="gc-example"><strong>FY2026:</strong> 8,400 / 8,528 = <strong>98.50%</strong> pass rate</div>
+          <div class="gc-tags"><span class="gc-tag">Executive</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="executive" data-terms="month on month MoM improvement delta change">
+          <div class="gc-term"><i class="fas fa-arrow-up" style="color:#FF8300;margin-top:2px"></i>Month-on-Month (MoM) Improvement<span class="gc-abbr">MoM</span></div>
+          <div class="gc-definition">The percentage-point change in Overall Accuracy between the most recent complete month and the prior month. Positive = improvement; negative = decline. Used to assess short-term trajectory of the team.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">MoM = Accuracy(current month) − Accuracy(previous month)</div>
+          </div>
+          <div class="gc-example"><strong>Mar vs Feb 2026:</strong> 98.49% − 99.43% = <strong>−0.94 pp</strong> (decline)</div>
+          <div class="gc-tags"><span class="gc-tag orange">Executive</span><span class="gc-tag">Trend</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="executive" data-terms="week on week WoW change weekly">
+          <div class="gc-term"><i class="fas fa-calendar-week" style="color:#FF8300;margin-top:2px"></i>Week-on-Week (WoW) Change<span class="gc-abbr">WoW</span></div>
+          <div class="gc-definition">The percentage-point change in weekly accuracy between the most recent week and the immediately preceding week within the same or adjacent month. Reflects very short-term fluctuation — useful for spotting one-off spikes or drops.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">WoW = Accuracy(current week) − Accuracy(previous week)</div>
+          </div>
+          <div class="gc-example"><strong>Apr W4 vs Apr W3:</strong> 97.87% − 93.62% = <strong>+4.25 pp</strong> recovery</div>
+          <div class="gc-tags"><span class="gc-tag orange">Executive</span><span class="gc-tag">Weekly</span></div>
+        </div>
+
+        <div class="glossary-card gc-blue" data-category="executive" data-terms="critical parameters gauge target 99">
+          <div class="gc-term"><i class="fas fa-circle-dot" style="color:#0D5DBF;margin-top:2px"></i>Critical Parameters Accuracy<span class="gc-abbr">CPA</span></div>
+          <div class="gc-definition">Accuracy calculated only for parameters classified as "critical" — fields whose errors have direct business or compliance impact (e.g., Offer Details, Interview Process, Start Date). These carry a higher benchmark of 99% vs the overall 95% target.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">CPA (%) = (Critical Passed / Critical Applicable) × 100</div>
+          </div>
+          <div class="gc-example"><strong>FY2026:</strong> 98.62% — 0.38 pp below the 99% critical target → <strong>⚠ Below Target</strong></div>
+          <div class="gc-tags"><span class="gc-tag blue">Executive</span><span class="gc-tag red">Target: 99%</span></div>
+        </div>
+
+        <div class="glossary-card gc-green" data-category="executive" data-terms="non-critical parameters gauge 97 target">
+          <div class="gc-term"><i class="fas fa-circle-dot" style="color:#01A982;margin-top:2px"></i>Non-Critical Parameters Accuracy<span class="gc-abbr">NCPA</span></div>
+          <div class="gc-definition">Accuracy measured only for parameters that are considered non-critical — administrative or process steps where errors are correctable without major compliance risk. The benchmark is lower at 97%.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">NCPA (%) = (Non-Critical Passed / Non-Critical Applicable) × 100</div>
+          </div>
+          <div class="gc-example"><strong>FY2026:</strong> 97.89% — above the 97% target → <strong>✓ Above Target</strong></div>
+          <div class="gc-tags"><span class="gc-tag">Executive</span><span class="gc-tag">Target: 97%</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 2: ACCURACY TRENDS ── -->
+    <div class="glossary-section" id="gls-trends">
+      <div class="glossary-section-header">
+        <div class="glossary-section-icon" style="background:rgba(1,169,130,0.12);color:#01A982"><i class="fas fa-chart-line"></i></div>
+        <div>
+          <div class="glossary-section-title">Accuracy Trends &amp; Analysis</div>
+          <div class="glossary-section-sub">Time-series metrics, heatmap bands, and stage comparisons</div>
+        </div>
+        <div class="glossary-section-badge">6 terms</div>
+      </div>
+      <div class="glossary-grid">
+
+        <div class="glossary-card gc-green" data-category="trends" data-terms="monthly accuracy trend month over month period">
+          <div class="gc-term"><i class="fas fa-chart-line" style="color:#01A982;margin-top:2px"></i>Monthly Accuracy<span class="gc-abbr">MA</span></div>
+          <div class="gc-definition">Accuracy calculated for each calendar month by aggregating all checkpoints within that month. Forms the backbone of the trend chart and month-over-month comparison. Each month's accuracy is independent — it reflects the recruiter behaviour in that specific period.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">Monthly Accuracy (%) = (Month Passed / (Month Total − Month N/A)) × 100</div>
+          </div>
+          <div class="gc-example"><strong>March 2026:</strong> 3,141 / (3,191 − 2) = 3,141 / 3,189 = <strong>98.49%</strong></div>
+          <div class="gc-tags"><span class="gc-tag">Trends</span><span class="gc-tag blue">Time-series</span></div>
+        </div>
+
+        <div class="glossary-card gc-green" data-category="trends" data-terms="weekly accuracy heatmap week color band">
+          <div class="gc-term"><i class="fas fa-th" style="color:#01A982;margin-top:2px"></i>Weekly Accuracy &amp; Heatmap Bands<span class="gc-abbr">WA</span></div>
+          <div class="gc-definition">Accuracy calculated at the weekly granularity. Displayed as a colour-coded heatmap where each cell represents one week. Band thresholds: ≥99% (green), 98–99% (teal), 95–98% (orange), below 95% (red). Allows quick visual detection of anomalous weeks.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula + Bands</div>
+            <div class="gc-formula">Weekly Acc (%) = (Week Passed / (Week Total − Week N/A)) × 100
+  ≥99% → Green  |  98–99% → Teal
+  95–98% → Orange  |  &lt;95% → Red</div>
+          </div>
+          <div class="gc-example"><strong>Apr W3 2026:</strong> 47 pass / 51 applicable = <strong>93.62%</strong> → Red band (anomaly week)</div>
+          <div class="gc-tags"><span class="gc-tag">Trends</span><span class="gc-tag">Heatmap</span></div>
+        </div>
+
+        <div class="glossary-card gc-blue" data-category="trends" data-terms="pre selection post selection stage accuracy">
+          <div class="gc-term"><i class="fas fa-layer-group" style="color:#0D5DBF;margin-top:2px"></i>Pre vs Post Selection Accuracy<span class="gc-abbr">PPSA</span></div>
+          <div class="gc-definition">Accuracy split by the stage of the hiring process. <strong>Pre Selection</strong> covers intake, scheduling, and engagement meeting parameters (audited before a candidate is selected). <strong>Post Selection</strong> covers offer, on-boarding, ERP, and start-date parameters (after selection decision). Post Selection has higher volume and critical parameters.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">Stage Accuracy (%) = (Stage Passed / Stage Applicable) × 100
+  Pre Selection:  2,438 pass / 2,474 = 98.54%
+  Post Selection: 5,962 pass / 6,122 = 97.38%</div>
+          </div>
+          <div class="gc-example"><strong>FY2026:</strong> Pre = 99.39% accuracy (lower volume, fewer critical params); Post = 97.51% (higher volume, complex params)</div>
+          <div class="gc-tags"><span class="gc-tag blue">Trends</span><span class="gc-tag">Stage</span></div>
+        </div>
+
+        <div class="glossary-card gc-red" data-category="trends" data-terms="critical parameter error rate high fail high risk">
+          <div class="gc-term"><i class="fas fa-exclamation-circle" style="color:#C54E4B;margin-top:2px"></i>Critical Parameter Error Rate<span class="gc-abbr">CPER</span></div>
+          <div class="gc-definition">The error rate for an individual parameter classified as critical. A parameter is flagged as critical when its failure rate exceeds the 5% threshold (configurable in Settings). These parameters are highlighted in the trends criticality chart and drive the most CAPA actions.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">Parameter Error Rate (%) = (Param Failures / Param Opportunities) × 100</div>
+          </div>
+          <div class="gc-example"><strong>Target start date:</strong> 53 fails / 59 opportunities = <strong>89.83%</strong> — extreme critical outlier</div>
+          <div class="gc-tags"><span class="gc-tag red">Trends</span><span class="gc-tag red">Critical</span></div>
+        </div>
+
+        <div class="glossary-card gc-green" data-category="trends" data-terms="95 target line benchmark threshold accuracy target">
+          <div class="gc-term"><i class="fas fa-minus" style="color:#01A982;margin-top:2px"></i>95% Accuracy Target Benchmark<span class="gc-abbr">ATB</span></div>
+          <div class="gc-definition">The organisational minimum accuracy standard set by HPE for the South 1 Talent Acquisition team. All charts include this as a horizontal reference line (red dashed). Any month or week whose accuracy falls below this line is flagged in alerts and risk panels. The target is configurable via the Settings drawer.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Context</div>
+            <div class="gc-formula">Target = 95.0% (default, adjustable via Threshold Settings)
+  Critical target = 99.0% for critical-only parameters</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag">Trends</span><span class="gc-tag blue">Benchmark</span></div>
+        </div>
+
+        <div class="glossary-card gc-teal" data-category="trends" data-terms="N/A not applicable excluded checkpoint">
+          <div class="gc-term"><i class="fas fa-ban" style="color:#17a2b8;margin-top:2px"></i>N/A (Not Applicable) Checkpoints<span class="gc-abbr">NA</span></div>
+          <div class="gc-definition">Checkpoints excluded from both pass and fail counts because the parameter was genuinely not applicable to that particular hire (e.g., ERP Bonus field for a contractor hire). N/A checkpoints are counted in Opportunity Count but subtracted before computing accuracy to prevent inflation.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Impact on accuracy</div>
+            <div class="gc-formula">Applicable = Total − N/A
+  Accuracy = Passed / Applicable × 100  (N/A excluded from denominator)</div>
+          </div>
+          <div class="gc-example"><strong>Jan 2026:</strong> 40 N/A in 1,228 total → Applicable = 1,188 → Accuracy = 1,180/1,188 = <strong>99.33%</strong></div>
+          <div class="gc-tags"><span class="gc-tag blue">Trends</span><span class="gc-tag">Data Quality</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 3: IMPROVEMENT & SCOPE ── -->
+    <div class="glossary-section" id="gls-improvement">
+      <div class="glossary-section-header">
+        <div class="glossary-section-icon" style="background:rgba(255,131,0,0.12);color:#FF8300"><i class="fas fa-arrow-trend-up"></i></div>
+        <div>
+          <div class="glossary-section-title">Improvement &amp; Scope</div>
+          <div class="glossary-section-sub">Forecasting, regression, Pareto, and period-over-period delta metrics</div>
+        </div>
+        <div class="glossary-section-badge">6 terms</div>
+      </div>
+      <div class="glossary-grid">
+
+        <div class="glossary-card gc-orange" data-category="improvement" data-terms="linear regression trend slope forecast predict">
+          <div class="gc-term"><i class="fas fa-chart-area" style="color:#FF8300;margin-top:2px"></i>Linear Regression Trend &amp; Slope<span class="gc-abbr">LR</span></div>
+          <div class="gc-definition">A statistical line fitted through historical accuracy data points (weekly or monthly) using Ordinary Least Squares. The <strong>slope</strong> tells you how much accuracy changes per period: positive slope = improving, negative = declining. The regression line is extrapolated to forecast future accuracy assuming the current trend continues.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula (OLS)</div>
+            <div class="gc-formula">slope = (n·ΣxY − Σx·ΣY) / (n·Σx² − (Σx)²)
+  intercept = (ΣY − slope·Σx) / n
+  forecast(t) = intercept + slope × t  (clamped 80–100%)</div>
+          </div>
+          <div class="gc-example"><strong>Apr recruiter (Kusuma K):</strong> slope = −1.48 pp/month → declining rapidly; forecast May ≈ <strong>84.3%</strong></div>
+          <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag">Statistics</span><span class="gc-tag blue">Forecast</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="improvement" data-terms="AI forecast prediction next 4 weeks projected">
+          <div class="gc-term"><i class="fas fa-crystal-ball" style="color:#FF8300;margin-top:2px"></i>AI Accuracy Forecast<span class="gc-abbr">AAF</span></div>
+          <div class="gc-definition">A 4-week forward projection built by extending the linear regression line beyond the last data point. Confidence bands (optimistic / pessimistic) are derived by adding/subtracting 1.5× the root mean square error of the regression fit. The forecast does not use ML in the traditional sense — it is deterministic linear extrapolation presented with AI-branded labelling to surface future risk clearly.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Forecast bands</div>
+            <div class="gc-formula">Central = intercept + slope × (n + t)
+  Optimistic = Central + 1.5 × RMSE
+  Pessimistic = Central − 1.5 × RMSE</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag blue">Forecast</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="improvement" data-terms="pareto 80/20 rule top errors cumulative">
+          <div class="gc-term"><i class="fas fa-sort-amount-down" style="color:#FF8300;margin-top:2px"></i>Pareto Analysis (80/20 Rule)<span class="gc-abbr">PA</span></div>
+          <div class="gc-definition">A ranked bar chart of parameters by failure count, overlaid with a cumulative percentage line. The 80/20 principle states that roughly 80% of all errors are caused by 20% of parameters. The Pareto chart identifies which few parameters to fix first for the greatest quality improvement.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Cumulative %</div>
+            <div class="gc-formula">Cumulative % at rank k = (Sum of failures ranks 1..k / Total failures) × 100</div>
+          </div>
+          <div class="gc-example"><strong>FY2026:</strong> "Target start date" (53 fails) alone = 41.4% of all 128 errors → fixing it alone resolves 41% of defects</div>
+          <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag">Root Cause</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="improvement" data-terms="period over period delta improvement change previous">
+          <div class="gc-term"><i class="fas fa-table" style="color:#FF8300;margin-top:2px"></i>Period-over-Period Delta<span class="gc-abbr">PoPD</span></div>
+          <div class="gc-definition">The absolute change in accuracy (in percentage points, pp) between consecutive periods — shown for both monthly and weekly views. A positive delta means improvement; negative means decline. The delta table highlights the magnitude of swings so managers can see which periods had the largest movements.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">PoPD = Accuracy(period N) − Accuracy(period N−1)
+  e.g., Feb − Jan: 99.43 − 99.33 = +0.10 pp
+        Mar − Feb: 98.49 − 99.43 = −0.94 pp</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag blue">Delta</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="improvement" data-terms="recruiter error frequency top bottom coaching">
+          <div class="gc-term"><i class="fas fa-user-circle" style="color:#FF8300;margin-top:2px"></i>Recruiter Error Frequency<span class="gc-abbr">REF</span></div>
+          <div class="gc-definition">Total count of audit failures attributed to a specific recruiter across all parameters in the selected period. Not the same as accuracy (which is rate-adjusted for volume). A recruiter with 300 audits and 10 errors contributes more absolute errors than one with 30 audits and 5 errors, even though their accuracy rates differ.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">REF = Sum of all parameter failures for recruiter in period</div>
+          </div>
+          <div class="gc-example"><strong>Kusuma K:</strong> 33 errors across 276 audits — highest absolute count, driving coaching recommendation</div>
+          <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag">Recruiter</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="improvement" data-terms="PM performance manager accuracy team average">
+          <div class="gc-term"><i class="fas fa-sitemap" style="color:#FF8300;margin-top:2px"></i>PM (Project Manager) Team Accuracy<span class="gc-abbr">PMTA</span></div>
+          <div class="gc-definition">The weighted average accuracy across all recruiters managed by a given Project Manager. A PM with three recruiters — one at 99%, one at 97%, one at 88% — would have a team average that reflects the combined checkpoint counts. Low-accuracy PMs indicate a coaching and process-adherence gap at the team level.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">PM Accuracy = (Total Pass under PM / Total Applicable under PM) × 100</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag purple">PM</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 4: CAPA ── -->
+    <div class="glossary-section" id="gls-capa">
+      <div class="glossary-section-header">
+        <div class="glossary-section-icon" style="background:rgba(155,89,182,0.12);color:#9b59b6"><i class="fas fa-clipboard-check"></i></div>
+        <div>
+          <div class="glossary-section-title">CAPA — Corrective &amp; Preventive Actions</div>
+          <div class="glossary-section-sub">Bot Undo Moves register metrics and resolution KPIs</div>
+        </div>
+        <div class="glossary-section-badge">5 terms</div>
+      </div>
+      <div class="glossary-grid">
+
+        <div class="glossary-card gc-purple" data-category="capa" data-terms="CAPA corrective preventive action bot undo">
+          <div class="gc-term"><i class="fas fa-clipboard-check" style="color:#9b59b6;margin-top:2px"></i>CAPA — Corrective &amp; Preventive Action<span class="gc-abbr">CAPA</span></div>
+          <div class="gc-definition">A formal quality-management record raised when a recruitment system bot reverses an action taken by a recruiter (a "Bot Undo Move"). Each CAPA captures the root cause category, the recruiter responsible, the date raised, the target close date, and current resolution status. CAPAs drive the improvement cycle by ensuring every systematic error is addressed and tracked to closure.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Status values</div>
+            <div class="gc-formula">Open → In Progress → Closed
+  Overdue = Open past target close date</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag purple">CAPA</span><span class="gc-tag blue">Quality</span></div>
+        </div>
+
+        <div class="glossary-card gc-purple" data-category="capa" data-terms="CAPA closure rate closed resolved target 80">
+          <div class="gc-term"><i class="fas fa-check-double" style="color:#9b59b6;margin-top:2px"></i>CAPA Closure Rate<span class="gc-abbr">CCR</span></div>
+          <div class="gc-definition">The percentage of raised CAPAs that have been fully closed (resolved and verified). The organisational target is 80%. A low closure rate indicates open quality issues are not being resolved in time, creating compounding risk.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">CCR (%) = (Closed CAPAs / Total CAPAs) × 100
+  Target: ≥ 80%</div>
+          </div>
+          <div class="gc-example"><strong>Current:</strong> 2 closed / 4 total = <strong>50%</strong> — below the 80% target</div>
+          <div class="gc-tags"><span class="gc-tag purple">CAPA</span><span class="gc-tag red">Target: 80%</span></div>
+        </div>
+
+        <div class="glossary-card gc-purple" data-category="capa" data-terms="average days to close resolution time SLA days">
+          <div class="gc-term"><i class="fas fa-clock" style="color:#9b59b6;margin-top:2px"></i>Average Days to Close (CAPA)<span class="gc-abbr">ADC</span></div>
+          <div class="gc-definition">The mean number of calendar days between the date a CAPA was raised and the date it was closed. Measures the speed of the corrective action process. Target is ≤17 days. Open/overdue CAPAs are excluded from this average (they have no close date yet).</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">ADC = Sum(Close_Date − Raise_Date) for closed CAPAs / Count(Closed CAPAs)
+  Target: ≤ 17 days</div>
+          </div>
+          <div class="gc-example"><strong>Current closed CAPAs:</strong> (10 + 18) / 2 = <strong>14 days</strong> average — within target</div>
+          <div class="gc-tags"><span class="gc-tag purple">CAPA</span><span class="gc-tag">Time-to-resolve</span></div>
+        </div>
+
+        <div class="glossary-card gc-red" data-category="capa" data-terms="overdue CAPA past due late escalation">
+          <div class="gc-term"><i class="fas fa-exclamation-triangle" style="color:#C54E4B;margin-top:2px"></i>Overdue CAPAs<span class="gc-abbr">OC</span></div>
+          <div class="gc-definition">CAPAs whose status is Open or In Progress AND whose target close date has already passed (today's date > target close date). Each overdue CAPA triggers an active red alert in the Goal Tracker panel and should be escalated immediately to the responsible PM.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Condition</div>
+            <div class="gc-formula">Overdue = (Status != 'Closed') AND (Today &gt; Target_Close_Date)</div>
+          </div>
+          <div class="gc-example"><strong>CAPA-003:</strong> Target close Apr-26, status still Open → <strong>Overdue</strong> → Red alert raised</div>
+          <div class="gc-tags"><span class="gc-tag red">CAPA</span><span class="gc-tag red">Alert</span></div>
+        </div>
+
+        <div class="glossary-card gc-purple" data-category="capa" data-terms="root cause category CAPA classification type">
+          <div class="gc-term"><i class="fas fa-sitemap" style="color:#9b59b6;margin-top:2px"></i>Root Cause Category<span class="gc-abbr">RCC</span></div>
+          <div class="gc-definition">The classification of why a bot undo move was triggered. Root cause categories used in this dashboard include: Process Gap (recruiter didn't follow the defined step), Data Entry Error (wrong value entered), System Issue (platform/tool caused the error), and Training Gap (recruiter lacked knowledge of the requirement). CAPAs grouped by root cause surface systemic vs individual issues.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-list" style="margin-right:4px"></i>Categories</div>
+            <div class="gc-formula">Process Gap | Data Entry Error | System Issue | Training Gap</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag purple">CAPA</span><span class="gc-tag">Classification</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 5: AI INSIGHTS ── -->
+    <div class="glossary-section" id="gls-insights">
+      <div class="glossary-section-header">
+        <div class="glossary-section-icon" style="background:rgba(231,76,60,0.10);color:#e74c3c"><i class="fas fa-brain"></i></div>
+        <div>
+          <div class="glossary-section-title">AI Insights &amp; Recommendations</div>
+          <div class="glossary-section-sub">Predictive flags, risk classifications, and recommendation ranking</div>
+        </div>
+        <div class="glossary-section-badge">4 terms</div>
+      </div>
+      <div class="glossary-grid">
+
+        <div class="glossary-card gc-red" data-category="insights" data-terms="predictive risk flag high medium low AI">
+          <div class="gc-term"><i class="fas fa-flag" style="color:#C54E4B;margin-top:2px"></i>Predictive Risk Flag<span class="gc-abbr">PRF</span></div>
+          <div class="gc-definition">An AI-generated alert that identifies a condition likely to cause a quality degradation in the next 4 weeks if left unaddressed. Risk level is assigned as HIGH, MEDIUM, or LOW based on the severity of the current metric, the rate of change, and historical impact of similar conditions. Flags are ordered by expected impact.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Risk levels</div>
+            <div class="gc-formula">HIGH   = Immediate action needed; likely to breach target
+  MEDIUM = Monitor closely; may breach under unfavourable conditions
+  LOW    = Watch; minimal current impact</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag red">AI Insights</span><span class="gc-tag red">Risk</span></div>
+        </div>
+
+        <div class="glossary-card gc-red" data-category="insights" data-terms="accuracy radar chart dimension spider">
+          <div class="gc-term"><i class="fas fa-spider" style="color:#C54E4B;margin-top:2px"></i>Accuracy Radar (Spider) Chart<span class="gc-abbr">ARC</span></div>
+          <div class="gc-definition">A multi-axis chart where each axis represents a different audit dimension (monthly accuracy, stage accuracy, PM average, top-recruiter average, target). The area of the polygon formed by connecting the data points relative to the maximum area indicates overall programme health. A compact polygon = gaps in multiple dimensions.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Axes</div>
+            <div class="gc-formula">Jan Acc | Feb Acc | Mar Acc | Apr Acc | Pre-Sel | Post-Sel | PM Avg</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag red">AI Insights</span><span class="gc-tag">Visualisation</span></div>
+        </div>
+
+        <div class="glossary-card gc-red" data-category="insights" data-terms="error heatmap recruiter parameter matrix">
+          <div class="gc-term"><i class="fas fa-th" style="color:#C54E4B;margin-top:2px"></i>Recruiter × Parameter Error Heatmap<span class="gc-abbr">RPEH</span></div>
+          <div class="gc-definition">A matrix heatmap where rows = error parameters and columns = recruiters. Each cell shows the failure rate for that recruiter on that parameter. Colour intensity indicates severity. Dark red cells identify specific recruiter-parameter combinations requiring immediate targeted coaching — far more actionable than looking at overall accuracy alone.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Cell formula</div>
+            <div class="gc-formula">Cell[param, recruiter] = (Failures by recruiter on param / Total recruiter audits) × 100</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag red">AI Insights</span><span class="gc-tag">Matrix</span></div>
+        </div>
+
+        <div class="glossary-card gc-red" data-category="insights" data-terms="action recommendation ROI ranked priority impact">
+          <div class="gc-term"><i class="fas fa-tasks" style="color:#C54E4B;margin-top:2px"></i>Action Recommendations (Ranked by ROI)<span class="gc-abbr">ARR</span></div>
+          <div class="gc-definition">A prioritised list of corrective actions ranked by their expected return-on-investment in terms of accuracy improvement. ROI is estimated as: (# errors addressable × accuracy gain per fix) / effort. The list ensures managers invest coaching and process-improvement time in the highest-impact activities first.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Ranking logic</div>
+            <div class="gc-formula">Priority Score = (Addressable Failures × Accuracy Gain) / Estimated Effort
+  Ranked descending by Priority Score</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag red">AI Insights</span><span class="gc-tag orange">Priority</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 6: SLA PERFORMANCE ── -->
+    <div class="glossary-section" id="gls-sla">
+      <div class="glossary-section-header">
+        <div class="glossary-section-icon" style="background:rgba(23,162,184,0.12);color:#17a2b8"><i class="fas fa-handshake"></i></div>
+        <div>
+          <div class="glossary-section-title">SLA Performance</div>
+          <div class="glossary-section-sub">Service Level Agreement compliance metrics — contractual Category B obligations</div>
+        </div>
+        <div class="glossary-section-badge">7 terms</div>
+      </div>
+      <div class="glossary-grid">
+
+        <div class="glossary-card gc-teal" data-category="sla" data-terms="SLA service level agreement compliance met not met">
+          <div class="gc-term"><i class="fas fa-handshake" style="color:#17a2b8;margin-top:2px"></i>SLA Met Rate (Overall Compliance)<span class="gc-abbr">SMR</span></div>
+          <div class="gc-definition">The percentage of SLA reporting instances (metric × month combinations) where the contractual target was achieved. HPE tracks 10 Category B SLA metrics. For each month each metric is reported, it counts as one instance — either Met, Not Met, or Not Reported. The Met Rate is the primary SLA health indicator.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">SLA Met Rate (%) = (Met instances / Total reported instances) × 100
+  Note: Not Reported instances are excluded from denominator</div>
+          </div>
+          <div class="gc-example"><strong>FY25-26 YTD:</strong> 184 Met / 224 reported = <strong>82.1%</strong> (10 NR instances in Apr-25 excluded)</div>
+          <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag">Compliance</span></div>
+        </div>
+
+        <div class="glossary-card gc-teal" data-category="sla" data-terms="time to fill TTF days to hire 45 55 enterprise technical">
+          <div class="gc-term"><i class="fas fa-hourglass-half" style="color:#17a2b8;margin-top:2px"></i>Time to Fill (TTF)<span class="gc-abbr">TTF</span></div>
+          <div class="gc-definition">The number of calendar days from the date a job requisition is opened to the date an offer is accepted. HPE has two contractual TTF targets: ≤45 days for Enterprise roles and ≤55 days for Technical roles. A month is "SLA Met" for TTF if the average (or median, per contract) across all closed reqs in that month is within the target.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">TTF = Offer Accept Date − Requisition Open Date (calendar days)
+  Enterprise target: ≤45 days  |  Technical target: ≤55 days</div>
+          </div>
+          <div class="gc-example"><strong>Enterprise TTF FY25:</strong> Not Met in 45.8% of months — highest risk SLA metric in the dashboard</div>
+          <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag red">Critical SLA</span></div>
+        </div>
+
+        <div class="glossary-card gc-teal" data-category="sla" data-terms="aged requisitions percentage old open positions">
+          <div class="gc-term"><i class="fas fa-calendar-times" style="color:#17a2b8;margin-top:2px"></i>% Aged Requisitions<span class="gc-abbr">PAR</span></div>
+          <div class="gc-definition">The percentage of currently open requisitions that have been open beyond the "aged" threshold (e.g., 60 days). Contractual SLA requires: ≤25% aged for Technical roles and ≤20% aged for Enterprise roles. A high aged percentage indicates a backlog and slowed hiring pipeline.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">% Aged = (Reqs open &gt; threshold days / Total open reqs at month-end) × 100
+  Technical target: ≤25%  |  Enterprise target: ≤20%</div>
+          </div>
+          <div class="gc-example"><strong>Enterprise FY25:</strong> Not Met 37.5% of months — 2nd worst SLA metric</div>
+          <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag red">High Risk</span></div>
+        </div>
+
+        <div class="glossary-card gc-teal" data-category="sla" data-terms="agency utilization utilisation third party vendor 100">
+          <div class="gc-term"><i class="fas fa-building" style="color:#17a2b8;margin-top:2px"></i>% Agency Utilisation<span class="gc-abbr">AU</span></div>
+          <div class="gc-definition">The percentage of hires in a month sourced through approved staffing agencies vs directly. Contractual requirement is to meet a defined utilisation rate. Both Technical and Enterprise bands achieved 100% SLA Met Rate — the best-performing metric in the dashboard.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">% Agency Util = (Agency-sourced hires / Total hires in month) × 100
+  Compared against contractual utilisation band</div>
+          </div>
+          <div class="gc-example"><strong>FY25 both bands:</strong> 100% Met Rate — highlighted as best practice benchmark</div>
+          <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag">Best Performer</span></div>
+        </div>
+
+        <div class="glossary-card gc-teal" data-category="sla" data-terms="internal hiring rate internal candidates 91 enterprise">
+          <div class="gc-term"><i class="fas fa-users-cog" style="color:#17a2b8;margin-top:2px"></i>% Internal Hiring Rate<span class="gc-abbr">IHR</span></div>
+          <div class="gc-definition">The proportion of filled roles hired from the internal talent pool (existing HPE employees or internal movers) vs external candidates. A contractual target is set per role category. Internal hiring reduces external agency spend and retention risk.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">IHR (%) = (Internal fills / Total fills in month) × 100</div>
+          </div>
+          <div class="gc-example"><strong>Enterprise FY25:</strong> 91% SLA Met — near-excellent; Technical: 78% Met — needs monitoring</div>
+          <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag">Hiring Mix</span></div>
+        </div>
+
+        <div class="glossary-card gc-teal" data-category="sla" data-terms="NR not reported missing data blackout submission">
+          <div class="gc-term"><i class="fas fa-file-excel" style="color:#17a2b8;margin-top:2px"></i>Not Reported (NR) Instances<span class="gc-abbr">NR</span></div>
+          <div class="gc-definition">Months where no SLA data was submitted for a metric — neither a "Met" nor "Not Met" verdict could be recorded. Not Reported is treated as a data governance failure, not as "Met". Apr-25 had a complete 10-metric blackout (all 10 Category B metrics NR), representing the single worst governance event in the review period.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Impact</div>
+            <div class="gc-formula">NR instances are excluded from Met Rate denominator
+  but are counted in the total reporting instances for governance scoring</div>
+          </div>
+          <div class="gc-example"><strong>Apr-25 blackout:</strong> 10 NR instances → governance score penalised; recoverable in FY26 if submissions improve</div>
+          <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag red">Governance</span></div>
+        </div>
+
+        <div class="glossary-card gc-teal" data-category="sla" data-terms="avg requisition volume average reqs enterprise technical">
+          <div class="gc-term"><i class="fas fa-layer-group" style="color:#17a2b8;margin-top:2px"></i>Average Requisition Volume<span class="gc-abbr">ARV</span></div>
+          <div class="gc-definition">The average number of open or closed requisitions handled in a month, measured separately for Technical and Enterprise role categories. The SLA target defines a minimum or maximum volume band. Tracking this ensures the team is operating at expected capacity.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">ARV = Sum(monthly req count) / Number of reported months
+  Compared against contractual volume band per category</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag">Volume</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── SECTION 7: PERFORMANCE INTELLIGENCE ── -->
+    <div class="glossary-section" id="gls-performance">
+      <div class="glossary-section-header">
+        <div class="glossary-section-icon" style="background:rgba(255,131,0,0.12);color:#FF8300"><i class="fas fa-user-chart"></i></div>
+        <div>
+          <div class="glossary-section-title">Performance Intelligence</div>
+          <div class="glossary-section-sub">Risk engine scores, tier rankings, goal tracking, and PM accountability metrics</div>
+        </div>
+        <div class="glossary-section-badge">12 terms</div>
+      </div>
+      <div class="glossary-grid">
+
+        <div class="glossary-card gc-red" data-category="performance" data-terms="risk score predictive 0 100 recruiter at risk">
+          <div class="gc-term"><i class="fas fa-shield-alt" style="color:#C54E4B;margin-top:2px"></i>Predictive Risk Score<span class="gc-abbr">PRS</span></div>
+          <div class="gc-definition">A composite 0–100 score computed for each recruiter that predicts the probability of a quality breach in the next period. Four weighted factors contribute: accuracy level, trend slope, audit volume, and consecutive accuracy drops. Higher score = more at risk. Score ≥45 triggers the "At Risk" classification.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula (sum capped at 100)</div>
+            <div class="gc-formula">PRS = Accuracy Penalty + Trend Penalty + Volume Weight + Drop Score
+  Accuracy Penalty:  ≥99% → 0  |  ≥97% → 10  |  ≥95% → 25  |  &lt;95% → 40
+  Trend Penalty:     min(30, max(0, round(−slope × 5)))
+  Volume Weight:     &lt;50 audits → 5  |  &gt;300 audits + &gt;5 errors → 15  |  else → 8
+  Drop Score:        0 drops → 0  |  1 drop → 5  |  2 drops → 10  |  ≥3 drops → 15</div>
+          </div>
+          <div class="gc-example"><strong>Kusuma K:</strong> 40 (acc) + 8 (trend) + 15 (volume) + 10 (drops) = <strong>73/100 → Critical</strong></div>
+          <div class="gc-tags"><span class="gc-tag red">Performance</span><span class="gc-tag">Risk Engine</span></div>
+        </div>
+
+        <div class="glossary-card gc-red" data-category="performance" data-terms="risk level critical high medium low classification">
+          <div class="gc-term"><i class="fas fa-traffic-light" style="color:#C54E4B;margin-top:2px"></i>Risk Level Classification<span class="gc-abbr">RLC</span></div>
+          <div class="gc-definition">The risk category assigned to a recruiter based on their Predictive Risk Score. Four levels: Low, Medium, High, Critical. Each level triggers different management responses — from passive monitoring (Low) to immediate coaching and escalation (Critical).</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Thresholds</div>
+            <div class="gc-formula">Score 0–24   → Low      (green)  — Monitor passively
+  Score 25–44  → Medium   (yellow) — Review monthly
+  Score 45–69  → High     (orange) — Weekly coaching plan
+  Score 70–100 → Critical (red)    — Immediate escalation</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag red">Performance</span><span class="gc-tag">Classification</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="performance" data-terms="tier 1 2 3 critical scorecard ranking tier badge">
+          <div class="gc-term"><i class="fas fa-medal" style="color:#FF8300;margin-top:2px"></i>Recruiter Tier Ranking<span class="gc-abbr">RTR</span></div>
+          <div class="gc-definition">A performance tier assigned to each recruiter based on their most recent monthly accuracy. Four tiers: Tier 1 (elite), Tier 2 (proficient), Tier 3 (developing), and Critical (needs immediate intervention). Tiers are displayed on the Scorecard panel as coloured badges and border colours on each recruiter card.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Tier boundaries</div>
+            <div class="gc-formula">Latest Accuracy (most recent month with data):
+  Tier 1   → Accuracy ≥ 99%   (green border)
+  Tier 2   → 97% ≤ Acc &lt; 99% (blue border)
+  Tier 3   → 95% ≤ Acc &lt; 97% (orange border)
+  Critical → Accuracy &lt; 95%  (red border)</div>
+          </div>
+          <div class="gc-example"><strong>Eluri Naga P:</strong> Apr = 99.7% → <strong>Tier 1</strong>; Kusuma K: Apr = 85.8% → <strong>Critical</strong></div>
+          <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag">Scorecard</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="performance" data-terms="consecutive drops accuracy decline months row streak">
+          <div class="gc-term"><i class="fas fa-fire" style="color:#FF8300;margin-top:2px"></i>Consecutive Accuracy Drops<span class="gc-abbr">CAD</span></div>
+          <div class="gc-definition">The count of consecutive months in which a recruiter's accuracy was lower than the previous month. Two or more consecutive drops trigger the "At Risk" badge (🔴) on the scorecard and contribute 10 points to the Risk Score. Three drops contribute 15 points. Configured via the Threshold Settings drawer (maxConsecDrops).</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">CAD = count of i where Accuracy[month_i] &lt; Accuracy[month_i-1]
+  for all consecutive available month pairs
+  At Risk badge: CAD ≥ maxConsecDrops (default: 2)</div>
+          </div>
+          <div class="gc-example"><strong>Kusuma K:</strong> Jan 90.2 → Feb 89.5 → Mar 87.3 → Apr 85.8 = <strong>3 consecutive drops</strong></div>
+          <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag red">Risk Trigger</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="performance" data-terms="coaching recommended flag bottom 20 percent bottom quartile">
+          <div class="gc-term"><i class="fas fa-chalkboard-teacher" style="color:#FF8300;margin-top:2px"></i>Coaching Recommended Flag<span class="gc-abbr">CRF</span></div>
+          <div class="gc-definition">A flag shown on the Scorecard card for recruiters in the bottom 20% of the sorted accuracy list. The bottom 20% is calculated dynamically — sorting all recruiters by latest accuracy descending and flagging the bottom ceil(n × 0.20) recruiters. This is separate from the At Risk flag, which is based on consecutive drops rather than relative ranking.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">Cutoff = ceil(Total Recruiters × 0.20)
+  Flag if recruiter rank (desc accuracy) &gt;= Total − Cutoff
+  FY2026: 15 recruiters → bottom 3 flagged</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag">Scorecard</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="performance" data-terms="trend arrow improving declining stable slope direction">
+          <div class="gc-term"><i class="fas fa-arrows-alt-v" style="color:#FF8300;margin-top:2px"></i>Trend Arrow &amp; Direction<span class="gc-abbr">TAD</span></div>
+          <div class="gc-definition">A visual indicator derived from the linear regression slope of a recruiter's monthly accuracy. Three states: Improving (▲, slope &gt; +0.15 pp/month), Stable (→, slope between −0.15 and +0.15), Declining (▼, slope &lt; −0.15). Used across scorecard cards, risk table, and comparison modal.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Thresholds</div>
+            <div class="gc-formula">slope &gt; +0.15  → ▲ Improving  (green)
+  −0.15 ≤ slope ≤ +0.15 → → Stable (grey)
+  slope &lt; −0.15  → ▼ Declining (red)</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag">Trend</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="performance" data-terms="parameter deep dive drill fail pct opportunity">
+          <div class="gc-term"><i class="fas fa-microscope" style="color:#FF8300;margin-top:2px"></i>Parameter Failure % (Deep-Dive)<span class="gc-abbr">PF%</span></div>
+          <div class="gc-definition">For each of the 12 audited parameters, the percentage of times it failed out of the total opportunities it was checked. Displayed in the Parameter Deep-Dive panel as a ranked list with drill-down capability. Parameters with Fail% ≥ 5% are flagged as high-risk and trigger alerts.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">Parameter Fail % = (Opportunity_Fail / Opportunity_Count) × 100
+  High risk threshold: ≥ 5% (configurable in Settings)</div>
+          </div>
+          <div class="gc-example"><strong>Conduct Intake Call:</strong> 10 / 242 = <strong>4.13%</strong> — below 5% threshold, classified orange (watch)</div>
+          <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag">Parameter</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="performance" data-terms="breach probability risk chart parameter">
+          <div class="gc-term"><i class="fas fa-percent" style="color:#FF8300;margin-top:2px"></i>Parameter Breach Probability<span class="gc-abbr">PBP</span></div>
+          <div class="gc-definition">An estimated probability (0–100%) that a parameter's error rate will exceed the threshold in the next review period. Calculated from the current failure rate using a heuristic: if already above threshold → high probability; if near threshold → linear interpolation; if well below → low probability. Displayed as a horizontal bar chart in the Risk Intelligence panel.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Heuristic formula</div>
+            <div class="gc-formula">If Fail% &gt; 5: prob = min(99, 80 + Fail%)
+  If Fail% &gt; 3: prob = min(99, 50 + Fail% × 5)
+  Else:          prob = Fail% × 8</div>
+          </div>
+          <div class="gc-example"><strong>Target start date (89.83%):</strong> 80 + 89.83 = capped at <strong>99%</strong> breach probability</div>
+          <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag red">Risk Engine</span></div>
+        </div>
+
+        <div class="glossary-card gc-green" data-category="performance" data-terms="goal tracker target goal completion ring donut">
+          <div class="gc-term"><i class="fas fa-bullseye" style="color:#01A982;margin-top:2px"></i>Goal Tracker Completion %<span class="gc-abbr">GTC</span></div>
+          <div class="gc-definition">For each organisational goal (e.g., "Achieve 98% accuracy by Apr"), the completion percentage shows how close the current metric is to the goal target. Displayed as an animated ring chart. 100% means the goal is fully achieved; below 100% shows remaining gap proportionally.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
+            <div class="gc-formula">Completion % = min(100, (Current Value / Target Value) × 100)
+  For "reduce errors" goals: = min(100, (Target Max / Current) × 100)</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag">Performance</span><span class="gc-tag blue">Goal</span></div>
+        </div>
+
+        <div class="glossary-card gc-orange" data-category="performance" data-terms="PM accountability matrix manager team performance">
+          <div class="gc-term"><i class="fas fa-sitemap" style="color:#FF8300;margin-top:2px"></i>PM Accountability Matrix<span class="gc-abbr">PMAM</span></div>
+          <div class="gc-definition">A view of PM-level performance aggregating accuracy, error count, and trend across all recruiters managed by each Project Manager. The matrix helps leadership identify which PM teams need structural support vs which are self-sufficient. PMs with team accuracy below 97% are flagged.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>PM KPIs</div>
+            <div class="gc-formula">Team Accuracy = Weighted mean across PM's recruiter pool
+  Team Error Rate = Total errors / Total applicable checkpoints
+  Recruiter Count = len(PERF_DATA.pm_recruiters[PM])</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag purple">PM</span></div>
+        </div>
+
+        <div class="glossary-card gc-green" data-category="performance" data-terms="configurable threshold alert settings minAccuracy maxErrorRate maxConsecDrops">
+          <div class="gc-term"><i class="fas fa-sliders-h" style="color:#01A982;margin-top:2px"></i>Configurable Alert Thresholds<span class="gc-abbr">CAT</span></div>
+          <div class="gc-definition">Three client-adjustable thresholds that control when Risk and Alert flags are triggered. Modified in real-time via the Settings drawer (gear icon in header) — no code changes required. Changes immediately re-render the Risk Intelligence panel and Goal Tracker alerts.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Three thresholds</div>
+            <div class="gc-formula">minAccuracy      = minimum overall accuracy before alert (default 95.0%)
+  maxErrorRate     = max parameter fail% before alert (default 5.0%)
+  maxConsecDrops   = consecutive monthly drops before At Risk flag (default 2)</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag">Performance</span><span class="gc-tag blue">Settings</span></div>
+        </div>
+
+        <div class="glossary-card gc-green" data-category="performance" data-terms="comparison tool head to head side by side recruiter compare">
+          <div class="gc-term"><i class="fas fa-columns" style="color:#01A982;margin-top:2px"></i>Recruiter Comparison Score<span class="gc-abbr">RCS</span></div>
+          <div class="gc-definition">A head-to-head comparison of 2–3 selected recruiters across: latest accuracy, total audits, errors, error rate, monthly trend (Jan–Apr), and parameter failure matrix. Launched via the "Compare" button on any Scorecard card. Helps managers objectively compare peers and identify relative strengths and coaching gaps.</div>
+          <div class="gc-formula-box">
+            <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Error Rate per recruiter</div>
+            <div class="gc-formula">Recruiter Error Rate = (Total Errors / Total Audits) × 100
+  Monthly accuracy plotted as line chart (Jan–Apr, null months bridged)</div>
+          </div>
+          <div class="gc-tags"><span class="gc-tag">Performance</span><span class="gc-tag blue">Comparison</span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Bottom note -->
+    <div style="margin-top:32px;padding:20px 24px;background:var(--bg);border-radius:12px;border:1px solid var(--border);display:flex;align-items:flex-start;gap:14px">
+      <i class="fas fa-info-circle" style="color:var(--hpe-blue);font-size:20px;margin-top:2px;flex-shrink:0"></i>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px">Data Sources &amp; Calculation Basis</div>
+        <div style="font-size:12px;color:var(--text-secondary);line-height:1.7">
+          All metrics in this dashboard are derived from the structured audit checkpoint data for <strong>HPE South 1 Region — FY2026 (Jan–Apr)</strong>.
+          Accuracy calculations follow the <strong>Opportunity-based methodology</strong>: each audit parameter check on each hire record = one opportunity.
+          N/A checkpoints are systematically excluded from accuracy denominators.
+          Linear regression and forecast values are computed client-side using Ordinary Least Squares.
+          Configurable thresholds (minAccuracy, maxErrorRate, maxConsecDrops) can be adjusted live via the Settings drawer without any code changes.
+          SLA data covers <strong>Category B contractual obligations</strong> for the HPE FY24-25 and FY25-26 periods (HPE fiscal year: November–October).
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end tab-glossary -->
+
 </div>
 
 <script>
@@ -7772,7 +8669,8 @@ function _buildSearchIndex() {
     { tab:'insights',    label:'AI Insights',                icon:'fa-brain',          iconColor:'#e74c3c', meta:'Radar, heatmap' },
     { tab:'data',        label:'Data Management',            icon:'fa-database',       iconColor:'#2ecc71', meta:'Weekly audit table' },
     { tab:'sla',         label:'SLA Performance',            icon:'fa-clipboard-check',iconColor:'#3498db', meta:'SLA compliance metrics' },
-    { tab:'performance', label:'Performance Intelligence',   icon:'fa-user-chart',     iconColor:'#FF8300', meta:'Scorecard, risk, PM panel' }
+    { tab:'performance', label:'Performance Intelligence',   icon:'fa-user-chart',     iconColor:'#FF8300', meta:'Scorecard, risk, PM panel' },
+    { tab:'glossary',    label:'Glossary',                   icon:'fa-book-open',      iconColor:'#01A982', meta:'Definitions, formulas, calculations' }
   ];
   tabs.forEach(function(t) {
     idx.push({ type:'tab', tab:t.tab, label:t.label, meta:t.meta, icon:t.icon, iconColor:t.iconColor,
@@ -8296,6 +9194,72 @@ function buildCompareModal() {
         }
       }
     });
+  }, 120);
+}
+
+// ==================== GLOSSARY TAB JS ====================
+function filterGlossary(q) {
+  var lower = (q||'').trim().toLowerCase();
+  var cards = document.querySelectorAll('.glossary-card');
+  var anyVisible = false;
+  cards.forEach(function(card) {
+    var terms   = (card.getAttribute('data-terms')||'').toLowerCase();
+    var termEl  = card.querySelector('.gc-term');
+    var defEl   = card.querySelector('.gc-definition');
+    var text    = terms + ' ' + (termEl ? termEl.textContent : '') + ' ' + (defEl ? defEl.textContent : '');
+    var show    = !lower || text.toLowerCase().indexOf(lower) !== -1;
+    card.classList.toggle('glossary-hidden', !show);
+    if (show) anyVisible = true;
+  });
+  var noRes = document.getElementById('glossaryNoResults');
+  if (noRes) noRes.style.display = anyVisible ? 'none' : 'block';
+  // Hide section wrappers that have no visible cards when filtering
+  document.querySelectorAll('.glossary-section').forEach(function(sec) {
+    var visCount = sec.querySelectorAll('.glossary-card:not(.glossary-hidden)').length;
+    sec.style.display = (lower && visCount === 0) ? 'none' : '';
+  });
+}
+
+function filterGlossaryCategory(cat, btn) {
+  // Clear text search
+  var inp = document.getElementById('glossarySearchInput');
+  if (inp) inp.value = '';
+  // Toggle active button
+  document.querySelectorAll('.glossary-filter-btn').forEach(function(b) { b.classList.remove('active'); });
+  if (btn) btn.classList.add('active');
+  var cards = document.querySelectorAll('.glossary-card');
+  cards.forEach(function(card) {
+    if (cat === 'all') {
+      card.classList.remove('glossary-hidden');
+      return;
+    }
+    if (cat === 'formula') {
+      var hasFormula = !!card.querySelector('.gc-formula');
+      card.classList.toggle('glossary-hidden', !hasFormula);
+      return;
+    }
+    card.classList.toggle('glossary-hidden', card.getAttribute('data-category') !== cat);
+  });
+  // Show/hide section wrappers
+  document.querySelectorAll('.glossary-section').forEach(function(sec) {
+    var visCount = sec.querySelectorAll('.glossary-card:not(.glossary-hidden)').length;
+    sec.style.display = visCount > 0 ? '' : 'none';
+  });
+  var noRes = document.getElementById('glossaryNoResults');
+  if (noRes) noRes.style.display = 'none';
+}
+
+function scrollToGlossarySection(sectionId) {
+  // Ensure we are on the glossary tab first
+  var tab = document.getElementById('tab-glossary');
+  if (tab && !tab.classList.contains('active')) {
+    var navBtn = document.querySelector('.nav-tab[onclick*="glossary"]');
+    if (navBtn) switchTab('glossary', navBtn);
+  }
+  // Then scroll after a small paint delay
+  setTimeout(function() {
+    var el = document.getElementById(sectionId);
+    if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
   }, 120);
 }
 
