@@ -826,6 +826,42 @@ function getDashboardHTML(): string {
     .acc-badge.good { background: #e8f0fb; color: var(--hpe-blue); }
     .acc-badge.warning { background: #fff3e6; color: var(--hpe-orange); }
     .acc-badge.bad { background: #fceaea; color: var(--hpe-red); }
+    /* ========== ACCURACY COLOR LEGEND ========== */
+    .acc-legend-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      padding: 7px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      margin-bottom: 14px;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .acc-legend-bar .alb-title {
+      color: var(--text-muted);
+      font-weight: 700;
+      font-size: 11px;
+      margin-right: 4px;
+      white-space: nowrap;
+    }
+    .acc-legend-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 9px;
+      border-radius: 20px;
+      font-size: 11px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+    .ali-green  { background:#e6f9f5; color:#01A982; border:1px solid rgba(1,169,130,0.3); }
+    .ali-amber  { background:#fff3e6; color:#FF8300; border:1px solid rgba(255,131,0,0.3); }
+    .ali-red    { background:#fceaea; color:#C54E4B; border:1px solid rgba(197,78,75,0.3); }
+    html.dark .acc-legend-bar { background:#1e2a3a; border-color:rgba(255,255,255,0.1); }
+
     /* ========== DRILL-DOWN TABLE ROWS ========== */
     .drill-row-clickable { cursor: pointer; transition: background 0.15s; }
     .drill-row-clickable:hover { background: #edfff8 !important; }
@@ -2003,6 +2039,12 @@ function getDashboardHTML(): string {
     <div class="row-2">
       <div class="card">
         <div class="card-title"><i class="fas fa-chart-line"></i> 16-Week Accuracy Trend</div>
+        <div class="acc-legend-bar">
+          <span class="alb-title">Accuracy Key:</span>
+          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
+        </div>
         <div class="card-subtitle">Weekly accuracy performance FY2026 with 95% target line</div>
         <div class="chart-container" style="height:180px">
           <canvas id="sparklineChart"></canvas>
@@ -2027,7 +2069,13 @@ function getDashboardHTML(): string {
     <!-- Month-wise Summary Table -->
     <div class="card card-full">
       <div class="card-title"><i class="fas fa-table"></i> Monthly Performance Summary</div>
-      <div class="card-subtitle">FY2026 month-over-month performance breakdown</div>
+      <div class="acc-legend-bar">
+          <span class="alb-title">Accuracy Key:</span>
+          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
+        </div>
+        <div class="card-subtitle">FY2026 month-over-month performance breakdown</div>
       <div class="table-container">
         <table>
           <thead>
@@ -2216,6 +2264,12 @@ function getDashboardHTML(): string {
     <div class="forecast-section">
       <div class="card">
         <div class="card-title"><i class="fas fa-chart-area"></i> Accuracy Trajectory + AI Forecast (Next 4 Weeks)</div>
+        <div class="acc-legend-bar">
+          <span class="alb-title">Accuracy Key:</span>
+          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
+        </div>
         <div class="card-subtitle">Historical trend with linear regression + ML-based projection for upcoming weeks</div>
         <div class="chart-container" style="height:280px">
           <canvas id="forecastChart"></canvas>
@@ -2586,7 +2640,7 @@ function getDashboardHTML(): string {
       <div>
         <div class="section-title">
           <div class="icon-badge"><i class="fas fa-brain"></i></div>
-          Audit Insights & Recommendations
+          Insights and Recommendations
         </div>
         <div class="section-subtitle">NLG-powered narrative summaries, predictive risk flags, and ranked action items</div>
       </div>
@@ -3289,6 +3343,12 @@ function getDashboardHTML(): string {
         <!-- Risk Score Table -->
         <div class="card" style="grid-column:1/3">
           <div class="card-title"><i class="fas fa-shield-alt"></i> Recruiter Predictive Risk Scores</div>
+          <div class="acc-legend-bar">
+          <span class="alb-title">Accuracy Key:</span>
+          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
+        </div>
           <div class="card-subtitle">Risk score 0–100 based on error frequency, trend, volume &amp; parameter failure pattern. ≥2 consecutive accuracy drops = 🔴 At Risk.</div>
           <div class="table-container" style="max-height:340px;overflow-y:auto">
             <table id="riskScoreTable">
@@ -3419,6 +3479,12 @@ function getDashboardHTML(): string {
       <!-- Goal timeline -->
       <div class="card card-full" style="margin-bottom:18px">
         <div class="card-title"><i class="fas fa-road"></i> Accuracy Goal Progress — Forecast to Target</div>
+        <div class="acc-legend-bar">
+          <span class="alb-title">Accuracy Key:</span>
+          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
+        </div>
         <div class="card-subtitle">Actual monthly accuracy vs quarterly target trajectory (99% by Jun 2026)</div>
         <div class="chart-container" style="height:220px"><canvas id="goalProgressChart"></canvas></div>
       </div>
@@ -4049,7 +4115,7 @@ function getDashboardHTML(): string {
       <div class="glossary-section-header">
         <div class="glossary-section-icon" style="background:rgba(231,76,60,0.10);color:#e74c3c"><i class="fas fa-brain"></i></div>
         <div>
-          <div class="glossary-section-title">Audit Insights &amp; Recommendations</div>
+          <div class="glossary-section-title">Insights and Recommendations</div>
           <div class="glossary-section-sub">Predictive flags, risk classifications, and recommendation ranking</div>
         </div>
         <div class="glossary-section-badge">4 terms</div>
@@ -4401,7 +4467,7 @@ const DASHBOARD_DATA = {
     {Month_Number: 10, Month: 'Jan', Opportunity_Count: 1228, Opportunity_Pass: 1180, Opportunity_Fail: 8, Opportunity_NA: 40, Accuracy: 99.33, Error_Rate: 0.65},
     {Month_Number: 11, Month: 'Feb', Opportunity_Count: 1961, Opportunity_Pass: 1921, Opportunity_Fail: 11, Opportunity_NA: 29, Accuracy: 99.43, Error_Rate: 0.56},
     {Month_Number: 12, Month: 'Mar', Opportunity_Count: 3191, Opportunity_Pass: 3141, Opportunity_Fail: 48, Opportunity_NA: 2, Accuracy: 98.49, Error_Rate: 1.50},
-    {Month_Number: 1, Month: 'Apr', Opportunity_Count: 2219, Opportunity_Pass: 2158, Opportunity_Fail: 61, Opportunity_NA: 0, Accuracy: 97.25, Error_Rate: 2.75}
+    {Month_Number: 13, Month: 'Apr', Opportunity_Count: 2219, Opportunity_Pass: 2158, Opportunity_Fail: 61, Opportunity_NA: 0, Accuracy: 97.25, Error_Rate: 2.75}
   ],
   week_stats: [
     {Month: 'Jan', Month_Number: 10, Week: 1, Opportunity_Count: 135, Opportunity_Pass: 135, Opportunity_Fail: 0, Opportunity_NA: 0, Accuracy: 100.00, Week_Label: 'Jan W1'},
@@ -4416,10 +4482,10 @@ const DASHBOARD_DATA = {
     {Month: 'Mar', Month_Number: 12, Week: 2, Opportunity_Count: 760, Opportunity_Pass: 740, Opportunity_Fail: 20, Opportunity_NA: 0, Accuracy: 97.37, Week_Label: 'Mar W2'},
     {Month: 'Mar', Month_Number: 12, Week: 3, Opportunity_Count: 613, Opportunity_Pass: 604, Opportunity_Fail: 9, Opportunity_NA: 0, Accuracy: 98.53, Week_Label: 'Mar W3'},
     {Month: 'Mar', Month_Number: 12, Week: 4, Opportunity_Count: 973, Opportunity_Pass: 962, Opportunity_Fail: 11, Opportunity_NA: 0, Accuracy: 98.87, Week_Label: 'Mar W4'},
-    {Month: 'Apr', Month_Number: 1, Week: 1, Opportunity_Count: 528, Opportunity_Pass: 526, Opportunity_Fail: 2, Opportunity_NA: 0, Accuracy: 99.62, Week_Label: 'Apr W1'},
-    {Month: 'Apr', Month_Number: 1, Week: 2, Opportunity_Count: 642, Opportunity_Pass: 634, Opportunity_Fail: 8, Opportunity_NA: 0, Accuracy: 98.75, Week_Label: 'Apr W2'},
-    {Month: 'Apr', Month_Number: 1, Week: 3, Opportunity_Count: 674, Opportunity_Pass: 631, Opportunity_Fail: 43, Opportunity_NA: 0, Accuracy: 93.62, Week_Label: 'Apr W3'},
-    {Month: 'Apr', Month_Number: 1, Week: 4, Opportunity_Count: 375, Opportunity_Pass: 367, Opportunity_Fail: 8, Opportunity_NA: 0, Accuracy: 97.87, Week_Label: 'Apr W4'}
+    {Month: 'Apr', Month_Number: 13, Week: 1, Opportunity_Count: 528, Opportunity_Pass: 526, Opportunity_Fail: 2, Opportunity_NA: 0, Accuracy: 99.62, Week_Label: 'Apr W1'},
+    {Month: 'Apr', Month_Number: 13, Week: 2, Opportunity_Count: 642, Opportunity_Pass: 634, Opportunity_Fail: 8, Opportunity_NA: 0, Accuracy: 98.75, Week_Label: 'Apr W2'},
+    {Month: 'Apr', Month_Number: 13, Week: 3, Opportunity_Count: 674, Opportunity_Pass: 631, Opportunity_Fail: 43, Opportunity_NA: 0, Accuracy: 93.62, Week_Label: 'Apr W3'},
+    {Month: 'Apr', Month_Number: 13, Week: 4, Opportunity_Count: 375, Opportunity_Pass: 367, Opportunity_Fail: 8, Opportunity_NA: 0, Accuracy: 97.87, Week_Label: 'Apr W4'}
   ],
   top_errors: [
     {Parameter: 'Target start date', Opportunity_Fail: 53, Opportunity_Count: 59, Fail_Pct: 89.83},
@@ -5979,7 +6045,7 @@ function initInsightsCharts() {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { position: 'top', labels: {font:{size:11},boxWidth:12} } },
       scales: {
-        y: { min: 92, max: 100, ticks: { callback: v => v + '%', font:{size:11} } },
+        y: { min: 88, max: 100, ticks: { callback: v => v + '%', font:{size:11} } },
         x: { ticks: {font:{size:10}, maxRotation:45}, grid:{display:false} }
       }
     }
@@ -6340,7 +6406,7 @@ function updateTrendCharts() {
         interaction: {mode:'index', intersect:false},
         plugins: { legend: {position:'top', labels:{font:{size:12},padding:16,boxWidth:14}} },
         scales: {
-          y:  { min: 94, max: 100, position:'left', ticks:{callback:function(v){return v+'%';}, font:{size:11}} },
+          y:  { min: 88, max: 100, position:'left', ticks:{callback:function(v){return v+'%';}, font:{size:11}} },
           y2: { min: 0,  max: 5,   position:'right', ticks:{callback:function(v){return v+'%';}, font:{size:11}}, grid:{display:false} },
           x:  { ticks:{font:{size:12}}, grid:{display:false} }
         }
@@ -8334,14 +8400,14 @@ function runExportPDF() {
         doc.save(filename);
         hideProgress();
         if (btn) btn.disabled = false;
-        showToast('success', '\u2713 PDF exported: ' + filename);
+        showToast('\u2713 PDF exported: ' + filename, 'success');
       }, 400);
 
     } catch(err) {
       console.error('PDF export error:', err);
       hideProgress();
       if (btn) btn.disabled = false;
-      showToast('error', 'PDF export failed: ' + (err.message || err));
+      showToast('PDF export failed: ' + (err.message || err), 'error');
     }
   }, 50);
 }
@@ -8362,9 +8428,9 @@ function runExportPPT() {
     var t = document.getElementById('slideThumb-' + n);
     if (t && t.classList.contains('selected')) selected.push(n);
   });
-  if (!selected.length) { showToast('error','No slides selected'); if(btn)btn.disabled=false; return; }
+  if (!selected.length) { showToast('No slides selected', 'error'); if(btn)btn.disabled=false; return; }
 
-  if (!window.PptxGenJS) { showToast('error','PptxGenJS not loaded yet — please wait a moment'); if(btn)btn.disabled=false; return; }
+  if (!window.PptxGenJS) { showToast('PptxGenJS not loaded yet — please wait a moment', 'error'); if(btn)btn.disabled=false; return; }
 
   showProgress('\ud83d\udcca', 'Generating PowerPoint\u2026', 'Initialising slides\u2026');
 
@@ -8565,7 +8631,7 @@ function runExportPPT() {
 
         } else if (n === 5) {
           // ── AI INSIGHTS ─────────────────────────────────────────
-          slide.addText('Audit Insights & Recommendations', { x:0.15, y:0.15, w:12, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
+          slide.addText('Insights and Recommendations', { x:0.15, y:0.15, w:12, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
           slide.addText('Auto-generated intelligence · FY2026 · HPE Talent Acquisition', { x:0.15, y:0.65, w:12, h:0.3, fontSize:10, color:T.sub.replace('#',''), fontFace:'Calibri' });
 
           var aiCards = [
@@ -8604,18 +8670,18 @@ function runExportPPT() {
       pptx.writeFile({ fileName: filename }).then(function() {
         hideProgress();
         if (btn) btn.disabled = false;
-        showToast('success','\u2713 PowerPoint exported: ' + filename);
+        showToast('\u2713 PowerPoint exported: ' + filename, 'success');
       }).catch(function(err) {
         hideProgress();
         if (btn) btn.disabled = false;
-        showToast('error','PPT export failed: ' + err.message);
+        showToast('PPT export failed: ' + err.message, 'error');
       });
 
     } catch(err) {
       console.error('PPT export error:', err);
       hideProgress();
       if (btn) btn.disabled = false;
-      showToast('error','PPT export failed: ' + (err.message || err));
+      showToast('PPT export failed: ' + (err.message || err), 'error');
     }
   }, 50);
 }
@@ -9524,7 +9590,7 @@ function initSLAExecCharts() {
     options: {
       responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{position:'bottom'}, tooltip:{callbacks:{label:ctx=>ctx.dataset.label+': '+ctx.parsed.y+'%'}} },
-      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+      scales:{ y:{min:0,max:100,ticks:{callback:v=>v+'%'}} }
     }
   });
 
@@ -9603,7 +9669,7 @@ function initSLAMonthlyCharts() {
     options:{
       responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{position:'bottom'} },
-      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+      scales:{ y:{min:0,max:100,ticks:{callback:v=>v+'%'}} }
     }
   });
 
@@ -9676,7 +9742,7 @@ function initSLAFYCharts() {
     options:{
       responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{position:'bottom',labels:{boxWidth:12,font:{size:11}}} },
-      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'},title:{display:true,text:'Compliance %'}} }
+      scales:{ y:{min:0,max:100,ticks:{callback:v=>v+'%'},title:{display:true,text:'Compliance %'}} }
     }
   });
 
@@ -9857,7 +9923,7 @@ function initSLAReportingChart() {
     options:{
       responsive:true, maintainAspectRatio:false,
       plugins:{ legend:{position:'bottom'} },
-      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+      scales:{ y:{min:0,max:100,ticks:{callback:v=>v+'%'}} }
     }
   });
 
