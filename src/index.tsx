@@ -2653,7 +2653,7 @@ function getDashboardHTML(): string {
         Auto-Generated Narrative Summary — FY2026 YTD
       </div>
       <div class="narr-text" id="narrativeText">
-        <p>HPE South 1 Region has processed <strong class="highlight">8,599 audit checkpoints</strong> across FY2026 (January through April), achieving an overall accuracy of <strong class="highlight">98.50%</strong> — <strong class="highlight">3.50 percentage points above</strong> the 95% organizational target.</p>
+        <p>HPE Talent Acquisition has processed <strong class="highlight">8,599 audit checkpoints</strong> across FY2026 (January through April), achieving an overall accuracy of <strong class="highlight">98.50%</strong> — <strong class="highlight">3.50 percentage points above</strong> the 95% organizational target.</p>
         <br>
         <p>The <strong>accuracy trajectory has been predominantly positive</strong>: starting at 97.25% in January (HPE FY Month 10), improving sharply to 99.33% in January (Mon 10), sustaining at 99.43% in February, before a slight moderation to 98.49% in March. The March softening was largely attributable to a <strong class="warn-text">spike in "Target start date" failures</strong> (20 errors in March W2 alone), which has been flagged for CAPA action.</p>
         <br>
@@ -3536,7 +3536,7 @@ function getDashboardHTML(): string {
             </div>
             <div>
               <div style="font-size:15px;font-weight:700;color:var(--hpe-dark)">HPE Audit Performance Report</div>
-              <div style="font-size:12px;color:var(--text-muted);margin-top:3px">FY2026 · South 1 Region · Auto-generated</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:3px">FY2026 · HPE TA · Auto-generated</div>
               <div style="font-size:11px;color:var(--hpe-green);margin-top:5px;font-weight:600"><i class="fas fa-check-circle"></i> A4 Portrait · Multi-page · Print-ready</div>
             </div>
           </div>
@@ -4437,7 +4437,7 @@ function getDashboardHTML(): string {
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--text-primary);margin-bottom:4px">Data Sources &amp; Calculation Basis</div>
         <div style="font-size:12px;color:var(--text-secondary);line-height:1.7">
-          All metrics in this dashboard are derived from the structured audit checkpoint data for <strong>HPE South 1 Region — FY2026 (Jan–Apr)</strong>.
+          All metrics in this dashboard are derived from the structured audit checkpoint data for <strong>HPE Talent Acquisition — FY2026 (Jan–Apr)</strong>.
           Accuracy calculations follow the <strong>Opportunity-based methodology</strong>: each audit parameter check on each hire record = one opportunity.
           N/A checkpoints are systematically excluded from accuracy denominators.
           Linear regression and forecast values are computed client-side using Ordinary Least Squares.
@@ -6323,7 +6323,7 @@ function updateExecutiveKPIs() {
 
   // Section subtitle
   var subEl = document.querySelector('#tab-executive .section-subtitle');
-  if (subEl) subEl.textContent = periodLabel + ' | HPE Talent Acquisition Audit Performance Overview — South 1 Region';
+  if (subEl) subEl.textContent = periodLabel + ' | HPE Talent Acquisition Audit Performance Overview';
 }
 
 function getPeriodLabel() {
@@ -7716,7 +7716,7 @@ function _drawSlidePreview(ctx, n, T, W, H) {
     ctx.fillRect(0, 54, W, H - 54);
 
     txt('Executive Performance Report', 16, 82, 12, T.text, 'left', true);
-    txt('FY2026 · South 1 Region · Jan–Apr 2026', 16, 98, 8, T.sub, 'left', false);
+    txt('FY2026 · HPE Talent Acquisition · Jan–Apr 2026', 16, 98, 8, T.sub, 'left', false);
 
     // Big accuracy
     ctx.fillStyle = T.accent;
@@ -7996,7 +7996,9 @@ function runExportPDF() {
         doc2.setFillColor('#f0fff8'); doc2.roundedRect(margin, y, contentW, 8, 2, 2, 'F');
         doc2.setFillColor('#01A982'); doc2.roundedRect(margin, y, 3, 8, 1, 1, 'F');
         doc2.setFontSize(9); doc2.setFont('helvetica','bold'); doc2.setTextColor('#01A982');
-        doc2.text(icon + '  ' + title, margin + 6, y + 5.5);
+        // Strip non-latin1 chars from icon to prevent jsPDF Helvetica crash
+        var safeIcon = icon.split('').filter(function(c){return c.charCodeAt(0)<=255;}).join('');
+        doc2.text((safeIcon ? safeIcon + '  ' : '') + title, margin + 6, y + 5.5);
         doc2.setTextColor('#1a2332'); return y + 12;
       }
 
@@ -8027,7 +8029,7 @@ function runExportPDF() {
         doc.setFontSize(20); doc.setFont('helvetica','bold'); doc.setTextColor('#0f1624');
         doc.text('Audit Performance Report', margin, 80);
         doc.setFontSize(11); doc.setFont('helvetica','normal'); doc.setTextColor('#6b7280');
-        doc.text('FY2026  ·  South 1 Region  ·  Jan – Apr 2026', margin, 90);
+        doc.text('FY2026  ·  HPE Talent Acquisition  ·  Jan – Apr 2026', margin, 90);
 
         hline(96, '#e5e7eb');
 
@@ -8177,7 +8179,7 @@ function runExportPDF() {
 
         var insightData = [
           { type:'alert', icon:'\u26a0', title:'Accuracy Dip in April — Action Required',
-            body:'Accuracy declined from 99.43% in February to 97.25% in April (−2.18%), marking the lowest point in FY2026. This downward trajectory from Feb→Mar (98.49%)→Apr (97.25%) signals a worsening trend.',
+            body:'Accuracy declined from 99.43% in February to 97.25% in April (-2.18%), marking the lowest point in FY2026. This downward trajectory from Feb->Mar (98.49%)->Apr (97.25%) signals a worsening trend.',
             rec:'Recommendation: Root cause analysis and corrective action to reverse the decline before it breaches the 95% target.', col:'#e74c3c', bg:'#fff5f5' },
           { type:'critical', icon:'\ud83d\udd34', title:'Target Start Date — Critical Anomaly (89.83% Fail Rate)',
             body:'The "Target start date" parameter has an alarming 89.83% failure rate (53 failures out of 59 audits). This single parameter accounts for 41.4% of all FY2026 errors.',
@@ -8195,7 +8197,8 @@ function runExportPDF() {
           doc.setFillColor(ins.bg); doc.roundedRect(margin, cy, contentW, 32, 3, 3, 'F');
           doc.setFillColor(ins.col); doc.roundedRect(margin, cy, 3, 32, 2, 2, 'F');
           doc.setFontSize(8); doc.setFont('helvetica','bold'); doc.setTextColor(ins.col);
-          doc.text(ins.icon + '  ' + ins.title, margin+7, cy+7);
+          var safeInsIcon = ins.icon.split('').filter(function(c){return c.charCodeAt(0)<=255;}).join('');
+          doc.text((safeInsIcon ? safeInsIcon + '  ' : '') + ins.title, margin+7, cy+7);
           doc.setFont('helvetica','normal'); doc.setTextColor('#374151'); doc.setFontSize(7);
           var bodyLines = doc.splitTextToSize(ins.body, contentW-14);
           doc.text(bodyLines.slice(0,2), margin+7, cy+14);
@@ -8393,7 +8396,7 @@ function runExportPDF() {
       doc.text('End of Report', PW/2, cy, {align:'center'});
       doc.setFontSize(9); doc.setFont('helvetica','normal'); doc.setTextColor('#6b7280');
       doc.text('HPE Talent Acquisition Quality Programme — FY2026', PW/2, cy+10, {align:'center'});
-      doc.text('South 1 Region · Confidential · For Internal Use Only', PW/2, cy+18, {align:'center'});
+      doc.text('HPE Talent Acquisition · Confidential · For Internal Use Only', PW/2, cy+18, {align:'center'});
 
       setExportProgress('\ud83d\udcc4', 'Download Ready!', 'Saving file\u2026', 100);
       setTimeout(function() {
@@ -8496,7 +8499,7 @@ function runExportPPT() {
 
           // Report title
           slide.addText('Audit Performance Report', { x:0.4, y:3.1, w:9, h:0.65, fontSize:28, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
-          slide.addText('FY2026  ·  South 1 Region  ·  Jan – Apr 2026', { x:0.4, y:3.78, w:9, h:0.4, fontSize:13, color:T.sub.replace('#',''), fontFace:'Calibri' });
+          slide.addText('FY2026  ·  HPE Talent Acquisition  ·  Jan – Apr 2026', { x:0.4, y:3.78, w:9, h:0.4, fontSize:13, color:T.sub.replace('#',''), fontFace:'Calibri' });
 
           // Divider
           slide.addShape(pptx.ShapeType.rect, { x:0.4, y:4.25, w:12.5, h:0.02, fill:{color:T.line.replace('#','')}, line:{type:'none'} });
@@ -8523,7 +8526,7 @@ function runExportPPT() {
         } else if (n === 2) {
           // ── KPI OVERVIEW ────────────────────────────────────────
           slide.addText('KPI Overview', { x:0.15, y:0.15, w:9, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
-          slide.addText('FY2026 · HPE Talent Acquisition · South 1 Region', { x:0.15, y:0.65, w:9, h:0.3, fontSize:10, color:T.sub.replace('#',''), fontFace:'Calibri' });
+          slide.addText('FY2026 · HPE Talent Acquisition', { x:0.15, y:0.65, w:9, h:0.3, fontSize:10, color:T.sub.replace('#',''), fontFace:'Calibri' });
 
           // 6 KPI tiles
           var kpi6 = [
