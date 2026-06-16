@@ -1685,6 +1685,7 @@
       gap: 14px;
     }
     .glossary-card {
+      cursor: pointer;
       background: var(--card-bg); border: 1.5px solid var(--border);
       border-radius: 12px; padding: 16px 18px; transition: box-shadow 0.18s, border-color 0.18s;
       border-left: 4px solid transparent;
@@ -1823,7 +1824,7 @@
     <i class="fas fa-clipboard-check"></i> CAPA — Bot Undo <span class="tab-badge">4</span>
   </div>
   <div class="nav-tab" onclick="switchTab('insights', this)">
-    <i class="fas fa-brain"></i> AI Insights
+    <i class="fas fa-brain"></i> Audit Insights
   </div>
   <div class="nav-tab" onclick="switchTab('data', this)">
     <i class="fas fa-database"></i> Data Management
@@ -1850,7 +1851,7 @@
           <div class="icon-badge"><i class="fas fa-tachometer-alt"></i></div>
           Executive Summary
         </div>
-        <div class="section-subtitle">FY2026 | HPE Talent Acquisition Audit Performance Overview — South 1 Region</div>
+        <div class="section-subtitle">FY2026 | HPE TA Audit Compliance Overview</div>
       </div>
       <div class="period-filter" id="execPeriodFilter">
         <span style="font-size:12px;color:var(--text-muted);font-weight:600">PERIOD:</span>
@@ -1895,31 +1896,38 @@
       </div>
       <div class="kpi-card green">
         <div class="kpi-icon green"><i class="fas fa-check-circle"></i></div>
-        <div class="kpi-label">Passed Audits</div>
-        <div class="kpi-value" id="kpi-pass">8,400</div>
-        <div class="kpi-delta delta-neutral" id="kpi-pass-delta"><i class="fas fa-minus"></i> 97.69% pass rate</div>
+        <div class="kpi-label">Pass %</div>
+        <div class="kpi-value" id="kpi-pass">97.69%</div>
+        <div class="kpi-delta delta-neutral" id="kpi-pass-delta"><i class="fas fa-minus"></i> 8,400 audits passed</div>
         <div class="kpi-sub" id="kpi-pass-sub">Out of 8,599 total</div>
       </div>
       <div class="kpi-card red">
         <div class="kpi-icon red"><i class="fas fa-exclamation-triangle"></i></div>
-        <div class="kpi-label">Total Errors</div>
-        <div class="kpi-value" id="kpi-errors">128</div>
-        <div class="kpi-delta delta-down" id="kpi-errors-delta"><i class="fas fa-arrow-down"></i> 1.49% error rate</div>
+        <div class="kpi-label">Error %</div>
+        <div class="kpi-value" id="kpi-errors" style="color:var(--hpe-red)">1.49%</div>
+        <div class="kpi-delta delta-down" id="kpi-errors-delta"><i class="fas fa-arrow-up"></i> 128 errors</div>
         <div class="kpi-sub" id="kpi-errors-sub">Across 12 parameters</div>
+      </div>
+      <div class="kpi-card slate">
+        <div class="kpi-icon" style="background:rgba(100,116,139,0.12)"><i class="fas fa-ban" style="color:#64748b"></i></div>
+        <div class="kpi-label">N/A Count</div>
+        <div class="kpi-value" id="kpi-na">71</div>
+        <div class="kpi-delta delta-neutral" id="kpi-na-delta"><i class="fas fa-minus"></i> Not applicable</div>
+        <div class="kpi-sub" id="kpi-na-sub">Excluded from accuracy</div>
       </div>
       <div class="kpi-card orange">
         <div class="kpi-icon orange"><i class="fas fa-arrow-up"></i></div>
-        <div class="kpi-label">MoM Improvement</div>
-        <div class="kpi-value" id="kpi-mom">+0.94%</div>
-        <div class="kpi-delta delta-up" id="kpi-mom-delta"><i class="fas fa-arrow-up"></i> Mar vs Feb</div>
-        <div class="kpi-sub" id="kpi-mom-sub">Consistent upward trend</div>
+        <div class="kpi-label">Apr vs Mar Improvement</div>
+        <div class="kpi-value" id="kpi-mom">-1.24%</div>
+        <div class="kpi-delta delta-down" id="kpi-mom-delta"><i class="fas fa-arrow-down"></i> Apr vs Mar</div>
+        <div class="kpi-sub" id="kpi-mom-sub">Month-over-month change</div>
       </div>
       <div class="kpi-card yellow">
         <div class="kpi-icon yellow"><i class="fas fa-calendar-week"></i></div>
-        <div class="kpi-label">WoW Change</div>
+        <div class="kpi-label">Recent Week Improvement</div>
         <div class="kpi-value" id="kpi-wow">+0.34%</div>
-        <div class="kpi-delta delta-up" id="kpi-wow-delta"><i class="fas fa-arrow-up"></i> W4 vs W3 (Mar)</div>
-        <div class="kpi-sub" id="kpi-wow-sub">Last week performance</div>
+        <div class="kpi-delta delta-up" id="kpi-wow-delta"><i class="fas fa-arrow-up"></i> W4 vs W3 (Apr)</div>
+        <div class="kpi-sub" id="kpi-wow-sub">Latest week vs prior</div>
       </div>
     </div>
 
@@ -1953,7 +1961,7 @@
     <div class="ai-insights">
       <div class="ai-insights-header">
         <div class="ai-badge"><i class="fas fa-robot"></i> AI INSIGHTS</div>
-        <div class="ai-insights-title">Auto-Generated Intelligence — FY2026 Snapshot</div>
+        <div class="ai-insights-title">Audit Intelligence Snapshot — FY2026</div>
       </div>
       <div class="insight-list">
         <div class="insight-item">
@@ -1985,10 +1993,17 @@
         </div>
       </div>
       <div class="card">
-        <div class="card-title"><i class="fas fa-pie-chart"></i> Stage Distribution</div>
-        <div class="card-subtitle">Audit pass/fail split by process stage</div>
+        <div class="card-title"><i class="fas fa-layer-group"></i> Pre-Selection Stage Distribution</div>
+        <div class="card-subtitle">Pre-selection audit pass / fail / N⁠A breakdown</div>
         <div class="chart-container" style="height:180px">
-          <canvas id="stageDonutChart"></canvas>
+          <canvas id="stagePreChart"></canvas>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-layer-group"></i> Post-Selection Stage Distribution</div>
+        <div class="card-subtitle">Post-selection audit pass / fail / N⁠A breakdown</div>
+        <div class="chart-container" style="height:180px">
+          <canvas id="stagePostChart"></canvas>
         </div>
       </div>
     </div>
@@ -2007,9 +2022,9 @@
               <th>Failed</th>
               <th>N/A</th>
               <th>Accuracy %</th>
-              <th>Error Rate %</th>
+              <th>Error %</th>
+              <th>Pass %</th>
               <th>MoM Change</th>
-              <th>Status</th>
             </tr>
           </thead>
           <tbody id="monthSummaryTable"></tbody>
@@ -2555,7 +2570,7 @@
       <div>
         <div class="section-title">
           <div class="icon-badge"><i class="fas fa-brain"></i></div>
-          AI Insights & Recommendations
+          Audit Insights & Recommendations
         </div>
         <div class="section-subtitle">NLG-powered narrative summaries, predictive risk flags, and ranked action items</div>
       </div>
@@ -2646,7 +2661,7 @@
       <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
       <div class="upload-title">Drop Audit Data File Here</div>
       <div class="upload-subtitle">Supports .xlsx, .xls, .csv formats — Max 50MB<br>
-        <strong>Required sheets:</strong> "Parameter audit count" + "Recruiter audit count"
+        <strong>Required sheets:</strong> "Parameter Data" + "Recruiter Data"
       </div>
     </div>
 
@@ -2657,11 +2672,11 @@
         <div class="card-subtitle">Connection and data freshness indicators</div>
         <div class="validation-item">
           <span class="val-icon" style="color:var(--hpe-green)">✅</span>
-          <div class="val-text"><strong>Parameter audit count sheet:</strong> 319 rows loaded successfully</div>
+          <div class="val-text"><strong>Parameter data sheet:</strong> 319 rows loaded successfully</div>
         </div>
         <div class="validation-item">
           <span class="val-icon" style="color:var(--hpe-green)">✅</span>
-          <div class="val-text"><strong>Recruiter audit count sheet:</strong> 8,600 rows loaded successfully</div>
+          <div class="val-text"><strong>Recruiter data sheet:</strong> 8,600 rows loaded successfully</div>
         </div>
         <div class="validation-item">
           <span class="val-icon" style="color:var(--hpe-green)">✅</span>
@@ -2692,10 +2707,6 @@
             <div style="font-size:22px;font-weight:800;color:var(--hpe-blue)">8,600</div>
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Recruiter Audit Rows</div>
           </div>
-          <div style="background:#fff3e6;padding:14px;border-radius:8px;text-align:center">
-            <div style="font-size:22px;font-weight:800;color:var(--hpe-orange)">22</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Unique Parameters</div>
-          </div>
           <div style="background:#fceaea;padding:14px;border-radius:8px;text-align:center">
             <div style="font-size:22px;font-weight:800;color:var(--hpe-red)">54</div>
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Unique Recruiters</div>
@@ -2704,7 +2715,7 @@
             <div style="font-size:22px;font-weight:800;color:var(--hpe-slate)">5</div>
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Program Managers</div>
           </div>
-          <div style="background:#fffbe6;padding:14px;border-radius:8px;text-align:center">
+          <div style="background:#fffbe6;padding:14px;border-radius:8px;text-align:center;grid-column:span 2">
             <div style="font-size:22px;font-weight:800;color:#b8860b">4</div>
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Months Covered</div>
           </div>
@@ -2744,7 +2755,7 @@
           <div class="icon-badge"><i class="fas fa-clipboard-check"></i></div>
           SLA Performance Dashboard
         </div>
-        <div class="section-subtitle">HPE South 1 | Practice Head: Mahak | FY24-25 & FY25-26 Contractual SLA Review</div>
+        <div class="section-subtitle">Practice Head: Mahak | FY25 Full Year (Nov-24→Oct-25) &amp; FY26 YTD (Nov-25→Apr-26) Contractual SLA Review</div>
       </div>
     </div>
 
@@ -2763,7 +2774,7 @@
       <div id="slaHealthBanner" class="sla-health-banner sla-health-good">
         <i class="fas fa-check-circle" style="font-size:22px"></i>
         <div>
-          <div style="font-size:14px;font-weight:800">SLA Health: IMPROVING — FY25 full year (81.8%) outperforms FY24 partial (75.7%); FY26 YTD at 82.0%</div>
+          <div style="font-size:14px;font-weight:800">SLA Health: IMPROVING — FY25 Full Year (Nov-24→Oct-25): 81.8% | FY26 YTD (Nov-25→Apr-26): 82.0%</div>
           <div style="font-size:12px;font-weight:500;margin-top:2px">HPE FY = Nov–Oct &nbsp;|&nbsp; FY25 (Nov-24→Oct-25): 90 Met / 110 reported &nbsp;|&nbsp; Critical risk: TTF Enterprise (45% FY25) &amp; Feb-26 regression</div>
         </div>
       </div>
@@ -2832,7 +2843,7 @@
         <div class="card">
           <div class="sla-section-title"><i class="fas fa-lightbulb" style="color:var(--hpe-orange)"></i> Key Findings</div>
           <div class="sla-insight-box">
-            <strong>📈 Steady Improvement (HPE FY):</strong> FY24 partial (Apr-Oct 24) = 75.7% → FY25 full (Nov-24 to Oct-25) = 81.8% → FY26 YTD (Nov-25 to Apr-26) = 82.0%. Strong Q4 FY25 momentum (93%) carries into FY26.
+            <strong>📈 Sustained Performance (HPE FY):</strong> FY25 Full Year (Nov-24 to Oct-25) = 81.8% → FY26 YTD (Nov-25 to Apr-26) = 82.0%. Strong Q4 FY25 momentum (93%) continues into FY26.
           </div>
           <div class="sla-insight-box warn">
             <strong>⚠ Apr-25 Total Blackout:</strong> All 10 SLA metrics were "Not Reported" in April 2025 (Q2 FY25) — a complete governance failure impacting FY25 Q2 reporting integrity.
@@ -2894,34 +2905,12 @@
         <i class="fas fa-info-circle" style="font-size:20px"></i>
         <div>
           <div style="font-size:13px;font-weight:800">HPE Fiscal Year: November to October</div>
-          <div style="font-size:12px;font-weight:500;margin-top:2px">FY24 = Nov-23 → Oct-24 &nbsp;|&nbsp; FY25 = Nov-24 → Oct-25 &nbsp;|&nbsp; FY26 = Nov-25 → Oct-26 (current, partial)</div>
+          <div style="font-size:12px;font-weight:500;margin-top:2px">FY25 = Nov-24 → Oct-25 (Full Year) &nbsp;|&nbsp; FY26 = Nov-25 → Oct-26 (YTD, current)</div>
         </div>
       </div>
 
-      <!-- 3-card FY summary grid -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:22px">
-
-        <!-- FY24 partial -->
-        <div class="sla-fy-card" style="border-top:3px solid #95a5a6">
-          <div class="sla-fy-label" style="color:#7f8c8d">FY 2024 <span style="font-size:12px;font-weight:600;background:#ecf0f1;border-radius:8px;padding:2px 8px;margin-left:6px">Partial</span></div>
-          <div style="font-size:11px;color:var(--text-muted);margin-bottom:14px">Apr-24 – Oct-24 (7 months in scope)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px">
-            <div style="text-align:center;background:#f4f7fb;padding:10px;border-radius:8px">
-              <div style="font-size:22px;font-weight:800;color:#7f8c8d">75.7%</div>
-              <div style="font-size:10px;color:var(--text-muted)">Compliance</div>
-            </div>
-            <div style="text-align:center;background:#fceaea;padding:10px;border-radius:8px">
-              <div style="font-size:22px;font-weight:800;color:var(--hpe-red)">24.3%</div>
-              <div style="font-size:10px;color:var(--text-muted)">Non-Compliance</div>
-            </div>
-          </div>
-          <div style="font-size:12px;color:var(--text-secondary)">
-            <div style="padding:5px 0;border-bottom:1px solid var(--border)">✅ Met: <strong>53</strong></div>
-            <div style="padding:5px 0;border-bottom:1px solid var(--border)">❌ Not Met: <strong>17</strong></div>
-            <div style="padding:5px 0;border-bottom:1px solid var(--border)">📭 NR: <strong>0</strong></div>
-            <div style="padding:5px 0">📅 Worst: Jun-24 (60%) | Best: Aug-24 (90%)</div>
-          </div>
-        </div>
+      <!-- 2-card FY summary grid (FY25 + FY26) -->
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-bottom:22px">
 
         <!-- FY25 full -->
         <div class="sla-fy-card" style="border-top:3px solid var(--hpe-blue)">
@@ -2970,30 +2959,25 @@
       </div>
 
       <!-- FY YoY delta banner -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:22px">
-        <div style="background:linear-gradient(135deg,#ebf5fb,#d6eaf8);border-radius:10px;padding:16px 20px;border:1px solid rgba(52,152,219,0.3)">
-          <div style="font-size:11px;font-weight:800;color:#1a4fa0;text-transform:uppercase;letter-spacing:0.5px">FY24 → FY25 Change</div>
-          <div style="font-size:28px;font-weight:800;color:var(--hpe-blue);margin:6px 0">▲ +6.1 pp</div>
-          <div style="font-size:12px;color:#555">75.7% → 81.8% | Improvement on full-year FY25 vs partial FY24</div>
-        </div>
+      <div style="display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:22px">
         <div style="background:linear-gradient(135deg,#e6f7f2,#d5f5ec);border-radius:10px;padding:16px 20px;border:1px solid rgba(1,169,130,0.3)">
           <div style="font-size:11px;font-weight:800;color:#0a7a56;text-transform:uppercase;letter-spacing:0.5px">FY25 → FY26 YTD Trend</div>
           <div style="font-size:28px;font-weight:800;color:var(--hpe-green);margin:6px 0">▲ +0.2 pp</div>
-          <div style="font-size:12px;color:#555">81.8% → 82.0% YTD | FY26 on track; Feb-26 dip requires monitoring</div>
+          <div style="font-size:12px;color:#555">FY25 Full Year: 81.8% → FY26 YTD: 82.0% | FY26 on track; Feb-26 dip requires monitoring</div>
         </div>
       </div>
 
       <div class="card card-full mb-20">
-        <div class="sla-section-title"><i class="fas fa-balance-scale"></i> FY24 vs FY25 vs FY26 YTD — Per-Metric Compliance (HPE FY: Nov–Oct)</div>
-        <div class="card-subtitle">FY24 = Apr-Oct 24 (partial) &nbsp;|&nbsp; FY25 = Nov-24 to Oct-25 (full) &nbsp;|&nbsp; FY26 = Nov-25 to Apr-26 (YTD)</div>
+        <div class="sla-section-title"><i class="fas fa-balance-scale"></i> FY25 vs FY26 YTD — Per-Metric Compliance (HPE FY: Nov–Oct)</div>
+        <div class="card-subtitle">FY25 = Nov-24 to Oct-25 (Full Year) &nbsp;|&nbsp; FY26 = Nov-25 to Apr-26 (YTD)</div>
         <div class="chart-container" style="height:320px">
           <canvas id="slaFYCompareChart"></canvas>
         </div>
       </div>
 
       <div class="card card-full mb-20">
-        <div class="sla-section-title"><i class="fas fa-chart-area"></i> Monthly Compliance Trend — FY24 vs FY25 vs FY26 (by FY month position)</div>
-        <div class="card-subtitle">M1 = first month of each FY (Nov for FY25/FY26; Apr for partial FY24). Dashed = partial FY24.</div>
+        <div class="sla-section-title"><i class="fas fa-chart-area"></i> Monthly Compliance Trend — FY25 vs FY26 (by FY month position)</div>
+        <div class="card-subtitle">M1 = first month of FY (Nov). FY25 = 12 months full year. FY26 = YTD (5 months reported).</div>
         <div class="chart-container" style="height:280px">
           <canvas id="slaFYTrendChart"></canvas>
         </div>
@@ -3001,16 +2985,16 @@
 
       <div class="row-2">
         <div class="card">
-          <div class="sla-section-title"><i class="fas fa-arrow-up" style="color:var(--hpe-green)"></i> FY25 vs FY24 — Metric Improvements &amp; Risk (HPE FY)</div>
+          <div class="sla-section-title"><i class="fas fa-arrow-up" style="color:var(--hpe-green)"></i> FY25 vs FY26 — Metric Performance (HPE FY)</div>
           <table class="sla-metric-table">
-            <thead><tr><th>Metric</th><th>FY24</th><th>FY25</th><th>FY24→25</th><th>FY26 YTD</th><th>FY25→26</th></tr></thead>
+            <thead><tr><th>Metric</th><th>FY25</th><th>FY26 YTD</th><th>FY25→26</th></tr></thead>
             <tbody id="slaFYImprovementBody"></tbody>
           </table>
         </div>
         <div class="card">
           <div class="sla-section-title"><i class="fas fa-exclamation-circle" style="color:var(--hpe-orange)"></i> Metrics Below 80% in Any FY — Requires Focus</div>
           <table class="sla-metric-table">
-            <thead><tr><th>Metric</th><th>FY24</th><th>FY25</th><th>FY26 YTD</th></tr></thead>
+            <thead><tr><th>Metric</th><th>FY25</th><th>FY26 YTD</th></tr></thead>
             <tbody id="slaFYRiskBody"></tbody>
           </table>
         </div>
@@ -3194,21 +3178,21 @@
         <div id="slaTrendClassifications" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:10px">
           <div>
             <div style="font-weight:700;color:var(--hpe-green);margin-bottom:10px;font-size:13px">📈 IMPROVING Metrics</div>
-            <div class="sla-insight-box" style="margin-bottom:8px"><strong>Time to Fill – Enterprise:</strong> 29% FY24 → 45% FY25. Q4 FY25 showed recovery but FY26 YTD still at 40%. Needs sustained focus.</div>
-            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Aged – Enterprise:</strong> 71% FY24 → 55% FY25 → 80% FY26. FY25 dipped (Q1-Q2 FY25 failures) but FY26 recovering strongly.</div>
-            <div class="sla-insight-box"><strong>% Aged – Technical:</strong> 71% FY24 → 82% FY25. Strong Q4 FY25, though FY26 shows minor relapse (60%).</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>Time to Fill – Enterprise:</strong> FY25: 45% compliance. FY26 YTD: 40%. Q4 FY25 showed recovery but TTF Enterprise remains the key risk metric.</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Aged – Enterprise:</strong> FY25: 55% (Q1-Q2 FY25 failures). FY26 YTD: 80%. Recovering strongly.</div>
+            <div class="sla-insight-box"><strong>% Aged – Technical:</strong> FY25: 82% (strong Q4 FY25). FY26 YTD: 60% (minor relapse requiring monitoring).</div>
           </div>
           <div>
             <div style="font-weight:700;color:var(--hpe-orange);margin-bottom:10px;font-size:13px">⚠ INCONSISTENT Metrics</div>
-            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Time to Fill – Technical:</strong> 71% FY24 → 64% FY25 → 80% FY26 YTD. Dipped in FY25 (Q1 failures Nov-Jan); improving in FY26.</div>
-            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Avg Reqs Vol – Technical:</strong> 100% FY24 → 73% FY25 (Q1 FY25 failures). FY26 back to 100% YTD.</div>
-            <div class="sla-insight-box warn"><strong>Internal Hiring – Technical:</strong> 86% FY24 → 91% FY25 → 80% FY26. Generally strong; Apr-26 failure breaks Q1 FY26 streak.</div>
+            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Time to Fill – Technical:</strong> FY25: 64% (Q1 failures Nov-Jan). FY26 YTD: 80%. Improving trend in FY26.</div>
+            <div class="sla-insight-box warn" style="margin-bottom:8px"><strong>Avg Reqs Vol – Technical:</strong> FY25: 73% (Q1 FY25 failures). FY26 YTD: 100%. Fully recovered.</div>
+            <div class="sla-insight-box warn"><strong>Internal Hiring – Technical:</strong> FY25: 91% (strong performance). FY26 YTD: 80%. Apr-26 failure disrupts Q2 FY26 streak.</div>
           </div>
           <div>
             <div style="font-weight:700;color:var(--hpe-green);margin-bottom:10px;font-size:13px">✅ STABLE / PERFECT Metrics</div>
-            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Technical:</strong> 100% in FY24, FY25 and FY26 YTD. Zero failures across all 23 reported months.</div>
+            <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Technical:</strong> 100% in FY25 and FY26 YTD. Zero failures across all reported months. Perfect compliance.</div>
             <div class="sla-insight-box" style="margin-bottom:8px"><strong>% Agency Utilization – Enterprise:</strong> 100% all three FYs. Perfect compliance throughout entire period.</div>
-            <div class="sla-insight-box"><strong>Internal Hiring – Enterprise:</strong> 100% FY24 &amp; FY25 → 80% FY26 YTD (1 failure in Feb-26). Near-perfect historically.</div>
+            <div class="sla-insight-box"><strong>Internal Hiring – Enterprise:</strong> FY25: 100% (perfect). FY26 YTD: 80% (1 failure in Feb-26). Near-perfect historically.</div>
           </div>
         </div>
       </div>
@@ -3490,7 +3474,7 @@
             </label>
             <label class="pdf-section-chip" style="cursor:pointer">
               <input type="checkbox" id="pdfSec-insights" checked style="display:none" onchange="updatePDFSections()">
-              <i class="fas fa-robot"></i> AI Insights
+              <i class="fas fa-robot"></i> Audit Insights
             </label>
             <label class="pdf-section-chip" style="cursor:pointer">
               <input type="checkbox" id="pdfSec-trend" checked style="display:none" onchange="updatePDFSections()">
@@ -3579,7 +3563,7 @@
           <div class="slide-thumb selected" id="slideThumb-5" onclick="toggleSlide(5)">
             <canvas id="slideCanvas-5" width="320" height="180"></canvas>
             <div class="slide-check"><i class="fas fa-check"></i></div>
-            <div class="slide-thumb-label">Slide 5 · AI Insights</div>
+            <div class="slide-thumb-label">Slide 5 · Audit Insights</div>
           </div>
         </div>
 
@@ -3689,7 +3673,7 @@
       <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-trends')"><span class="glossary-toc-dot" style="background:#01A982"></span>Accuracy Trends</a>
       <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-improvement')"><span class="glossary-toc-dot" style="background:#FF8300"></span>Improvement &amp; Scope</a>
       <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-capa')"><span class="glossary-toc-dot" style="background:#9b59b6"></span>CAPA</a>
-      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-insights')"><span class="glossary-toc-dot" style="background:#e74c3c"></span>AI Insights</a>
+      <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-insights')"><span class="glossary-toc-dot" style="background:#e74c3c"></span>Audit Insights</a>
       <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-sla')"><span class="glossary-toc-dot" style="background:#17a2b8"></span>SLA Performance</a>
       <a class="glossary-toc-item" onclick="scrollToGlossarySection('gls-performance')"><span class="glossary-toc-dot" style="background:#FF8300"></span>Performance Intelligence</a>
     </div>
@@ -3711,7 +3695,7 @@
       </div>
       <div class="glossary-grid">
 
-        <div class="glossary-card gc-green" data-category="executive" data-terms="overall accuracy audit accuracy">
+        <div class="glossary-card gc-green" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="overall accuracy audit accuracy">
           <div class="gc-term"><i class="fas fa-bullseye" style="color:#01A982;margin-top:2px"></i>Overall Accuracy<span class="gc-abbr">OA</span></div>
           <div class="gc-definition">The headline FY audit accuracy percentage. Measures the proportion of audit checkpoints that passed out of the total checkpoints evaluated. N/A checkpoints (where the parameter was not applicable for that hire) are <em>excluded</em> from both numerator and denominator so they do not artificially inflate the score.</div>
           <div class="gc-formula-box">
@@ -3722,7 +3706,7 @@
           <div class="gc-tags"><span class="gc-tag">Executive</span><span class="gc-tag blue">KPI</span><span class="gc-tag">Target: 95%</span></div>
         </div>
 
-        <div class="glossary-card gc-red" data-category="executive" data-terms="error rate fail rate parameter error">
+        <div class="glossary-card gc-red" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="error rate fail rate parameter error">
           <div class="gc-term"><i class="fas fa-exclamation-triangle" style="color:#C54E4B;margin-top:2px"></i>Error Rate<span class="gc-abbr">ER</span></div>
           <div class="gc-definition">The complement of Overall Accuracy. Represents the percentage of applicable checkpoints that failed. A single audit record can fail on multiple parameters, each counting as a separate failure against the parameter's opportunity count.</div>
           <div class="gc-formula-box">
@@ -3734,7 +3718,7 @@
           <div class="gc-tags"><span class="gc-tag red">Executive</span><span class="gc-tag blue">KPI</span></div>
         </div>
 
-        <div class="glossary-card gc-blue" data-category="executive" data-terms="total audits opportunity count volume">
+        <div class="glossary-card gc-blue" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="total audits opportunity count volume">
           <div class="gc-term"><i class="fas fa-clipboard-list" style="color:#0D5DBF;margin-top:2px"></i>Total Audits / Opportunity Count<span class="gc-abbr">OC</span></div>
           <div class="gc-definition">The total number of individual audit checkpoints evaluated in a given period. One hiring record may be audited against 10–15 parameters, so Opportunity Count is always much larger than the number of hires. Each parameter check on each hire = one opportunity.</div>
           <div class="gc-formula-box">
@@ -3745,7 +3729,7 @@
           <div class="gc-tags"><span class="gc-tag blue">Executive</span><span class="gc-tag blue">Volume</span></div>
         </div>
 
-        <div class="glossary-card gc-green" data-category="executive" data-terms="passed audits pass rate">
+        <div class="glossary-card gc-green" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="passed audits pass rate">
           <div class="gc-term"><i class="fas fa-check-circle" style="color:#01A982;margin-top:2px"></i>Passed Audits<span class="gc-abbr">PP</span></div>
           <div class="gc-definition">Count of checkpoints where the recruiter complied fully with the audited parameter. A checkpoint is "Passed" when the field, date, form, or process step was completed correctly and on time according to HPE's audit standards.</div>
           <div class="gc-formula-box">
@@ -3756,7 +3740,7 @@
           <div class="gc-tags"><span class="gc-tag">Executive</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="executive" data-terms="month on month MoM improvement delta change">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="month on month MoM improvement delta change">
           <div class="gc-term"><i class="fas fa-arrow-up" style="color:#FF8300;margin-top:2px"></i>Month-on-Month (MoM) Improvement<span class="gc-abbr">MoM</span></div>
           <div class="gc-definition">The percentage-point change in Overall Accuracy between the most recent complete month and the prior month. Positive = improvement; negative = decline. Used to assess short-term trajectory of the team.</div>
           <div class="gc-formula-box">
@@ -3767,7 +3751,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Executive</span><span class="gc-tag">Trend</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="executive" data-terms="week on week WoW change weekly">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="week on week WoW change weekly">
           <div class="gc-term"><i class="fas fa-calendar-week" style="color:#FF8300;margin-top:2px"></i>Week-on-Week (WoW) Change<span class="gc-abbr">WoW</span></div>
           <div class="gc-definition">The percentage-point change in weekly accuracy between the most recent week and the immediately preceding week within the same or adjacent month. Reflects very short-term fluctuation — useful for spotting one-off spikes or drops.</div>
           <div class="gc-formula-box">
@@ -3778,7 +3762,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Executive</span><span class="gc-tag">Weekly</span></div>
         </div>
 
-        <div class="glossary-card gc-blue" data-category="executive" data-terms="critical parameters gauge target 99">
+        <div class="glossary-card gc-blue" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="critical parameters gauge target 99">
           <div class="gc-term"><i class="fas fa-circle-dot" style="color:#0D5DBF;margin-top:2px"></i>Critical Parameters Accuracy<span class="gc-abbr">CPA</span></div>
           <div class="gc-definition">Accuracy calculated only for parameters classified as "critical" — fields whose errors have direct business or compliance impact (e.g., Offer Details, Interview Process, Start Date). These carry a higher benchmark of 99% vs the overall 95% target.</div>
           <div class="gc-formula-box">
@@ -3789,7 +3773,7 @@
           <div class="gc-tags"><span class="gc-tag blue">Executive</span><span class="gc-tag red">Target: 99%</span></div>
         </div>
 
-        <div class="glossary-card gc-green" data-category="executive" data-terms="non-critical parameters gauge 97 target">
+        <div class="glossary-card gc-green" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="non-critical parameters gauge 97 target">
           <div class="gc-term"><i class="fas fa-circle-dot" style="color:#01A982;margin-top:2px"></i>Non-Critical Parameters Accuracy<span class="gc-abbr">NCPA</span></div>
           <div class="gc-definition">Accuracy measured only for parameters that are considered non-critical — administrative or process steps where errors are correctable without major compliance risk. The benchmark is lower at 97%.</div>
           <div class="gc-formula-box">
@@ -3815,7 +3799,7 @@
       </div>
       <div class="glossary-grid">
 
-        <div class="glossary-card gc-green" data-category="trends" data-terms="monthly accuracy trend month over month period">
+        <div class="glossary-card gc-green" onclick="navigateToTab('trends')" title="Navigate to Accuracy Trends" style="cursor:pointer" data-category="trends" data-terms="monthly accuracy trend month over month period">
           <div class="gc-term"><i class="fas fa-chart-line" style="color:#01A982;margin-top:2px"></i>Monthly Accuracy<span class="gc-abbr">MA</span></div>
           <div class="gc-definition">Accuracy calculated for each calendar month by aggregating all checkpoints within that month. Forms the backbone of the trend chart and month-over-month comparison. Each month's accuracy is independent — it reflects the recruiter behaviour in that specific period.</div>
           <div class="gc-formula-box">
@@ -3826,7 +3810,7 @@
           <div class="gc-tags"><span class="gc-tag">Trends</span><span class="gc-tag blue">Time-series</span></div>
         </div>
 
-        <div class="glossary-card gc-green" data-category="trends" data-terms="weekly accuracy heatmap week color band">
+        <div class="glossary-card gc-green" onclick="navigateToTab('trends')" title="Navigate to Accuracy Trends" style="cursor:pointer" data-category="trends" data-terms="weekly accuracy heatmap week color band">
           <div class="gc-term"><i class="fas fa-th" style="color:#01A982;margin-top:2px"></i>Weekly Accuracy &amp; Heatmap Bands<span class="gc-abbr">WA</span></div>
           <div class="gc-definition">Accuracy calculated at the weekly granularity. Displayed as a colour-coded heatmap where each cell represents one week. Band thresholds: ≥99% (green), 98–99% (teal), 95–98% (orange), below 95% (red). Allows quick visual detection of anomalous weeks.</div>
           <div class="gc-formula-box">
@@ -3839,7 +3823,7 @@
           <div class="gc-tags"><span class="gc-tag">Trends</span><span class="gc-tag">Heatmap</span></div>
         </div>
 
-        <div class="glossary-card gc-blue" data-category="trends" data-terms="pre selection post selection stage accuracy">
+        <div class="glossary-card gc-blue" onclick="navigateToTab('trends')" title="Navigate to Accuracy Trends" style="cursor:pointer" data-category="trends" data-terms="pre selection post selection stage accuracy">
           <div class="gc-term"><i class="fas fa-layer-group" style="color:#0D5DBF;margin-top:2px"></i>Pre vs Post Selection Accuracy<span class="gc-abbr">PPSA</span></div>
           <div class="gc-definition">Accuracy split by the stage of the hiring process. <strong>Pre Selection</strong> covers intake, scheduling, and engagement meeting parameters (audited before a candidate is selected). <strong>Post Selection</strong> covers offer, on-boarding, ERP, and start-date parameters (after selection decision). Post Selection has higher volume and critical parameters.</div>
           <div class="gc-formula-box">
@@ -3852,7 +3836,7 @@
           <div class="gc-tags"><span class="gc-tag blue">Trends</span><span class="gc-tag">Stage</span></div>
         </div>
 
-        <div class="glossary-card gc-red" data-category="trends" data-terms="critical parameter error rate high fail high risk">
+        <div class="glossary-card gc-red" onclick="navigateToTab('trends')" title="Navigate to Accuracy Trends" style="cursor:pointer" data-category="trends" data-terms="critical parameter error rate high fail high risk">
           <div class="gc-term"><i class="fas fa-exclamation-circle" style="color:#C54E4B;margin-top:2px"></i>Critical Parameter Error Rate<span class="gc-abbr">CPER</span></div>
           <div class="gc-definition">The error rate for an individual parameter classified as critical. A parameter is flagged as critical when its failure rate exceeds the 5% threshold (configurable in Settings). These parameters are highlighted in the trends criticality chart and drive the most CAPA actions.</div>
           <div class="gc-formula-box">
@@ -3863,8 +3847,8 @@
           <div class="gc-tags"><span class="gc-tag red">Trends</span><span class="gc-tag red">Critical</span></div>
         </div>
 
-        <div class="glossary-card gc-green" data-category="trends" data-terms="95 target line benchmark threshold accuracy target">
-          <div class="gc-term"><i class="fas fa-minus" style="color:#01A982;margin-top:2px"></i>95% Accuracy Target Benchmark<span class="gc-abbr">ATB</span></div>
+        <div class="glossary-card gc-green" onclick="navigateToTab('trends')" title="Navigate to Accuracy Trends" style="cursor:pointer" data-category="trends" data-terms="95 target line benchmark threshold accuracy target">
+          <div class="gc-term"><i class="fas fa-minus" style="color:#01A982;margin-top:2px"></i>95% Accuracy Threshold Benchmark<span class="gc-abbr">ATB</span></div>
           <div class="gc-definition">The organisational minimum accuracy standard set by HPE for the South 1 Talent Acquisition team. All charts include this as a horizontal reference line (red dashed). Any month or week whose accuracy falls below this line is flagged in alerts and risk panels. The target is configurable via the Settings drawer.</div>
           <div class="gc-formula-box">
             <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Context</div>
@@ -3874,7 +3858,7 @@
           <div class="gc-tags"><span class="gc-tag">Trends</span><span class="gc-tag blue">Benchmark</span></div>
         </div>
 
-        <div class="glossary-card gc-teal" data-category="trends" data-terms="N/A not applicable excluded checkpoint">
+        <div class="glossary-card gc-teal" onclick="navigateToTab('trends')" title="Navigate to Accuracy Trends" style="cursor:pointer" data-category="trends" data-terms="N/A not applicable excluded checkpoint">
           <div class="gc-term"><i class="fas fa-ban" style="color:#17a2b8;margin-top:2px"></i>N/A (Not Applicable) Checkpoints<span class="gc-abbr">NA</span></div>
           <div class="gc-definition">Checkpoints excluded from both pass and fail counts because the parameter was genuinely not applicable to that particular hire (e.g., ERP Bonus field for a contractor hire). N/A checkpoints are counted in Opportunity Count but subtracted before computing accuracy to prevent inflation.</div>
           <div class="gc-formula-box">
@@ -3901,7 +3885,7 @@
       </div>
       <div class="glossary-grid">
 
-        <div class="glossary-card gc-orange" data-category="improvement" data-terms="linear regression trend slope forecast predict">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('improvement')" title="Navigate to Improvement" style="cursor:pointer" data-category="improvement" data-terms="linear regression trend slope forecast predict">
           <div class="gc-term"><i class="fas fa-chart-area" style="color:#FF8300;margin-top:2px"></i>Linear Regression Trend &amp; Slope<span class="gc-abbr">LR</span></div>
           <div class="gc-definition">A statistical line fitted through historical accuracy data points (weekly or monthly) using Ordinary Least Squares. The <strong>slope</strong> tells you how much accuracy changes per period: positive slope = improving, negative = declining. The regression line is extrapolated to forecast future accuracy assuming the current trend continues.</div>
           <div class="gc-formula-box">
@@ -3914,7 +3898,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag">Statistics</span><span class="gc-tag blue">Forecast</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="improvement" data-terms="AI forecast prediction next 4 weeks projected">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('improvement')" title="Navigate to Improvement" style="cursor:pointer" data-category="improvement" data-terms="AI forecast prediction next 4 weeks projected">
           <div class="gc-term"><i class="fas fa-crystal-ball" style="color:#FF8300;margin-top:2px"></i>AI Accuracy Forecast<span class="gc-abbr">AAF</span></div>
           <div class="gc-definition">A 4-week forward projection built by extending the linear regression line beyond the last data point. Confidence bands (optimistic / pessimistic) are derived by adding/subtracting 1.5× the root mean square error of the regression fit. The forecast does not use ML in the traditional sense — it is deterministic linear extrapolation presented with AI-branded labelling to surface future risk clearly.</div>
           <div class="gc-formula-box">
@@ -3926,7 +3910,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag blue">Forecast</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="improvement" data-terms="pareto 80/20 rule top errors cumulative">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('improvement')" title="Navigate to Improvement" style="cursor:pointer" data-category="improvement" data-terms="pareto 80/20 rule top errors cumulative">
           <div class="gc-term"><i class="fas fa-sort-amount-down" style="color:#FF8300;margin-top:2px"></i>Pareto Analysis (80/20 Rule)<span class="gc-abbr">PA</span></div>
           <div class="gc-definition">A ranked bar chart of parameters by failure count, overlaid with a cumulative percentage line. The 80/20 principle states that roughly 80% of all errors are caused by 20% of parameters. The Pareto chart identifies which few parameters to fix first for the greatest quality improvement.</div>
           <div class="gc-formula-box">
@@ -3937,7 +3921,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag">Root Cause</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="improvement" data-terms="period over period delta improvement change previous">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('improvement')" title="Navigate to Improvement" style="cursor:pointer" data-category="improvement" data-terms="period over period delta improvement change previous">
           <div class="gc-term"><i class="fas fa-table" style="color:#FF8300;margin-top:2px"></i>Period-over-Period Delta<span class="gc-abbr">PoPD</span></div>
           <div class="gc-definition">The absolute change in accuracy (in percentage points, pp) between consecutive periods — shown for both monthly and weekly views. A positive delta means improvement; negative means decline. The delta table highlights the magnitude of swings so managers can see which periods had the largest movements.</div>
           <div class="gc-formula-box">
@@ -3949,7 +3933,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag blue">Delta</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="improvement" data-terms="recruiter error frequency top bottom coaching">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('improvement')" title="Navigate to Improvement" style="cursor:pointer" data-category="improvement" data-terms="recruiter error frequency top bottom coaching">
           <div class="gc-term"><i class="fas fa-user-circle" style="color:#FF8300;margin-top:2px"></i>Recruiter Error Frequency<span class="gc-abbr">REF</span></div>
           <div class="gc-definition">Total count of audit failures attributed to a specific recruiter across all parameters in the selected period. Not the same as accuracy (which is rate-adjusted for volume). A recruiter with 300 audits and 10 errors contributes more absolute errors than one with 30 audits and 5 errors, even though their accuracy rates differ.</div>
           <div class="gc-formula-box">
@@ -3960,7 +3944,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Improvement</span><span class="gc-tag">Recruiter</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="improvement" data-terms="PM performance manager accuracy team average">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('improvement')" title="Navigate to Improvement" style="cursor:pointer" data-category="improvement" data-terms="PM performance manager accuracy team average">
           <div class="gc-term"><i class="fas fa-sitemap" style="color:#FF8300;margin-top:2px"></i>PM (Project Manager) Team Accuracy<span class="gc-abbr">PMTA</span></div>
           <div class="gc-definition">The weighted average accuracy across all recruiters managed by a given Project Manager. A PM with three recruiters — one at 99%, one at 97%, one at 88% — would have a team average that reflects the combined checkpoint counts. Low-accuracy PMs indicate a coaching and process-adherence gap at the team level.</div>
           <div class="gc-formula-box">
@@ -3985,7 +3969,7 @@
       </div>
       <div class="glossary-grid">
 
-        <div class="glossary-card gc-purple" data-category="capa" data-terms="CAPA corrective preventive action bot undo">
+        <div class="glossary-card gc-purple" onclick="navigateToTab('capa')" title="Navigate to CAPA" style="cursor:pointer" data-category="capa" data-terms="CAPA corrective preventive action bot undo">
           <div class="gc-term"><i class="fas fa-clipboard-check" style="color:#9b59b6;margin-top:2px"></i>CAPA — Corrective &amp; Preventive Action<span class="gc-abbr">CAPA</span></div>
           <div class="gc-definition">A formal quality-management record raised when a recruitment system bot reverses an action taken by a recruiter (a "Bot Undo Move"). Each CAPA captures the root cause category, the recruiter responsible, the date raised, the target close date, and current resolution status. CAPAs drive the improvement cycle by ensuring every systematic error is addressed and tracked to closure.</div>
           <div class="gc-formula-box">
@@ -3996,7 +3980,7 @@
           <div class="gc-tags"><span class="gc-tag purple">CAPA</span><span class="gc-tag blue">Quality</span></div>
         </div>
 
-        <div class="glossary-card gc-purple" data-category="capa" data-terms="CAPA closure rate closed resolved target 80">
+        <div class="glossary-card gc-purple" onclick="navigateToTab('capa')" title="Navigate to CAPA" style="cursor:pointer" data-category="capa" data-terms="CAPA closure rate closed resolved target 80">
           <div class="gc-term"><i class="fas fa-check-double" style="color:#9b59b6;margin-top:2px"></i>CAPA Closure Rate<span class="gc-abbr">CCR</span></div>
           <div class="gc-definition">The percentage of raised CAPAs that have been fully closed (resolved and verified). The organisational target is 80%. A low closure rate indicates open quality issues are not being resolved in time, creating compounding risk.</div>
           <div class="gc-formula-box">
@@ -4008,7 +3992,7 @@
           <div class="gc-tags"><span class="gc-tag purple">CAPA</span><span class="gc-tag red">Target: 80%</span></div>
         </div>
 
-        <div class="glossary-card gc-purple" data-category="capa" data-terms="average days to close resolution time SLA days">
+        <div class="glossary-card gc-purple" onclick="navigateToTab('capa')" title="Navigate to CAPA" style="cursor:pointer" data-category="capa" data-terms="average days to close resolution time SLA days">
           <div class="gc-term"><i class="fas fa-clock" style="color:#9b59b6;margin-top:2px"></i>Average Days to Close (CAPA)<span class="gc-abbr">ADC</span></div>
           <div class="gc-definition">The mean number of calendar days between the date a CAPA was raised and the date it was closed. Measures the speed of the corrective action process. Target is ≤17 days. Open/overdue CAPAs are excluded from this average (they have no close date yet).</div>
           <div class="gc-formula-box">
@@ -4020,7 +4004,7 @@
           <div class="gc-tags"><span class="gc-tag purple">CAPA</span><span class="gc-tag">Time-to-resolve</span></div>
         </div>
 
-        <div class="glossary-card gc-red" data-category="capa" data-terms="overdue CAPA past due late escalation">
+        <div class="glossary-card gc-red" onclick="navigateToTab('capa')" title="Navigate to CAPA" style="cursor:pointer" data-category="capa" data-terms="overdue CAPA past due late escalation">
           <div class="gc-term"><i class="fas fa-exclamation-triangle" style="color:#C54E4B;margin-top:2px"></i>Overdue CAPAs<span class="gc-abbr">OC</span></div>
           <div class="gc-definition">CAPAs whose status is Open or In Progress AND whose target close date has already passed (today's date > target close date). Each overdue CAPA triggers an active red alert in the Goal Tracker panel and should be escalated immediately to the responsible PM.</div>
           <div class="gc-formula-box">
@@ -4031,7 +4015,7 @@
           <div class="gc-tags"><span class="gc-tag red">CAPA</span><span class="gc-tag red">Alert</span></div>
         </div>
 
-        <div class="glossary-card gc-purple" data-category="capa" data-terms="root cause category CAPA classification type">
+        <div class="glossary-card gc-purple" onclick="navigateToTab('capa')" title="Navigate to CAPA" style="cursor:pointer" data-category="capa" data-terms="root cause category CAPA classification type">
           <div class="gc-term"><i class="fas fa-sitemap" style="color:#9b59b6;margin-top:2px"></i>Root Cause Category<span class="gc-abbr">RCC</span></div>
           <div class="gc-definition">The classification of why a bot undo move was triggered. Root cause categories used in this dashboard include: Process Gap (recruiter didn't follow the defined step), Data Entry Error (wrong value entered), System Issue (platform/tool caused the error), and Training Gap (recruiter lacked knowledge of the requirement). CAPAs grouped by root cause surface systemic vs individual issues.</div>
           <div class="gc-formula-box">
@@ -4049,14 +4033,14 @@
       <div class="glossary-section-header">
         <div class="glossary-section-icon" style="background:rgba(231,76,60,0.10);color:#e74c3c"><i class="fas fa-brain"></i></div>
         <div>
-          <div class="glossary-section-title">AI Insights &amp; Recommendations</div>
+          <div class="glossary-section-title">Audit Insights &amp; Recommendations</div>
           <div class="glossary-section-sub">Predictive flags, risk classifications, and recommendation ranking</div>
         </div>
         <div class="glossary-section-badge">4 terms</div>
       </div>
       <div class="glossary-grid">
 
-        <div class="glossary-card gc-red" data-category="insights" data-terms="predictive risk flag high medium low AI">
+        <div class="glossary-card gc-red" onclick="navigateToTab('insights')" title="Navigate to Insights" style="cursor:pointer" data-category="insights" data-terms="predictive risk flag high medium low AI">
           <div class="gc-term"><i class="fas fa-flag" style="color:#C54E4B;margin-top:2px"></i>Predictive Risk Flag<span class="gc-abbr">PRF</span></div>
           <div class="gc-definition">An AI-generated alert that identifies a condition likely to cause a quality degradation in the next 4 weeks if left unaddressed. Risk level is assigned as HIGH, MEDIUM, or LOW based on the severity of the current metric, the rate of change, and historical impact of similar conditions. Flags are ordered by expected impact.</div>
           <div class="gc-formula-box">
@@ -4065,30 +4049,30 @@
   MEDIUM = Monitor closely; may breach under unfavourable conditions
   LOW    = Watch; minimal current impact</div>
           </div>
-          <div class="gc-tags"><span class="gc-tag red">AI Insights</span><span class="gc-tag red">Risk</span></div>
+          <div class="gc-tags"><span class="gc-tag red">Audit Insights</span><span class="gc-tag red">Risk</span></div>
         </div>
 
-        <div class="glossary-card gc-red" data-category="insights" data-terms="accuracy radar chart dimension spider">
+        <div class="glossary-card gc-red" onclick="navigateToTab('insights')" title="Navigate to Insights" style="cursor:pointer" data-category="insights" data-terms="accuracy radar chart dimension spider">
           <div class="gc-term"><i class="fas fa-spider" style="color:#C54E4B;margin-top:2px"></i>Accuracy Radar (Spider) Chart<span class="gc-abbr">ARC</span></div>
           <div class="gc-definition">A multi-axis chart where each axis represents a different audit dimension (monthly accuracy, stage accuracy, PM average, top-recruiter average, target). The area of the polygon formed by connecting the data points relative to the maximum area indicates overall programme health. A compact polygon = gaps in multiple dimensions.</div>
           <div class="gc-formula-box">
             <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Axes</div>
             <div class="gc-formula">Jan Acc | Feb Acc | Mar Acc | Apr Acc | Pre-Sel | Post-Sel | PM Avg</div>
           </div>
-          <div class="gc-tags"><span class="gc-tag red">AI Insights</span><span class="gc-tag">Visualisation</span></div>
+          <div class="gc-tags"><span class="gc-tag red">Audit Insights</span><span class="gc-tag">Visualisation</span></div>
         </div>
 
-        <div class="glossary-card gc-red" data-category="insights" data-terms="error heatmap recruiter parameter matrix">
+        <div class="glossary-card gc-red" onclick="navigateToTab('insights')" title="Navigate to Insights" style="cursor:pointer" data-category="insights" data-terms="error heatmap recruiter parameter matrix">
           <div class="gc-term"><i class="fas fa-th" style="color:#C54E4B;margin-top:2px"></i>Recruiter × Parameter Error Heatmap<span class="gc-abbr">RPEH</span></div>
           <div class="gc-definition">A matrix heatmap where rows = error parameters and columns = recruiters. Each cell shows the failure rate for that recruiter on that parameter. Colour intensity indicates severity. Dark red cells identify specific recruiter-parameter combinations requiring immediate targeted coaching — far more actionable than looking at overall accuracy alone.</div>
           <div class="gc-formula-box">
             <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Cell formula</div>
             <div class="gc-formula">Cell[param, recruiter] = (Failures by recruiter on param / Total recruiter audits) × 100</div>
           </div>
-          <div class="gc-tags"><span class="gc-tag red">AI Insights</span><span class="gc-tag">Matrix</span></div>
+          <div class="gc-tags"><span class="gc-tag red">Audit Insights</span><span class="gc-tag">Matrix</span></div>
         </div>
 
-        <div class="glossary-card gc-red" data-category="insights" data-terms="action recommendation ROI ranked priority impact">
+        <div class="glossary-card gc-red" onclick="navigateToTab('insights')" title="Navigate to Insights" style="cursor:pointer" data-category="insights" data-terms="action recommendation ROI ranked priority impact">
           <div class="gc-term"><i class="fas fa-tasks" style="color:#C54E4B;margin-top:2px"></i>Action Recommendations (Ranked by ROI)<span class="gc-abbr">ARR</span></div>
           <div class="gc-definition">A prioritised list of corrective actions ranked by their expected return-on-investment in terms of accuracy improvement. ROI is estimated as: (# errors addressable × accuracy gain per fix) / effort. The list ensures managers invest coaching and process-improvement time in the highest-impact activities first.</div>
           <div class="gc-formula-box">
@@ -4096,7 +4080,7 @@
             <div class="gc-formula">Priority Score = (Addressable Failures × Accuracy Gain) / Estimated Effort
   Ranked descending by Priority Score</div>
           </div>
-          <div class="gc-tags"><span class="gc-tag red">AI Insights</span><span class="gc-tag orange">Priority</span></div>
+          <div class="gc-tags"><span class="gc-tag red">Audit Insights</span><span class="gc-tag orange">Priority</span></div>
         </div>
 
       </div>
@@ -4114,7 +4098,7 @@
       </div>
       <div class="glossary-grid">
 
-        <div class="glossary-card gc-teal" data-category="sla" data-terms="SLA service level agreement compliance met not met">
+        <div class="glossary-card gc-teal" onclick="navigateToTab('sla')" title="Navigate to SLA" style="cursor:pointer" data-category="sla" data-terms="SLA service level agreement compliance met not met">
           <div class="gc-term"><i class="fas fa-handshake" style="color:#17a2b8;margin-top:2px"></i>SLA Met Rate (Overall Compliance)<span class="gc-abbr">SMR</span></div>
           <div class="gc-definition">The percentage of SLA reporting instances (metric × month combinations) where the contractual target was achieved. HPE tracks 10 Category B SLA metrics. For each month each metric is reported, it counts as one instance — either Met, Not Met, or Not Reported. The Met Rate is the primary SLA health indicator.</div>
           <div class="gc-formula-box">
@@ -4126,7 +4110,7 @@
           <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag">Compliance</span></div>
         </div>
 
-        <div class="glossary-card gc-teal" data-category="sla" data-terms="time to fill TTF days to hire 45 55 enterprise technical">
+        <div class="glossary-card gc-teal" onclick="navigateToTab('sla')" title="Navigate to SLA" style="cursor:pointer" data-category="sla" data-terms="time to fill TTF days to hire 45 55 enterprise technical">
           <div class="gc-term"><i class="fas fa-hourglass-half" style="color:#17a2b8;margin-top:2px"></i>Time to Fill (TTF)<span class="gc-abbr">TTF</span></div>
           <div class="gc-definition">The number of calendar days from the date a job requisition is opened to the date an offer is accepted. HPE has two contractual TTF targets: ≤45 days for Enterprise roles and ≤55 days for Technical roles. A month is "SLA Met" for TTF if the average (or median, per contract) across all closed reqs in that month is within the target.</div>
           <div class="gc-formula-box">
@@ -4138,7 +4122,7 @@
           <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag red">Critical SLA</span></div>
         </div>
 
-        <div class="glossary-card gc-teal" data-category="sla" data-terms="aged requisitions percentage old open positions">
+        <div class="glossary-card gc-teal" onclick="navigateToTab('sla')" title="Navigate to SLA" style="cursor:pointer" data-category="sla" data-terms="aged requisitions percentage old open positions">
           <div class="gc-term"><i class="fas fa-calendar-times" style="color:#17a2b8;margin-top:2px"></i>% Aged Requisitions<span class="gc-abbr">PAR</span></div>
           <div class="gc-definition">The percentage of currently open requisitions that have been open beyond the "aged" threshold (e.g., 60 days). Contractual SLA requires: ≤25% aged for Technical roles and ≤20% aged for Enterprise roles. A high aged percentage indicates a backlog and slowed hiring pipeline.</div>
           <div class="gc-formula-box">
@@ -4150,7 +4134,7 @@
           <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag red">High Risk</span></div>
         </div>
 
-        <div class="glossary-card gc-teal" data-category="sla" data-terms="agency utilization utilisation third party vendor 100">
+        <div class="glossary-card gc-teal" onclick="navigateToTab('sla')" title="Navigate to SLA" style="cursor:pointer" data-category="sla" data-terms="agency utilization utilisation third party vendor 100">
           <div class="gc-term"><i class="fas fa-building" style="color:#17a2b8;margin-top:2px"></i>% Agency Utilisation<span class="gc-abbr">AU</span></div>
           <div class="gc-definition">The percentage of hires in a month sourced through approved staffing agencies vs directly. Contractual requirement is to meet a defined utilisation rate. Both Technical and Enterprise bands achieved 100% SLA Met Rate — the best-performing metric in the dashboard.</div>
           <div class="gc-formula-box">
@@ -4162,7 +4146,7 @@
           <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag">Best Performer</span></div>
         </div>
 
-        <div class="glossary-card gc-teal" data-category="sla" data-terms="internal hiring rate internal candidates 91 enterprise">
+        <div class="glossary-card gc-teal" onclick="navigateToTab('sla')" title="Navigate to SLA" style="cursor:pointer" data-category="sla" data-terms="internal hiring rate internal candidates 91 enterprise">
           <div class="gc-term"><i class="fas fa-users-cog" style="color:#17a2b8;margin-top:2px"></i>% Internal Hiring Rate<span class="gc-abbr">IHR</span></div>
           <div class="gc-definition">The proportion of filled roles hired from the internal talent pool (existing HPE employees or internal movers) vs external candidates. A contractual target is set per role category. Internal hiring reduces external agency spend and retention risk.</div>
           <div class="gc-formula-box">
@@ -4173,7 +4157,7 @@
           <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag">Hiring Mix</span></div>
         </div>
 
-        <div class="glossary-card gc-teal" data-category="sla" data-terms="NR not reported missing data blackout submission">
+        <div class="glossary-card gc-teal" onclick="navigateToTab('sla')" title="Navigate to SLA" style="cursor:pointer" data-category="sla" data-terms="NR not reported missing data blackout submission">
           <div class="gc-term"><i class="fas fa-file-excel" style="color:#17a2b8;margin-top:2px"></i>Not Reported (NR) Instances<span class="gc-abbr">NR</span></div>
           <div class="gc-definition">Months where no SLA data was submitted for a metric — neither a "Met" nor "Not Met" verdict could be recorded. Not Reported is treated as a data governance failure, not as "Met". Apr-25 had a complete 10-metric blackout (all 10 Category B metrics NR), representing the single worst governance event in the review period.</div>
           <div class="gc-formula-box">
@@ -4185,7 +4169,7 @@
           <div class="gc-tags"><span class="gc-tag blue">SLA</span><span class="gc-tag red">Governance</span></div>
         </div>
 
-        <div class="glossary-card gc-teal" data-category="sla" data-terms="avg requisition volume average reqs enterprise technical">
+        <div class="glossary-card gc-teal" onclick="navigateToTab('sla')" title="Navigate to SLA" style="cursor:pointer" data-category="sla" data-terms="avg requisition volume average reqs enterprise technical">
           <div class="gc-term"><i class="fas fa-layer-group" style="color:#17a2b8;margin-top:2px"></i>Average Requisition Volume<span class="gc-abbr">ARV</span></div>
           <div class="gc-definition">The average number of open or closed requisitions handled in a month, measured separately for Technical and Enterprise role categories. The SLA target defines a minimum or maximum volume band. Tracking this ensures the team is operating at expected capacity.</div>
           <div class="gc-formula-box">
@@ -4211,7 +4195,7 @@
       </div>
       <div class="glossary-grid">
 
-        <div class="glossary-card gc-red" data-category="performance" data-terms="risk score predictive 0 100 recruiter at risk">
+        <div class="glossary-card gc-red" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="risk score predictive 0 100 recruiter at risk">
           <div class="gc-term"><i class="fas fa-shield-alt" style="color:#C54E4B;margin-top:2px"></i>Predictive Risk Score<span class="gc-abbr">PRS</span></div>
           <div class="gc-definition">A composite 0–100 score computed for each recruiter that predicts the probability of a quality breach in the next period. Four weighted factors contribute: accuracy level, trend slope, audit volume, and consecutive accuracy drops. Higher score = more at risk. Score ≥45 triggers the "At Risk" classification.</div>
           <div class="gc-formula-box">
@@ -4226,7 +4210,7 @@
           <div class="gc-tags"><span class="gc-tag red">Performance</span><span class="gc-tag">Risk Engine</span></div>
         </div>
 
-        <div class="glossary-card gc-red" data-category="performance" data-terms="risk level critical high medium low classification">
+        <div class="glossary-card gc-red" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="risk level critical high medium low classification">
           <div class="gc-term"><i class="fas fa-traffic-light" style="color:#C54E4B;margin-top:2px"></i>Risk Level Classification<span class="gc-abbr">RLC</span></div>
           <div class="gc-definition">The risk category assigned to a recruiter based on their Predictive Risk Score. Four levels: Low, Medium, High, Critical. Each level triggers different management responses — from passive monitoring (Low) to immediate coaching and escalation (Critical).</div>
           <div class="gc-formula-box">
@@ -4239,7 +4223,7 @@
           <div class="gc-tags"><span class="gc-tag red">Performance</span><span class="gc-tag">Classification</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="performance" data-terms="tier 1 2 3 critical scorecard ranking tier badge">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="tier 1 2 3 critical scorecard ranking tier badge">
           <div class="gc-term"><i class="fas fa-medal" style="color:#FF8300;margin-top:2px"></i>Recruiter Tier Ranking<span class="gc-abbr">RTR</span></div>
           <div class="gc-definition">A performance tier assigned to each recruiter based on their most recent monthly accuracy. Four tiers: Tier 1 (elite), Tier 2 (proficient), Tier 3 (developing), and Critical (needs immediate intervention). Tiers are displayed on the Scorecard panel as coloured badges and border colours on each recruiter card.</div>
           <div class="gc-formula-box">
@@ -4254,7 +4238,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag">Scorecard</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="performance" data-terms="consecutive drops accuracy decline months row streak">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="consecutive drops accuracy decline months row streak">
           <div class="gc-term"><i class="fas fa-fire" style="color:#FF8300;margin-top:2px"></i>Consecutive Accuracy Drops<span class="gc-abbr">CAD</span></div>
           <div class="gc-definition">The count of consecutive months in which a recruiter's accuracy was lower than the previous month. Two or more consecutive drops trigger the "At Risk" badge (🔴) on the scorecard and contribute 10 points to the Risk Score. Three drops contribute 15 points. Configured via the Threshold Settings drawer (maxConsecDrops).</div>
           <div class="gc-formula-box">
@@ -4267,7 +4251,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag red">Risk Trigger</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="performance" data-terms="coaching recommended flag bottom 20 percent bottom quartile">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="coaching recommended flag bottom 20 percent bottom quartile">
           <div class="gc-term"><i class="fas fa-chalkboard-teacher" style="color:#FF8300;margin-top:2px"></i>Coaching Recommended Flag<span class="gc-abbr">CRF</span></div>
           <div class="gc-definition">A flag shown on the Scorecard card for recruiters in the bottom 20% of the sorted accuracy list. The bottom 20% is calculated dynamically — sorting all recruiters by latest accuracy descending and flagging the bottom ceil(n × 0.20) recruiters. This is separate from the At Risk flag, which is based on consecutive drops rather than relative ranking.</div>
           <div class="gc-formula-box">
@@ -4279,7 +4263,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag">Scorecard</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="performance" data-terms="trend arrow improving declining stable slope direction">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="trend arrow improving declining stable slope direction">
           <div class="gc-term"><i class="fas fa-arrows-alt-v" style="color:#FF8300;margin-top:2px"></i>Trend Arrow &amp; Direction<span class="gc-abbr">TAD</span></div>
           <div class="gc-definition">A visual indicator derived from the linear regression slope of a recruiter's monthly accuracy. Three states: Improving (▲, slope &gt; +0.15 pp/month), Stable (→, slope between −0.15 and +0.15), Declining (▼, slope &lt; −0.15). Used across scorecard cards, risk table, and comparison modal.</div>
           <div class="gc-formula-box">
@@ -4291,7 +4275,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag">Trend</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="performance" data-terms="parameter deep dive drill fail pct opportunity">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="parameter deep dive drill fail pct opportunity">
           <div class="gc-term"><i class="fas fa-microscope" style="color:#FF8300;margin-top:2px"></i>Parameter Failure % (Deep-Dive)<span class="gc-abbr">PF%</span></div>
           <div class="gc-definition">For each of the 12 audited parameters, the percentage of times it failed out of the total opportunities it was checked. Displayed in the Parameter Deep-Dive panel as a ranked list with drill-down capability. Parameters with Fail% ≥ 5% are flagged as high-risk and trigger alerts.</div>
           <div class="gc-formula-box">
@@ -4303,7 +4287,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag">Parameter</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="performance" data-terms="breach probability risk chart parameter">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="breach probability risk chart parameter">
           <div class="gc-term"><i class="fas fa-percent" style="color:#FF8300;margin-top:2px"></i>Parameter Breach Probability<span class="gc-abbr">PBP</span></div>
           <div class="gc-definition">An estimated probability (0–100%) that a parameter's error rate will exceed the threshold in the next review period. Calculated from the current failure rate using a heuristic: if already above threshold → high probability; if near threshold → linear interpolation; if well below → low probability. Displayed as a horizontal bar chart in the Risk Intelligence panel.</div>
           <div class="gc-formula-box">
@@ -4316,7 +4300,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag red">Risk Engine</span></div>
         </div>
 
-        <div class="glossary-card gc-green" data-category="performance" data-terms="goal tracker target goal completion ring donut">
+        <div class="glossary-card gc-green" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="goal tracker target goal completion ring donut">
           <div class="gc-term"><i class="fas fa-bullseye" style="color:#01A982;margin-top:2px"></i>Goal Tracker Completion %<span class="gc-abbr">GTC</span></div>
           <div class="gc-definition">For each organisational goal (e.g., "Achieve 98% accuracy by Apr"), the completion percentage shows how close the current metric is to the goal target. Displayed as an animated ring chart. 100% means the goal is fully achieved; below 100% shows remaining gap proportionally.</div>
           <div class="gc-formula-box">
@@ -4327,7 +4311,7 @@
           <div class="gc-tags"><span class="gc-tag">Performance</span><span class="gc-tag blue">Goal</span></div>
         </div>
 
-        <div class="glossary-card gc-orange" data-category="performance" data-terms="PM accountability matrix manager team performance">
+        <div class="glossary-card gc-orange" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="PM accountability matrix manager team performance">
           <div class="gc-term"><i class="fas fa-sitemap" style="color:#FF8300;margin-top:2px"></i>PM Accountability Matrix<span class="gc-abbr">PMAM</span></div>
           <div class="gc-definition">A view of PM-level performance aggregating accuracy, error count, and trend across all recruiters managed by each Project Manager. The matrix helps leadership identify which PM teams need structural support vs which are self-sufficient. PMs with team accuracy below 97% are flagged.</div>
           <div class="gc-formula-box">
@@ -4339,7 +4323,7 @@
           <div class="gc-tags"><span class="gc-tag orange">Performance</span><span class="gc-tag purple">PM</span></div>
         </div>
 
-        <div class="glossary-card gc-green" data-category="performance" data-terms="configurable threshold alert settings minAccuracy maxErrorRate maxConsecDrops">
+        <div class="glossary-card gc-green" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="configurable threshold alert settings minAccuracy maxErrorRate maxConsecDrops">
           <div class="gc-term"><i class="fas fa-sliders-h" style="color:#01A982;margin-top:2px"></i>Configurable Alert Thresholds<span class="gc-abbr">CAT</span></div>
           <div class="gc-definition">Three client-adjustable thresholds that control when Risk and Alert flags are triggered. Modified in real-time via the Settings drawer (gear icon in header) — no code changes required. Changes immediately re-render the Risk Intelligence panel and Goal Tracker alerts.</div>
           <div class="gc-formula-box">
@@ -4351,7 +4335,7 @@
           <div class="gc-tags"><span class="gc-tag">Performance</span><span class="gc-tag blue">Settings</span></div>
         </div>
 
-        <div class="glossary-card gc-green" data-category="performance" data-terms="comparison tool head to head side by side recruiter compare">
+        <div class="glossary-card gc-green" onclick="navigateToTab('performance')" title="Navigate to Performance" style="cursor:pointer" data-category="performance" data-terms="comparison tool head to head side by side recruiter compare">
           <div class="gc-term"><i class="fas fa-columns" style="color:#01A982;margin-top:2px"></i>Recruiter Comparison Score<span class="gc-abbr">RCS</span></div>
           <div class="gc-definition">A head-to-head comparison of 2–3 selected recruiters across: latest accuracy, total audits, errors, error rate, monthly trend (Jan–Apr), and parameter failure matrix. Launched via the "Compare" button on any Scorecard card. Helps managers objectively compare peers and identify relative strengths and coaching gaps.</div>
           <div class="gc-formula-box">
@@ -4376,7 +4360,7 @@
           N/A checkpoints are systematically excluded from accuracy denominators.
           Linear regression and forecast values are computed client-side using Ordinary Least Squares.
           Configurable thresholds (minAccuracy, maxErrorRate, maxConsecDrops) can be adjusted live via the Settings drawer without any code changes.
-          SLA data covers <strong>Category B contractual obligations</strong> for the HPE FY24-25 and FY25-26 periods (HPE fiscal year: November–October).
+          SLA data covers <strong>Category B contractual obligations</strong> for the HPE FY25 (Nov-24–Oct-25) and FY26 YTD (Nov-25–Apr-26) periods (HPE fiscal year: November–October).
         </div>
       </div>
     </div>
@@ -4477,24 +4461,51 @@ function destroyChart(id) {
 }
 
 // ==================== COLOR HELPERS ====================
-function getAccBadge(acc) {
-  if (acc >= 99) return '<span class="acc-badge excellent">⬤ ' + acc + '%</span>';
-  if (acc >= 95) return '<span class="acc-badge good">⬤ ' + acc + '%</span>';
-  if (acc >= 95) return '<span class="acc-badge warning">⬤ ' + acc + '%</span>';
-  return '<span class="acc-badge bad">⬤ ' + acc + '%</span>';
+// Accuracy colour legend (applied across all dashboard sections):
+// > 98%      → Green  (#01A982)  Performance Excellence
+// 95% – 98%  → Amber  (#FF8300)  Performance Watch
+// < 95%      → Red    (#C54E4B)  Performance Below Target
+function getAccColor(acc) {
+  if (acc > 98) return '#01A982';
+  if (acc >= 95) return '#FF8300';
+  return '#C54E4B';
 }
-
+function getAccLabel(acc) {
+  if (acc > 98) return 'Performance Excellence';
+  if (acc >= 95) return 'Performance Watch';
+  return 'Performance Below Target';
+}
+function getAccBadge(acc) {
+  var col = getAccColor(acc);
+  return '<span class="acc-badge" style="background:' + col + '20;color:' + col + ';border:1px solid ' + col + '40;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:700">⬤ ' + acc + '% — ' + getAccLabel(acc) + '</span>';
+}
 function getHeatmapColor(acc) {
-  if (acc >= 99) return {bg: '#01A982', text: 'white'};
-  if (acc >= 95) return {bg: '#4fc3a1', text: 'white'};
-  if (acc >= 95) return {bg: '#FF8300', text: 'white'};
-  return {bg: '#C54E4B', text: 'white'};
+  var col = getAccColor(acc);
+  return {bg: col, text: 'white'};
 }
 
 // ==================== TAB SWITCHING ====================
 // One-time init guards for non-SLA tabs
 let _execDone = false, _trendDone = false, _improveDone = false, _insightsDone = false, _perfDone = false;
 
+
+function navigateToTab(tabName) {
+  var navBtn = document.querySelector('.nav-tab[onclick*="switchTab('"+tabName+"'"]');
+  if (!navBtn) {
+    // Try finding by partial match
+    var allTabs = document.querySelectorAll('.nav-tab');
+    for (var i = 0; i < allTabs.length; i++) {
+      if (allTabs[i].getAttribute('onclick') && allTabs[i].getAttribute('onclick').indexOf("'"+tabName+"'") !== -1) {
+        navBtn = allTabs[i];
+        break;
+      }
+    }
+  }
+  if (navBtn) {
+    switchTab(tabName, navBtn);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+}
 function switchTab(tabName, el) {
   document.querySelectorAll('.tab-content').forEach(function(t) { t.classList.remove('active'); });
   document.querySelectorAll('.nav-tab').forEach(function(t) { t.classList.remove('active'); });
@@ -4503,7 +4514,7 @@ function switchTab(tabName, el) {
   
   // 150ms: enough for CSS display:block to propagate so canvas has real dimensions
   setTimeout(function() {
-    if (tabName === 'executive')   { if (!_execDone)    { _execDone    = true; initExecutiveCharts(); }    else { updateExecutiveKPIs(); updateExecutiveCharts(); reflowCharts(['sparklineChart','stageDonutChart']); } }
+    if (tabName === 'executive')   { if (!_execDone)    { _execDone    = true; initExecutiveCharts(); }    else { updateExecutiveKPIs(); updateExecutiveCharts(); reflowCharts(['sparklineChart','stagePreChart','stagePostChart']); } }
     if (tabName === 'trends')      { if (!_trendDone)   { _trendDone   = true; initTrendCharts(); }         else { updateTrendCharts(); reflowCharts(['stageComparisonChart','criticalBarChart']); } }
     if (tabName === 'improvement') { if (!_improveDone) { _improveDone = true; initImprovementCharts(); }  else { updateImprovementCharts(); reflowCharts(['paretoChart','recruiterErrorChart','pmChart','stageErrorChart']); } }
     if (tabName === 'capa')        { initCAPACharts(); }
@@ -4535,30 +4546,43 @@ function initExecutiveCharts() {
   // Filter-aware sparkline + month table
   updateExecutiveCharts();
 
-  // Stage donut (always full-FY, not filter-dependent)
-  destroyChart('stageDonutChart');
-  const stageCtx = document.getElementById('stageDonutChart').getContext('2d');
-  charts['stageDonutChart'] = new Chart(stageCtx, {
-    type: 'doughnut',
-    data: {
-      labels: ['Post Selection Pass', 'Post Selection Fail', 'Pre Selection Pass', 'Pre Selection Fail'],
-      datasets: [{
-        data: [5962, 92, 2438, 36],
-        backgroundColor: ['#01A982', '#C54E4B', '#4fc3a1', '#FF8300'],
-        borderWidth: 2,
-        borderColor: 'white'
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'bottom', labels: { font: {size:11}, padding: 10, boxWidth: 12 } },
-        tooltip: { callbacks: { label: ctx => ctx.label + ': ' + ctx.raw.toLocaleString() } }
+  // Pre-Selection bar chart
+  destroyChart('stagePreChart');
+  var stagePreEl = document.getElementById('stagePreChart');
+  if (stagePreEl) {
+    var preStage = DASHBOARD_DATA.stage_stats.find(function(s){ return s.Stage === 'Pre Selection'; }) || {};
+    charts['stagePreChart'] = new Chart(stagePreEl.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['Pass', 'Fail', 'N/A'],
+        datasets: [{ label: 'Pre-Selection', data: [preStage.Opportunity_Pass||2438, preStage.Opportunity_Fail||36, preStage.Opportunity_NA||3], backgroundColor: ['#01A982','#C54E4B','#94a3b8'], borderRadius: 5 }]
       },
-      cutout: '65%'
-    }
-  });
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.label + ': ' + c.raw.toLocaleString(); } } } },
+        scales: { y: { beginAtZero: true, max: Math.ceil((preStage.Opportunity_Pass||2438)*1.15), ticks: { font:{size:10} } }, x: { ticks: { font:{size:10} } } }
+      }
+    });
+  }
+
+  // Post-Selection bar chart
+  destroyChart('stagePostChart');
+  var stagePostEl = document.getElementById('stagePostChart');
+  if (stagePostEl) {
+    var postStage = DASHBOARD_DATA.stage_stats.find(function(s){ return s.Stage === 'Post Selection'; }) || {};
+    charts['stagePostChart'] = new Chart(stagePostEl.getContext('2d'), {
+      type: 'bar',
+      data: {
+        labels: ['Pass', 'Fail', 'N/A'],
+        datasets: [{ label: 'Post-Selection', data: [postStage.Opportunity_Pass||5962, postStage.Opportunity_Fail||92, postStage.Opportunity_NA||68], backgroundColor: ['#0D5DBF','#FF8300','#94a3b8'], borderRadius: 5 }]
+      },
+      options: {
+        responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.label + ': ' + c.raw.toLocaleString(); } } } },
+        scales: { y: { beginAtZero: true, max: Math.ceil((postStage.Opportunity_Pass||5962)*1.15), ticks: { font:{size:10} } }, x: { ticks: { font:{size:10} } } }
+      }
+    });
+  }
 
   // Month summary table (filter-aware via buildMonthTable)
   buildMonthTable();
@@ -4627,9 +4651,9 @@ function buildMonthTable() {
           ? '<span style="color:var(--hpe-red);font-weight:600">▼ ' + momChange + '%</span>'
           : '<span style="color:var(--text-muted)">— 0%</span>')
       : '<span style="color:var(--text-muted)">—</span>';
-    var status = m.Accuracy >= 95
-      ? '<span class="status-pill status-closed">✓ On Target</span>'
-      : '<span class="status-pill status-open">✗ Below Target</span>';
+    var applicable = m.Opportunity_Count - m.Opportunity_NA;
+    var passRate = applicable > 0 ? +((m.Opportunity_Pass / applicable) * 100).toFixed(2) : 0;
+    var errCol = getAccColor ? getAccColor(m.Accuracy) : '#C54E4B';
     return '<tr>'
       + '<td><strong>' + m.Month + ' 2026</strong></td>'
       + '<td>' + m.Opportunity_Count.toLocaleString() + '</td>'
@@ -4637,9 +4661,9 @@ function buildMonthTable() {
       + '<td style="color:var(--hpe-red);font-weight:600">' + m.Opportunity_Fail + '</td>'
       + '<td style="color:var(--text-muted)">' + m.Opportunity_NA + '</td>'
       + '<td>' + getAccBadge(m.Accuracy) + '</td>'
-      + '<td style="color:var(--hpe-orange);font-weight:600">' + m.Error_Rate + '%</td>'
+      + '<td style="color:var(--hpe-red);font-weight:600">' + m.Error_Rate + '%</td>'
+      + '<td style="color:var(--hpe-green);font-weight:600">' + passRate + '%</td>'
       + '<td>' + momHtml + '</td>'
-      + '<td>' + status + '</td>'
       + '</tr>';
   }).join('');
 }
@@ -4709,7 +4733,7 @@ function initTrendCharts() {
         tooltip: { backgroundColor: '#1a2532', padding: 12, cornerRadius: 8 }
       },
       scales: {
-        y: { min: 95, max: 101, position: 'left', ticks: { callback: v => v + '%', font:{size:11} }, grid: { color: 'rgba(0,0,0,0.06)' } },
+        y: { min: 95, max: 100, position: 'left', ticks: { callback: v => v + '%', font:{size:11} }, grid: { color: 'rgba(0,0,0,0.06)' } },
         y2: { min: 0, max: 5, position: 'right', ticks: { callback: v => v + '%', font:{size:11} }, grid: { display: false } },
         x: { ticks: { font: {size:12} }, grid: { display: false } }
       }
@@ -4727,17 +4751,20 @@ function initTrendCharts() {
     data: {
       labels: ['Post Selection', 'Pre Selection'],
       datasets: [
-        { label: 'Pass', data: [5962, 2438], backgroundColor: '#01A982' },
-        { label: 'Fail', data: [92, 36], backgroundColor: '#C54E4B' },
-        { label: 'N/A', data: [68, 3], backgroundColor: '#e1e8ef' }
+        { label: 'Pass %', data: [+(5962/(5962+92+68)*100).toFixed(1), +(2438/(2438+36+3)*100).toFixed(1)], backgroundColor: '#01A982' },
+        { label: 'Fail %', data: [+(92/(5962+92+68)*100).toFixed(1), +(36/(2438+36+3)*100).toFixed(1)], backgroundColor: '#C54E4B' },
+        { label: 'N/A %', data: [+(68/(5962+92+68)*100).toFixed(1), +(3/(2438+36+3)*100).toFixed(1)], backgroundColor: '#94a3b8' }
       ]
     },
     options: {
       responsive: true, maintainAspectRatio: false,
-      plugins: { legend: { position: 'top', labels: {font:{size:11}, boxWidth:12} } },
+      plugins: {
+        legend: { position: 'top', labels: {font:{size:11}, boxWidth:12} },
+        tooltip: { callbacks: { label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + '%' } }
+      },
       scales: {
         x: { stacked: true, grid: {display:false} },
-        y: { stacked: true, ticks: {font:{size:11}} }
+        y: { stacked: true, min: 0, max: 100, ticks: { callback: v => v + '%', font:{size:11} }, title: { display: true, text: '% of Audits' } }
       }
     }
   });
@@ -5080,7 +5107,7 @@ function buildForecastChart() {
           callbacks: { title: function(items){ return items[0].label + ' — ' + periodTitle; } } }
       },
       scales: {
-        y: { min: yMin, max: 101, ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
+        y: { min: yMin, max: 100, ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
         x: { ticks: {font:{size:10}, maxRotation:45}, grid:{display:false} }
       }
     }
@@ -5178,7 +5205,7 @@ function initImprovementCharts() {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: {display:false} },
       scales: {
-        y: { min: 96, max: 101, ticks: { callback: v => v + '%', font:{size:11} } },
+        y: { min: 88, max: 100, ticks: { callback: v => v + '%', font:{size:11} } },
         x: { ticks: {font:{size:10}, maxRotation:30}, grid:{display:false} }
       }
     }
@@ -5938,7 +5965,7 @@ function initInsightsCharts() {
       responsive: true, maintainAspectRatio: false,
       plugins: { legend: { position: 'top', labels: {font:{size:11},boxWidth:12} } },
       scales: {
-        y: { min: 92, max: 101, ticks: { callback: v => v + '%', font:{size:11} } },
+        y: { min: 92, max: 100, ticks: { callback: v => v + '%', font:{size:11} } },
         x: { ticks: {font:{size:10}, maxRotation:45}, grid:{display:false} }
       }
     }
@@ -6164,24 +6191,29 @@ function updateExecutiveKPIs() {
   setHtml('kpi-total-delta', '<i class="fas fa-clipboard-list"></i> ' + periodLabel);
   setText('kpi-total-sub', weeks.length + ' week(s) in view');
 
-  setText('kpi-pass', totalPass.toLocaleString());
-  setHtml('kpi-pass-delta', '<i class="fas fa-minus"></i> ' + passRate + '% pass rate');
+  setText('kpi-pass', passRate + '%');
+  setHtml('kpi-pass-delta', '<i class="fas fa-check"></i> ' + totalPass.toLocaleString() + ' audits passed');
   setText('kpi-pass-sub', 'Out of ' + totalCount.toLocaleString() + ' total');
 
-  setText('kpi-errors', totalFail.toString());
-  setHtml('kpi-errors-delta', '<i class="fas fa-arrow-' + (errRate > 2 ? 'up' : 'down') + '"></i> ' + errRate + '% error rate');
-  setClass('kpi-errors-delta', 'kpi-delta ' + (errRate > 2 ? 'delta-down' : 'delta-up'));
+  setText('kpi-errors', errRate + '%');
+  setHtml('kpi-errors-delta', '<i class="fas fa-arrow-' + (errRate > 2 ? 'up' : 'down') + '"></i> ' + totalFail + ' errors');
+  setClass('kpi-errors-delta', 'kpi-delta delta-down');
   setText('kpi-errors-sub', 'Across 12 parameters');
+
+  // N/A count
+  setText('kpi-na', totalNA.toLocaleString());
+  setHtml('kpi-na-delta', '<i class="fas fa-minus"></i> Not applicable checkpoints');
+  setText('kpi-na-sub', 'Excluded from accuracy calc');
 
   setText('kpi-mom', momVal || '—');
   setHtml('kpi-mom-delta', '<i class="fas fa-arrow-' + (momClass==='delta-up'?'up':momClass==='delta-down'?'down':'right') + '"></i> ' + momLabel);
   setClass('kpi-mom-delta', 'kpi-delta ' + momClass);
-  setText('kpi-mom-sub', momClass === 'delta-up' ? 'Improvement trend' : momClass === 'delta-down' ? 'Declining trend' : 'Stable');
+  setText('kpi-mom-sub', 'Apr vs Mar change');
 
   setText('kpi-wow', wowVal || '—');
   setHtml('kpi-wow-delta', '<i class="fas fa-arrow-' + (wowClass==='delta-up'?'up':wowClass==='delta-down'?'down':'right') + '"></i> ' + wowLabel);
   setClass('kpi-wow-delta', 'kpi-delta ' + wowClass);
-  setText('kpi-wow-sub', 'Weekly performance');
+  setText('kpi-wow-sub', 'Latest week vs prior week');
 
   // Gauges — Overall driven by filtered accuracy; Critical/Non-Critical scaled proportionally
   drawGauge('gaugeOverall', accuracy, '#01A982');
@@ -6252,7 +6284,7 @@ function updateExecutiveCharts() {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: {display:false}, tooltip: {mode:'index'} },
         scales: {
-          y: { min: Math.min(91, Math.floor(Math.min(...accData)) - 1), max: 101, ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
+          y: { min: Math.min(91, Math.floor(Math.min(...accData)) - 1), max: 100, ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
           x: { ticks: {font:{size:10}, maxRotation:45}, grid:{display:false} }
         }
       }
@@ -6294,7 +6326,7 @@ function updateTrendCharts() {
         interaction: {mode:'index', intersect:false},
         plugins: { legend: {position:'top', labels:{font:{size:12},padding:16,boxWidth:14}} },
         scales: {
-          y:  { min: 94, max: 101, position:'left', ticks:{callback:function(v){return v+'%';}, font:{size:11}} },
+          y:  { min: 94, max: 100, position:'left', ticks:{callback:function(v){return v+'%';}, font:{size:11}} },
           y2: { min: 0,  max: 5,   position:'right', ticks:{callback:function(v){return v+'%';}, font:{size:11}}, grid:{display:false} },
           x:  { ticks:{font:{size:12}}, grid:{display:false} }
         }
@@ -6375,7 +6407,7 @@ function rebuildCriticalBarChart() {
         }
       },
       scales: {
-        y: { min: yMin2, max: 101, ticks: {callback:function(v){ return v+'%'; }, font:{size:11}}, grid:{color:'rgba(0,0,0,0.06)'} },
+        y: { min: yMin2, max: 100, ticks: {callback:function(v){ return v+'%'; }, font:{size:11}}, grid:{color:'rgba(0,0,0,0.06)'} },
         x: { grid:{display:false}, ticks:{font:{size:12}} }
       }
     }
@@ -6926,7 +6958,7 @@ function buildRiskPanel() {
           tooltip:{callbacks:{label:function(ctx){ return ctx.dataset.label+': '+ctx.raw+'%'; }}}
         },
         scales:{
-          y:{ min:94, max:101, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
+          y:{ min:94, max:100, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
           x:{ ticks:{font:{size:11}} }
         }
       }
@@ -7008,7 +7040,7 @@ function buildScorecardPanel() {
       ]},
       options:{ responsive:true, maintainAspectRatio:false,
         plugins:{ legend:{position:'top',labels:{font:{size:10},boxWidth:10}} },
-        scales:{ y:{ min:82, max:101, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
+        scales:{ y:{ min:82, max:100, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
           x:{ ticks:{font:{size:9},maxRotation:45} } }
       }
     });
@@ -7186,7 +7218,7 @@ function buildPMPanel() {
             footer:function(){ return 'Click bar to see recruiter breakdown'; }
           }}
         },
-        scales:{ y:{ min:96, max:101, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
+        scales:{ y:{ min:88, max:100, ticks:{callback:function(v){return v+'%';},font:{size:10}} },
           x:{ ticks:{font:{size:11}} } }
       }
     });
@@ -7369,7 +7401,7 @@ function buildGoalsPanel() {
       ]},
       options:{ responsive:true, maintainAspectRatio:false,
         plugins:{ legend:{position:'top',labels:{font:{size:11},boxWidth:12}} },
-        scales:{ y:{ min:96, max:101, ticks:{callback:function(v){return v+'%';},font:{size:11}} },
+        scales:{ y:{ min:88, max:100, ticks:{callback:function(v){return v+'%';},font:{size:11}} },
           x:{ ticks:{font:{size:11}} } }
       }
     });
@@ -8519,7 +8551,7 @@ function runExportPPT() {
 
         } else if (n === 5) {
           // ── AI INSIGHTS ─────────────────────────────────────────
-          slide.addText('AI Insights & Recommendations', { x:0.15, y:0.15, w:12, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
+          slide.addText('Audit Insights & Recommendations', { x:0.15, y:0.15, w:12, h:0.5, fontSize:20, bold:true, color:T.text.replace('#',''), fontFace:'Calibri' });
           slide.addText('Auto-generated intelligence · FY2026 · HPE Talent Acquisition', { x:0.15, y:0.65, w:12, h:0.3, fontSize:10, color:T.sub.replace('#',''), fontFace:'Calibri' });
 
           var aiCards = [
@@ -8651,7 +8683,7 @@ function _buildSearchIndex() {
     { tab:'trends',      label:'Accuracy Trends',            icon:'fa-chart-line',     iconColor:'#01A982', meta:'Monthly & weekly trends' },
     { tab:'improvement', label:'Improvement & Scope',        icon:'fa-arrow-trend-up', iconColor:'#FF8300', meta:'Pareto, recruiter, PM charts' },
     { tab:'capa',        label:'CAPA — Bot Undo',            icon:'fa-clipboard-check',iconColor:'#9b59b6', meta:'Corrective actions' },
-    { tab:'insights',    label:'AI Insights',                icon:'fa-brain',          iconColor:'#e74c3c', meta:'Radar, heatmap' },
+    { tab:'insights',    label:'Audit Insights',                icon:'fa-brain',          iconColor:'#e74c3c', meta:'Radar, heatmap' },
     { tab:'data',        label:'Data Management',            icon:'fa-database',       iconColor:'#2ecc71', meta:'Weekly audit table' },
     { tab:'sla',         label:'SLA Performance',            icon:'fa-clipboard-check',iconColor:'#3498db', meta:'SLA compliance metrics' },
     { tab:'performance', label:'Performance Intelligence',   icon:'fa-user-chart',     iconColor:'#FF8300', meta:'Scorecard, risk, PM panel' },
@@ -8877,7 +8909,7 @@ function openSettingsDrawer() {
   _syncThreshBadges();
   _syncThreshPreview();
   _updateSliderBackground(document.getElementById('slider_minAccuracy'), 90, 100);
-  _updateSliderBackground(document.getElementById('slider_maxErrorRate'), 1, 15);
+  _updateSliderBackground(document.getElementById('slider_maxErrorRate'), 0, 15);
   _updateSliderBackground(document.getElementById('slider_maxConsecDrops'), 1, 5);
 
   document.getElementById('threshOverlay').classList.add('open');
@@ -9172,7 +9204,7 @@ function buildCompareModal() {
         responsive: true, maintainAspectRatio: false,
         plugins: { legend: { position:'top', labels:{ font:{size:11}, boxWidth:12, color: tickCol } } },
         scales: {
-          y: { min:84, max:101,
+          y: { min:84, max:100,
             ticks:{ callback:function(v){ return v+'%'; }, font:{size:10}, color:tickCol },
             grid:{ color:gridCol } },
           x: { ticks:{ font:{size:10}, color:tickCol }, grid:{ color:gridCol } }
@@ -9366,7 +9398,6 @@ const SLA_DATA = {
     ['MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','NR','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET','MET']
   ],
   // FY summaries — HPE FY = Nov to Oct
-  // FY24 partial: Apr-24 → Oct-24 (7 months, indices 0-6)
   // FY25 full:    Nov-24 → Oct-25 (12 months, indices 7-18, incl Apr-25 NR)
   // FY26 partial: Nov-25 → Apr-26 (5 months, indices 19-23, YTD)
   fy: {
@@ -9606,7 +9637,6 @@ function initSLAFYCharts() {
   _slaFYDone = true;
 
   // HPE FY = Nov to Oct
-  // FY24 partial: indices 0-6   (Apr-24 to Oct-24, 7 months)
   // FY25 full:    indices 7-18  (Nov-24 to Oct-25, 12 months)
   // FY26 partial: indices 19-23 (Nov-25 to Apr-26, 5 months YTD)
   const fySlice = (start, end) => (mi) => {
@@ -9615,20 +9645,18 @@ function initSLAFYCharts() {
     const nm  = slice.filter(s=>s==='NOT_MET').length;
     return met+nm>0 ? Math.round(met/(met+nm)*100) : 0;
   };
-  const fy24  = SLA_DATA.metrics.map((_,mi)=>fySlice(0,7)(mi));
   const fy25  = SLA_DATA.metrics.map((_,mi)=>fySlice(7,19)(mi));
   const fy26  = SLA_DATA.metrics.map((_,mi)=>fySlice(19,24)(mi));
 
-  // ---- 3-FY Grouped Bar (FY24 partial | FY25 full | FY26 YTD) ----
+  // ---- 2-FY Grouped Bar (FY25 full | FY26 YTD) ----
   slaDestroyChart('slaFYCompareChart');
   new Chart(document.getElementById('slaFYCompareChart'), {
     type:'bar',
     data:{
       labels: SLA_DATA.metricsShort,
       datasets:[
-        { label:'FY24 (Apr–Oct 24, partial)', data:fy24, backgroundColor:'rgba(149,165,166,0.8)',  borderRadius:4 },
-        { label:'FY25 (Nov-24 – Oct-25, full)',  data:fy25, backgroundColor:'rgba(52,152,219,0.8)',   borderRadius:4 },
-        { label:'FY26 (Nov-25 – Apr-26, YTD)',   data:fy26, backgroundColor:'rgba(1,169,130,0.85)',  borderRadius:4 }
+        { label:'FY25 (Nov-24 – Oct-25, Full Year)',  data:fy25, backgroundColor:'rgba(52,152,219,0.8)',   borderRadius:4 },
+        { label:'FY26 (Nov-25 – Apr-26, YTD)',        data:fy26, backgroundColor:'rgba(1,169,130,0.85)',  borderRadius:4 }
       ]
     },
     options:{
@@ -9639,9 +9667,6 @@ function initSLAFYCharts() {
   });
 
   // ---- FY trend lines (monthly compliance within each FY, aligned by FY month position) ----
-  // FY24 partial: 7 months (Apr-Oct 24)
-  const fy24Labels = SLA_DATA.months.slice(0,7);
-  const fy24Comp   = fy24Labels.map((_,i)=>slaMonthCompliance(i));
   // FY25 full: 12 months (Nov-24 to Oct-25)
   const fy25Labels = SLA_DATA.months.slice(7,19);
   const fy25Comp   = fy25Labels.map((_,i)=>slaMonthCompliance(i+7));
@@ -9659,7 +9684,7 @@ function initSLAFYCharts() {
     data:{
       labels: ['M1','M2','M3','M4','M5','M6','M7','M8','M9','M10','M11','M12'],
       datasets:[
-        { label:'FY24 (Apr-Oct 24)',      data:padNull(fy24Comp,maxLen),  borderColor:'#95a5a6', backgroundColor:'rgba(149,165,166,0.06)', borderWidth:2, tension:0.35, pointRadius:4, spanGaps:false, fill:true, borderDash:[5,4] },
+
         { label:'FY25 (Nov-24–Oct-25)', data:padNull(fy25Comp,maxLen),  borderColor:'#3498db', backgroundColor:'rgba(52,152,219,0.08)',   borderWidth:2.5, tension:0.35, pointRadius:4, spanGaps:false, fill:true },
         { label:'FY26 YTD (Nov-25–)',   data:padNull(fy26Comp,maxLen),  borderColor:'#01a982', backgroundColor:'rgba(1,169,130,0.10)',    borderWidth:2.5, tension:0.35, pointRadius:5, spanGaps:false, fill:true },
         { label:'85% Target', data:new Array(maxLen).fill(85), borderColor:'#f7b731', borderDash:[6,3], borderWidth:1.5, pointRadius:0, fill:false }
@@ -9672,44 +9697,39 @@ function initSLAFYCharts() {
           title: items => 'Month '+items[0].label,
           label: ctx => {
             if (ctx.parsed.y === null) return null;
-            const fyMonths = [fy24Labels, fy25Labels, fy26Labels, []];
+            const fyMonths = [fy25Labels, fy26Labels, []];
             const lbl = fyMonths[ctx.datasetIndex] ? (fyMonths[ctx.datasetIndex][ctx.dataIndex] || '') : '';
             return ctx.dataset.label+': '+ctx.parsed.y+'%'+(lbl?' ('+lbl+')':'');
           }
         }}
       },
-      scales:{ y:{min:0,max:110,ticks:{callback:v=>v+'%'}} }
+      scales:{ y:{min:0,max:100,ticks:{callback:v=>v+'%'}} }
     }
   });
 
-  // ---- Improvement / Risk tables: FY24 vs FY25 vs FY26 ----
+  // ---- Improvement / Risk tables: FY25 vs FY26 ----
   const impBody = document.getElementById('slaFYImprovementBody');
   if (impBody) {
     const pairs = SLA_DATA.metrics.map((n,i)=>({
-      name:n,
-      fy24:fy24[i], fy25:fy25[i], fy26:fy26[i],
-      d2425: fy25[i]-fy24[i],
-      d2526: fy26[i]-fy25[i]
+      name:n, fy25:fy25[i], fy26:fy26[i], d2526: fy26[i]-fy25[i]
     }));
-    const improved = pairs.filter(p=>p.d2425>0||p.d2526>0).sort((a,b)=>(b.d2425+b.d2526)-(a.d2425+a.d2526));
-    impBody.innerHTML = improved.map(p=>{
-      const arr25 = p.d2425>0?'<span style="color:#01a982;font-weight:700">▲+'+p.d2425+'%</span>':'<span style="color:#e74c3c">▼'+p.d2425+'%</span>';
-      const arr26 = p.d2526>0?'<span style="color:#01a982;font-weight:700">▲+'+p.d2526+'%</span>':p.d2526===0?'<span style="color:#aaa">—</span>':'<span style="color:#e74c3c">▼'+p.d2526+'%</span>';
-      return '<tr><td>'+p.name+'</td><td>'+p.fy24+'%</td><td>'+p.fy25+'%</td><td>'+arr25+'</td><td>'+p.fy26+'%</td><td>'+arr26+'</td></tr>';
-    }).join('') || '<tr><td colspan="6" style="color:#aaa">No improvements detected</td></tr>';
+    pairs.sort((a,b)=>b.d2526-a.d2526);
+    impBody.innerHTML = pairs.map(p=>{
+      const arr26 = p.d2526>0?'<span style="color:#01a982;font-weight:700">▲+'+p.d2526+'%</span>':p.d2526===0?'<span style="color:#aaa">—</span>':'<span style="color:#e74c3c">▼'+Math.abs(p.d2526)+'%</span>';
+      return '<tr><td>'+p.name+'</td><td>'+p.fy25+'%</td><td>'+p.fy26+'%</td><td>'+arr26+'</td></tr>';
+    }).join('') || '<tr><td colspan="4" style="color:#aaa">No data available</td></tr>';
   }
   const riskBody = document.getElementById('slaFYRiskBody');
   if (riskBody) {
     const pairs = SLA_DATA.metrics.map((n,i)=>({
-      name:n, fy24:fy24[i], fy25:fy25[i], fy26:fy26[i],
-      d2425: fy25[i]-fy24[i], d2526: fy26[i]-fy25[i]
+      name:n, fy25:fy25[i], fy26:fy26[i], d2526: fy26[i]-fy25[i]
     }));
     const at_risk = pairs.filter(p=>p.fy25<80||p.fy26<80).sort((a,b)=>Math.min(a.fy25,a.fy26)-Math.min(b.fy25,b.fy26));
     riskBody.innerHTML = at_risk.map(p=>{
       const risk25 = p.fy25<60?'<span style="color:#e74c3c;font-weight:700">'+p.fy25+'%</span>':p.fy25<80?'<span style="color:#f7b731;font-weight:700">'+p.fy25+'%</span>':'<span style="color:#01a982">'+p.fy25+'%</span>';
       const risk26 = p.fy26<60?'<span style="color:#e74c3c;font-weight:700">'+p.fy26+'%</span>':p.fy26<80?'<span style="color:#f7b731;font-weight:700">'+p.fy26+'%</span>':'<span style="color:#01a982">'+p.fy26+'%</span>';
-      return '<tr><td>'+p.name+'</td><td>'+p.fy24+'%</td><td>'+risk25+'</td><td>'+risk26+'</td></tr>';
-    }).join('') || '<tr><td colspan="4" style="color:#aaa">All metrics above threshold</td></tr>';
+      return '<tr><td>'+p.name+'</td><td>'+risk25+'</td><td>'+risk26+'</td></tr>';
+    }).join('') || '<tr><td colspan="3" style="color:#aaa">All metrics above threshold</td></tr>';
   }
 }
 
@@ -9881,7 +9901,7 @@ function initSLATrendCharts() {
   });
 
   // Quarterly compliance — HPE FY quarters (Nov-Oct)
-  // FY24 partial had no full quarters; show FY25 Q1-Q4 + FY26 Q1-Q2
+  // FY25 Q1-Q4 + FY26 Q1-Q2
   const quarters = [
     { label:'Q1 FY25 (Nov-Jan)',  idx:[7,8,9]    },
     { label:'Q2 FY25 (Feb-Apr)',  idx:[10,11,12] },
@@ -9912,19 +9932,19 @@ function initSLATrendCharts() {
     }
   });
 
-  // Trend classification — compare FY25 vs FY24 using HPE FY boundaries
+  // Trend classification — FY25 vs FY26 using HPE FY boundaries
   const classEl = document.getElementById('slaTrendClassifications');
   if (classEl) {
     const classify = (mi) => {
       const data = SLA_DATA.perMetricMonthly[mi];
-      // FY24 partial (idx 0-6), FY25 full (idx 7-18)
-      const fy24d = data.slice(0,7).filter(s=>s!=='NR');
+      // FY25 full (idx 7-18), FY26 partial (idx 19-23)
+      const fy25d = data.slice(7,19).filter(s=>s!=='NR');
       const fy25d = data.slice(7,19).filter(s=>s!=='NR');
       const fy26d = data.slice(19).filter(s=>s!=='NR');
-      const r24 = fy24d.length ? fy24d.filter(s=>s==='MET').length/fy24d.length : 0;
+      const r24 = fy25d.length ? fy25d.filter(s=>s==='MET').length/fy25d.length : 0;
       const r25 = fy25d.length ? fy25d.filter(s=>s==='MET').length/fy25d.length : 0;
       const r26 = fy26d.length ? fy26d.filter(s=>s==='MET').length/fy26d.length : 0;
-      // Use FY25 vs FY24 trend as primary signal, FY26 as confirmation
+      // Use FY25 vs FY26 trend as primary signal
       const d2425 = r25 - r24;
       const d2526 = r26 - r25;
       if (d2425 > 0.1 || (d2425 >= 0 && d2526 > 0.05)) return 'improving';
@@ -9975,7 +9995,7 @@ function initSLATrendCharts() {
       +'<div class="sla-rec-item sla-rec-medium">'
       +'<div class="sla-rec-priority">P5 — MEDIUM</div>'
       +'<div class="sla-rec-title"><i class="fas fa-calendar-check"></i> Leverage FY25 Momentum into FY26</div>'
-      +'<div class="sla-rec-body">FY25 (Nov-24 to Oct-25) achieved 81.8% compliance on 110 reported instances, recovering from FY24 partial (75.7%). FY26 YTD is at 82.0% but Feb-26 regression (60%) is a warning. Actions: (1) Protect Aug-Sep-25 and Nov-25 perfect-month benchmarks, (2) Investigate Feb-26 dip urgently, (3) Target 88%+ for FY26 full year (Nov-25 to Oct-26).</div>'
+      +'<div class="sla-rec-body">FY25 (Nov-24 to Oct-25) achieved 81.8% compliance on 110 reported instances. FY26 YTD is at 82.0% but Feb-26 regression (60%) is a warning signal. Actions: (1) Protect Aug-Sep-25 and Nov-25 perfect-month benchmarks, (2) Investigate Feb-26 dip urgently, (3) Target 88%+ for FY26 full year (Nov-25 to Oct-26).</div>'
       +'</div>'
       +'<div class="sla-rec-item sla-rec-low">'
       +'<div class="sla-rec-priority">P6 — STRATEGIC</div>'
@@ -10015,7 +10035,7 @@ function initSLADashboard() {
     <div class="thresh-live-preview" id="threshPreview">
       <div class="thresh-preview-title"><i class="fas fa-eye" style="margin-right:5px"></i>Current Active Thresholds</div>
       <div class="thresh-preview-row">
-        <span>Minimum Accuracy Target</span>
+        <span>Minimum Accuracy Threshold</span>
         <span class="thresh-preview-val" id="prev_minAccuracy">95.0%</span>
       </div>
       <div class="thresh-preview-row">
@@ -10031,10 +10051,10 @@ function initSLADashboard() {
     <!-- Slider 1: minAccuracy -->
     <div class="thresh-group">
       <div class="thresh-label">
-        <span><i class="fas fa-bullseye" style="color:var(--hpe-green);margin-right:6px"></i>Minimum Accuracy Target</span>
+        <span><i class="fas fa-bullseye" style="color:var(--hpe-green);margin-right:6px"></i>Minimum Accuracy Threshold</span>
         <span class="thresh-value-badge" id="badge_minAccuracy">95.0%</span>
       </div>
-      <div class="thresh-desc">Flag the system when overall accuracy drops below this level. Default: 95.0%</div>
+      <div class="thresh-desc">Critical: 100% | Non-Critical: 95%. Flag the system when overall accuracy drops below this level.</div>
       <input type="range" class="thresh-slider" id="slider_minAccuracy"
         min="90" max="100" step="0.5" value="95"
         oninput="onThreshSlider('minAccuracy', this.value)" />
@@ -10047,11 +10067,11 @@ function initSLADashboard() {
         <span><i class="fas fa-exclamation-triangle" style="color:var(--hpe-orange);margin-right:6px"></i>Max Error Rate (per parameter)</span>
         <span class="thresh-value-badge" id="badge_maxErrorRate">5.0%</span>
       </div>
-      <div class="thresh-desc">Raise an alert when any single parameter's error rate exceeds this percentage. Default: 5.0%</div>
+      <div class="thresh-desc">Critical: 0% | Non-Critical: 5%. Alert when any parameter's error rate exceeds this percentage.</div>
       <input type="range" class="thresh-slider" id="slider_maxErrorRate"
-        min="1" max="15" step="0.5" value="5"
+        min="0" max="15" step="0.5" value="5"
         oninput="onThreshSlider('maxErrorRate', this.value)" />
-      <div class="thresh-range-labels"><span>1%</span><span>15%</span></div>
+      <div class="thresh-range-labels"><span>0%</span><span>15%</span></div>
     </div>
 
     <!-- Slider 3: maxConsecDrops -->
