@@ -8005,7 +8005,7 @@ function runExportPDF() {
         doc.text('HPE', margin, 26);
         doc.setFontSize(10); doc.setFont('helvetica','normal');
         doc.text('Hewlett Packard Enterprise', margin, 34);
-        doc.setFontSize(8); doc.setTextColor('rgba(255,255,255,0.7)');
+        doc.setFontSize(8); doc.setTextColor('#d9f5ee'); // was rgba(255,255,255,0.7) — jsPDF doesn't support rgba()
         doc.text('Talent Acquisition — Audit Quality Programme', margin, 42);
 
         // Report title block
