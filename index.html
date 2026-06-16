@@ -4490,15 +4490,13 @@ let _execDone = false, _trendDone = false, _improveDone = false, _insightsDone =
 
 
 function navigateToTab(tabName) {
-  var navBtn = document.querySelector('.nav-tab[onclick*="switchTab('"+tabName+"'"]');
-  if (!navBtn) {
-    // Try finding by partial match
-    var allTabs = document.querySelectorAll('.nav-tab');
-    for (var i = 0; i < allTabs.length; i++) {
-      if (allTabs[i].getAttribute('onclick') && allTabs[i].getAttribute('onclick').indexOf("'"+tabName+"'") !== -1) {
-        navBtn = allTabs[i];
-        break;
-      }
+  var navBtn = null;
+  var allTabs = document.querySelectorAll('.nav-tab');
+  for (var i = 0; i < allTabs.length; i++) {
+    var oc = allTabs[i].getAttribute('onclick') || '';
+    if (oc.indexOf(tabName) !== -1) {
+      navBtn = allTabs[i];
+      break;
     }
   }
   if (navBtn) {
@@ -9939,16 +9937,13 @@ function initSLATrendCharts() {
       const data = SLA_DATA.perMetricMonthly[mi];
       // FY25 full (idx 7-18), FY26 partial (idx 19-23)
       const fy25d = data.slice(7,19).filter(s=>s!=='NR');
-      const fy25d = data.slice(7,19).filter(s=>s!=='NR');
       const fy26d = data.slice(19).filter(s=>s!=='NR');
-      const r24 = fy25d.length ? fy25d.filter(s=>s==='MET').length/fy25d.length : 0;
       const r25 = fy25d.length ? fy25d.filter(s=>s==='MET').length/fy25d.length : 0;
       const r26 = fy26d.length ? fy26d.filter(s=>s==='MET').length/fy26d.length : 0;
       // Use FY25 vs FY26 trend as primary signal
-      const d2425 = r25 - r24;
       const d2526 = r26 - r25;
-      if (d2425 > 0.1 || (d2425 >= 0 && d2526 > 0.05)) return 'improving';
-      if (d2425 < -0.1 || d2526 < -0.1) return 'declining';
+      if (d2526 > 0.1) return 'improving';
+      if (d2526 < -0.1) return 'declining';
       return 'stable';
     };
     const groups = { improving:[], stable:[], declining:[] };
