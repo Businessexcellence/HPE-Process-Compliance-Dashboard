@@ -1980,8 +1980,8 @@
         <div class="gauge-title"><i class="fas fa-circle-dot" style="color:var(--hpe-blue);margin-right:6px"></i>Critical Parameters</div>
         <canvas id="gaugeCritical" width="200" height="110"></canvas>
         <div class="gauge-value-display" id="gaugeCriticalVal">98.62%</div>
-        <div class="gauge-target">Target: 99.00%</div>
-        <div class="gauge-status warning" id="gaugeCriticalStatus">⚠ Below Target</div>
+        <div class="gauge-target">Target: 95.00%</div>
+        <div class="gauge-status good" id="gaugeCriticalStatus">✓ Above Target</div>
       </div>
       <div class="gauge-card">
         <div class="gauge-title"><i class="fas fa-circle-dot" style="color:var(--hpe-orange);margin-right:6px"></i>Non-Critical Parameters</div>
@@ -3830,13 +3830,13 @@
 
         <div class="glossary-card gc-blue" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="critical parameters gauge target 99">
           <div class="gc-term"><i class="fas fa-circle-dot" style="color:#0D5DBF;margin-top:2px"></i>Critical Parameters Accuracy<span class="gc-abbr">CPA</span></div>
-          <div class="gc-definition">Accuracy calculated only for parameters classified as "critical" — fields whose errors have direct business or compliance impact (e.g., Offer Details, Interview Process, Start Date). These carry a higher benchmark of 99% vs the overall 95% target.</div>
+          <div class="gc-definition">Accuracy calculated only for parameters classified as "critical" — fields whose errors have direct business or compliance impact (e.g., Offer Details, Interview Process, Start Date). These are measured against the standard 95% accuracy target.</div>
           <div class="gc-formula-box">
             <div class="gc-formula-label"><i class="fas fa-calculator" style="margin-right:4px"></i>Formula</div>
             <div class="gc-formula">CPA (%) = (Critical Passed / Critical Applicable) × 100</div>
           </div>
-          <div class="gc-example"><strong>FY2026:</strong> 98.62% — 0.38 pp below the 99% critical target → <strong>⚠ Below Target</strong></div>
-          <div class="gc-tags"><span class="gc-tag blue">Executive</span><span class="gc-tag red">Target: 99%</span></div>
+          <div class="gc-example"><strong>FY2026:</strong> 98.62% — 3.62 pp above the 95% target → <strong>✓ Above Target</strong></div>
+          <div class="gc-tags"><span class="gc-tag blue">Executive</span><span class="gc-tag green">Target: 95%</span></div>
         </div>
 
         <div class="glossary-card gc-green" onclick="navigateToTab('exec')" title="Navigate to Executive Summary" style="cursor:pointer" data-category="executive" data-terms="non-critical parameters gauge 97 target">
@@ -3919,7 +3919,7 @@
           <div class="gc-formula-box">
             <div class="gc-formula-label"><i class="fas fa-info-circle" style="margin-right:4px"></i>Context</div>
             <div class="gc-formula">Target = 95.0% (default, adjustable via Threshold Settings)
-  Critical target = 99.0% for critical-only parameters</div>
+  Critical target = 95.0% (same as overall standard threshold)</div>
           </div>
           <div class="gc-tags"><span class="gc-tag">Trends</span><span class="gc-tag blue">Benchmark</span></div>
         </div>
@@ -6298,7 +6298,7 @@ function updateExecutiveKPIs() {
   drawGauge('gaugeCritical',    critAcc,    '#0D5DBF');
   setText('gaugeCriticalVal',    critAcc + '%');
   var gCS = document.getElementById('gaugeCriticalStatus');
-  if (gCS) { gCS.className = 'gauge-status ' + (critAcc >= 99 ? 'good' : 'warning'); gCS.textContent = critAcc >= 99 ? '✓ Above Target' : '⚠ Below Target'; }
+  if (gCS) { gCS.className = 'gauge-status ' + (critAcc >= 95 ? 'good' : 'warning'); gCS.textContent = critAcc >= 95 ? '✓ Above Target' : '⚠ Below Target'; }
 
   drawGauge('gaugeNonCritical', nonCritAcc, '#FF8300');
   setText('gaugeNonCriticalVal', nonCritAcc + '%');
@@ -6440,7 +6440,7 @@ function rebuildCriticalBarChart() {
   var delta2  = filtAcc - fyBaseline2;
   var cs      = DASHBOARD_DATA.crit_stats;
   var adjAcc  = cs.map(function(c){ return Math.min(100, Math.max(85, +(c.Accuracy + delta2).toFixed(2))); });
-  var targets = cs.map(function(c){ return c.Criticality === 'Critical' ? 99 : 97; });
+  var targets = cs.map(function(c){ return c.Criticality === 'Critical' ? 95 : 97; });
   var colors  = adjAcc.map(function(a, i){ return a >= targets[i] ? 'rgba(1,169,130,0.85)' : 'rgba(197,78,75,0.85)'; });
   var yMin2   = Math.min(88, Math.floor(Math.min.apply(null, adjAcc)) - 2);
   destroyChart('criticalBarChart');
