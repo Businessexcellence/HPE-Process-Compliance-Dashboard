@@ -7,6 +7,8 @@
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='6' fill='%2301A982'/><text x='16' y='22' font-size='14' font-weight='bold' text-anchor='middle' fill='white' font-family='Arial'>H</text></svg>">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+  <!-- SheetJS for real Excel/CSV parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <!-- Export libraries -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1993,7 +1995,43 @@
       </div>
     </div>
 
-    <!-- AI Insights Panel -->
+    <!-- Hire Type Accuracy Breakdown -->
+    <div class="chart-grid-2" id="hireTypeBreakdownSection">
+      <div class="card">
+        <div class="card-title"><i class="fas fa-user-tie" style="color:#0D5DBF"></i> HPE Experienced — Accuracy by Month</div>
+        <div class="card-subtitle">Audit accuracy for experienced hire candidates (HPE_Experienced)</div>
+        <div class="acc-legend-bar">
+          <span class="alb-title">Accuracy Key:</span>
+          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
+        </div>
+        <div id="ht-exp-section">
+          <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">
+            <i class="fas fa-upload" style="font-size:24px;margin-bottom:8px;display:block;opacity:0.4"></i>
+            Upload data file to see HPE_Experienced accuracy breakdown
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title"><i class="fas fa-graduation-cap" style="color:#FF8300"></i> HPE UR — Accuracy by Month</div>
+        <div class="card-subtitle">Audit accuracy for university recruiting candidates (HPE_UR)</div>
+        <div class="acc-legend-bar">
+          <span class="alb-title">Accuracy Key:</span>
+          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
+        </div>
+        <div id="ht-ur-section">
+          <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">
+            <i class="fas fa-upload" style="font-size:24px;margin-bottom:8px;display:block;opacity:0.4"></i>
+            Upload data file to see HPE_UR accuracy breakdown
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Insights Panel -->
     <div class="ai-insights">
       <div class="ai-insights-header">
         <div class="ai-insights-title">Audit Intelligence Snapshot — FY2026</div>
@@ -2701,51 +2739,54 @@
           <div class="icon-badge"><i class="fas fa-database"></i></div>
           Data Management
         </div>
-        <div class="section-subtitle">Import, export, refresh, and validate your audit data</div>
+        <div class="section-subtitle">Upload your audit data file — dashboard updates automatically on every upload</div>
       </div>
     </div>
 
     <!-- Upload Zone -->
-    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()" 
+    <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()"
          ondragover="event.preventDefault(); this.classList.add('dragover')"
          ondragleave="this.classList.remove('dragover')"
          ondrop="handleDrop(event)">
       <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none" onchange="handleFileUpload(event)">
       <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
       <div class="upload-title">Drop Audit Data File Here</div>
-      <div class="upload-subtitle">Supports .xlsx, .xls, .csv formats — Max 50MB<br>
-        <strong>Required sheets:</strong> "Parameter Data" + "Recruiter Data"
+      <div class="upload-subtitle">Supports .xlsx, .xls, .csv &nbsp;|&nbsp; Max 50 MB<br>
+        <strong>Required columns:</strong> Month, Week, Parameter, Result (Pass/Fail/NA)<br>
+        <strong>Optional columns:</strong> Hire_Type (HPE_Experienced / HPE_UR), Recruiter, PM, Stage, Criticality
       </div>
     </div>
 
-    <!-- Status + Actions -->
+    <!-- Status + Summary -->
     <div class="chart-grid-2">
       <div class="card">
         <div class="card-title"><i class="fas fa-plug"></i> Data Source Status</div>
-        <div class="card-subtitle">Connection and data freshness indicators</div>
-        <div class="validation-item">
-          <span class="val-icon" style="color:var(--hpe-green)">✅</span>
-          <div class="val-text"><strong>Parameter data sheet:</strong> 319 rows loaded successfully</div>
-        </div>
-        <div class="validation-item">
-          <span class="val-icon" style="color:var(--hpe-green)">✅</span>
-          <div class="val-text"><strong>Recruiter data sheet:</strong> 8,600 rows loaded successfully</div>
-        </div>
-        <div class="validation-item">
-          <span class="val-icon" style="color:var(--hpe-green)">✅</span>
-          <div class="val-text"><strong>Data validation:</strong> All required columns present</div>
-        </div>
-        <div class="validation-item">
-          <span class="val-icon" style="color:var(--hpe-yellow)">⚠️</span>
-          <div class="val-text"><strong>Data normalization:</strong> 4 duplicate recruiter name variants resolved (e.g., " Critical" → "Critical")</div>
-        </div>
-        <div class="validation-item">
-          <span class="val-icon" style="color:var(--hpe-green)">✅</span>
-          <div class="val-text"><strong>Date range:</strong> Jan 2026 — Apr 2026 (FY2026)</div>
-        </div>
-        <div class="validation-item">
-          <span class="val-icon" style="color:var(--hpe-green)">✅</span>
-          <div class="val-text"><strong>Last refreshed:</strong> <span id="dataLastRefresh">Just now</span></div>
+        <div class="card-subtitle">Upload results and validation indicators</div>
+        <div id="dataStatusPanel">
+          <div class="validation-item">
+            <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+            <div class="val-text"><strong>Parameter data sheet:</strong> 319 rows loaded (seed data)</div>
+          </div>
+          <div class="validation-item">
+            <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+            <div class="val-text"><strong>Recruiter data sheet:</strong> 8,600 rows loaded (seed data)</div>
+          </div>
+          <div class="validation-item">
+            <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+            <div class="val-text"><strong>Data validation:</strong> All required columns present</div>
+          </div>
+          <div class="validation-item">
+            <span class="val-icon" style="color:var(--hpe-yellow)">&#9888;&#65039;</span>
+            <div class="val-text"><strong>Hire Type split:</strong> Upload a file with Hire_Type column to see HPE_Experienced vs HPE_UR breakdown</div>
+          </div>
+          <div class="validation-item">
+            <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+            <div class="val-text"><strong>Date range:</strong> Jan 2026 — Apr 2026 (FY2026)</div>
+          </div>
+          <div class="validation-item">
+            <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+            <div class="val-text"><strong>Last refreshed:</strong> <span id="dataLastRefresh">Seed data</span></div>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -2753,26 +2794,64 @@
         <div class="card-subtitle">Current dataset overview</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px">
           <div style="background:var(--hpe-green-light);padding:14px;border-radius:8px;text-align:center">
-            <div style="font-size:22px;font-weight:800;color:var(--hpe-green)">8,599</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Parameter Audit Rows</div>
+            <div style="font-size:22px;font-weight:800;color:var(--hpe-green)" id="ds-audit-count">8,599</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Total Audit Rows</div>
           </div>
           <div style="background:#e8f0fb;padding:14px;border-radius:8px;text-align:center">
-            <div style="font-size:22px;font-weight:800;color:var(--hpe-blue)">8,600</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Recruiter Audit Rows</div>
-          </div>
-          <div style="background:#fceaea;padding:14px;border-radius:8px;text-align:center">
-            <div style="font-size:22px;font-weight:800;color:var(--hpe-red)">54</div>
+            <div style="font-size:22px;font-weight:800;color:var(--hpe-blue)" id="ds-rec-count">54</div>
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Unique Recruiters</div>
           </div>
-          <div style="background:#eef2f5;padding:14px;border-radius:8px;text-align:center">
-            <div style="font-size:22px;font-weight:800;color:var(--hpe-slate)">5</div>
+          <div style="background:#fceaea;padding:14px;border-radius:8px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:var(--hpe-red)" id="ds-pm-count">5</div>
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Program Managers</div>
           </div>
-          <div style="background:#fffbe6;padding:14px;border-radius:8px;text-align:center;grid-column:span 2">
-            <div style="font-size:22px;font-weight:800;color:#b8860b">4</div>
+          <div style="background:#fffbe6;padding:14px;border-radius:8px;text-align:center">
+            <div style="font-size:22px;font-weight:800;color:#b8860b" id="ds-month-count">4</div>
             <div style="font-size:11px;color:var(--text-muted);margin-top:2px">Months Covered</div>
           </div>
         </div>
+      </div>
+    </div>
+
+    <!-- Hire Type Accuracy Section (populated after upload) -->
+    <div class="card card-full" id="dmHireTypeCard">
+      <div class="card-title"><i class="fas fa-layer-group"></i> Accuracy by Hire Type</div>
+      <div class="card-subtitle">HPE_Experienced vs HPE_UR — calculated separately from uploaded data</div>
+      <div id="dmHireTypeContent" style="margin-top:12px">
+        <div style="padding:28px;text-align:center;color:var(--text-muted)">
+          <i class="fas fa-file-upload" style="font-size:36px;opacity:0.3;display:block;margin-bottom:12px"></i>
+          <div style="font-size:14px;font-weight:600;margin-bottom:4px">No data uploaded yet</div>
+          <div style="font-size:12px">Upload a file with a <strong>Hire_Type</strong> column containing <strong>HPE_Experienced</strong> or <strong>HPE_UR</strong> values to see the split accuracy analysis here and in the Executive Summary.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Column Format Guide -->
+    <div class="card card-full">
+      <div class="card-title"><i class="fas fa-table"></i> Expected File Format</div>
+      <div class="card-subtitle">Your file should contain these columns (header row in row 1)</div>
+      <div style="overflow-x:auto;margin-top:12px">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead>
+            <tr style="background:var(--hpe-green);color:white">
+              <th style="padding:8px 12px;text-align:left">Column Name</th>
+              <th style="padding:8px 12px;text-align:left">Required</th>
+              <th style="padding:8px 12px;text-align:left">Example Values</th>
+              <th style="padding:8px 12px;text-align:left">Purpose</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="background:var(--surface)"><td style="padding:7px 12px;font-weight:700;color:var(--hpe-green)">Month</td><td style="padding:7px 12px"><span style="background:#e6f9f5;color:#01A982;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Required</span></td><td style="padding:7px 12px;color:var(--text-muted)">Jan, Feb, Mar, Apr</td><td style="padding:7px 12px">Month of audit</td></tr>
+            <tr style="background:var(--surface-2)"><td style="padding:7px 12px;font-weight:700;color:var(--hpe-green)">Week</td><td style="padding:7px 12px"><span style="background:#e6f9f5;color:#01A982;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Required</span></td><td style="padding:7px 12px;color:var(--text-muted)">1, 2, 3, 4</td><td style="padding:7px 12px">Week number within month</td></tr>
+            <tr style="background:var(--surface)"><td style="padding:7px 12px;font-weight:700;color:var(--hpe-green)">Parameter</td><td style="padding:7px 12px"><span style="background:#e6f9f5;color:#01A982;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Required</span></td><td style="padding:7px 12px;color:var(--text-muted)">Offer Details, Source of hire…</td><td style="padding:7px 12px">Audit checkpoint name</td></tr>
+            <tr style="background:var(--surface-2)"><td style="padding:7px 12px;font-weight:700;color:var(--hpe-green)">Result</td><td style="padding:7px 12px"><span style="background:#e6f9f5;color:#01A982;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Required</span></td><td style="padding:7px 12px;color:var(--text-muted)">Pass, Fail, NA</td><td style="padding:7px 12px">Audit outcome</td></tr>
+            <tr style="background:var(--surface)"><td style="padding:7px 12px;font-weight:700;color:#FF8300">Hire_Type</td><td style="padding:7px 12px"><span style="background:#fff3e6;color:#FF8300;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Optional</span></td><td style="padding:7px 12px;color:var(--text-muted)"><strong>HPE_Experienced</strong> or <strong>HPE_UR</strong></td><td style="padding:7px 12px">Enables split accuracy by hire type</td></tr>
+            <tr style="background:var(--surface-2)"><td style="padding:7px 12px;font-weight:700;color:#FF8300">Recruiter</td><td style="padding:7px 12px"><span style="background:#fff3e6;color:#FF8300;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Optional</span></td><td style="padding:7px 12px;color:var(--text-muted)">Recruiter full name</td><td style="padding:7px 12px">Recruiter performance panel</td></tr>
+            <tr style="background:var(--surface)"><td style="padding:7px 12px;font-weight:700;color:#FF8300">PM</td><td style="padding:7px 12px"><span style="background:#fff3e6;color:#FF8300;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Optional</span></td><td style="padding:7px 12px;color:var(--text-muted)">Program Manager name</td><td style="padding:7px 12px">PM panel drill-down</td></tr>
+            <tr style="background:var(--surface-2)"><td style="padding:7px 12px;font-weight:700;color:#FF8300">Stage</td><td style="padding:7px 12px"><span style="background:#fff3e6;color:#FF8300;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Optional</span></td><td style="padding:7px 12px;color:var(--text-muted)">Pre Selection, Post Selection</td><td style="padding:7px 12px">Stage accuracy charts</td></tr>
+            <tr style="background:var(--surface)"><td style="padding:7px 12px;font-weight:700;color:#FF8300">Criticality</td><td style="padding:7px 12px"><span style="background:#fff3e6;color:#FF8300;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:700">Optional</span></td><td style="padding:7px 12px;color:var(--text-muted)">Critical, Non Critical</td><td style="padding:7px 12px">Critical parameter gauges</td></tr>
+          </tbody>
+        </table>
       </div>
     </div>
 
@@ -6501,33 +6580,26 @@ function filterCapa(type, el) {
 // ==================== REFRESH ====================
 function refreshDashboard() {
   const refreshBtn = document.querySelector('.btn-refresh');
-  refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+  if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
   setTimeout(() => {
-    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+    if (refreshBtn) refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
     const now = new Date();
-    document.getElementById('refreshTime').textContent = 'Last refreshed: ' + now.toLocaleTimeString();
-    document.getElementById('dataLastRefresh').textContent = now.toLocaleString();
+    var rt = document.getElementById('refreshTime');
+    if (rt) rt.textContent = 'Last refreshed: ' + now.toLocaleTimeString();
+    var dlr = document.getElementById('dataLastRefresh');
+    if (dlr) dlr.textContent = now.toLocaleString();
   }, 1200);
 }
 
-// ==================== FILE UPLOAD ====================
+// ==================== FILE UPLOAD & DATA PROCESSING ====================
+
+// Stores last-uploaded parsed data split by hire type
+var UPLOADED_DATA = null;
+
 function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-  const zone = document.getElementById('uploadZone');
-  zone.innerHTML = `
-    <div class="upload-icon" style="color:var(--hpe-green)"><i class="fas fa-check-circle"></i></div>
-    <div class="upload-title" style="color:var(--hpe-green)">File Loaded: ${file.name}</div>
-    <div class="upload-subtitle">Size: ${(file.size/1024).toFixed(1)} KB — Processing data and refreshing charts...</div>
-  `;
-  setTimeout(() => {
-    zone.innerHTML = `
-      <div class="upload-icon"><i class="fas fa-cloud-upload-alt"></i></div>
-      <div class="upload-title">Drop Audit Data File Here</div>
-      <div class="upload-subtitle">File processed! Dashboard updated. Drag another file to refresh again.</div>
-    `;
-    refreshDashboard();
-  }, 2000);
+  _doParseFile(file);
 }
 
 function handleDrop(event) {
@@ -6535,7 +6607,633 @@ function handleDrop(event) {
   const zone = document.getElementById('uploadZone');
   zone.classList.remove('dragover');
   const file = event.dataTransfer.files[0];
-  if (file) handleFileUpload({target: {files: [file]}});
+  if (file) _doParseFile(file);
+}
+
+function _doParseFile(file) {
+  const zone = document.getElementById('uploadZone');
+  zone.innerHTML = `
+    <div class="upload-icon" style="color:var(--hpe-blue)"><i class="fas fa-spinner fa-spin"></i></div>
+    <div class="upload-title" style="color:var(--hpe-blue)">Reading: ${file.name}</div>
+    <div class="upload-subtitle">Parsing ${(file.size/1024).toFixed(1)} KB — please wait...</div>
+  `;
+
+  const reader = new FileReader();
+  const isCSV = file.name.toLowerCase().endsWith('.csv');
+
+  reader.onload = function(e) {
+    try {
+      var rows = [];
+      if (isCSV) {
+        rows = _parseCSVRows(e.target.result);
+      } else {
+        // Excel via SheetJS
+        var wb = XLSX.read(e.target.result, {type:'array'});
+        // Try "Parameter Data" sheet first, then fall back to first sheet
+        var wsName = wb.SheetNames.includes('Parameter Data') ? 'Parameter Data' : wb.SheetNames[0];
+        var ws = wb.Sheets[wsName];
+        rows = XLSX.utils.sheet_to_json(ws, {defval:''});
+      }
+
+      if (!rows || rows.length === 0) {
+        _uploadError(zone, 'No data rows found in the file.');
+        return;
+      }
+
+      // Validate required columns
+      var firstRow = rows[0];
+      var keys = Object.keys(firstRow).map(k => k.trim());
+      var required = ['Month', 'Week', 'Parameter', 'Result'];
+      var missing = required.filter(function(r){
+        return !keys.some(function(k){ return k.toLowerCase() === r.toLowerCase(); });
+      });
+      if (missing.length > 0) {
+        _uploadError(zone, 'Missing required columns: ' + missing.join(', ') + '. Expected columns: Month, Week, Parameter, Result, Hire_Type (optional), Recruiter (optional), PM (optional), Stage (optional), Criticality (optional).');
+        return;
+      }
+
+      // Normalise keys (trim + title-case matching)
+      rows = rows.map(function(r) {
+        var n = {};
+        Object.keys(r).forEach(function(k){ n[k.trim()] = (typeof r[k] === 'string') ? r[k].trim() : r[k]; });
+        return n;
+      });
+
+      // Process and inject into DASHBOARD_DATA
+      var result = _processRows(rows);
+      UPLOADED_DATA = result;
+
+      // Inject into live DASHBOARD_DATA + PERF_DATA
+      _injectDashboardData(result);
+
+      // Rebuild all charts and panels
+      _fullDashboardRebuild();
+
+      // Update upload zone to success
+      zone.innerHTML = `
+        <div class="upload-icon" style="color:var(--hpe-green)"><i class="fas fa-check-circle"></i></div>
+        <div class="upload-title" style="color:var(--hpe-green)">Loaded: ${file.name}</div>
+        <div class="upload-subtitle">${rows.length.toLocaleString()} rows processed &nbsp;|&nbsp; Dashboard fully updated &nbsp;|&nbsp; Drop another file to refresh</div>
+      `;
+
+      // Refresh status panel
+      _updateDataStatusPanel(result, file);
+
+      const now = new Date();
+      document.getElementById('refreshTime').textContent = 'Last refreshed: ' + now.toLocaleTimeString();
+      var dlr = document.getElementById('dataLastRefresh');
+      if (dlr) dlr.textContent = now.toLocaleString();
+
+      showToast('Dashboard updated from ' + file.name + ' (' + rows.length.toLocaleString() + ' rows)', 'success');
+
+    } catch(err) {
+      _uploadError(zone, 'Parse error: ' + err.message);
+    }
+  };
+
+  reader.onerror = function() { _uploadError(zone, 'File read error. Please try again.'); };
+
+  if (isCSV) {
+    reader.readAsText(file);
+  } else {
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+function _uploadError(zone, msg) {
+  zone.innerHTML = `
+    <div class="upload-icon" style="color:var(--hpe-red)"><i class="fas fa-exclamation-circle"></i></div>
+    <div class="upload-title" style="color:var(--hpe-red)">Upload Failed</div>
+    <div class="upload-subtitle" style="color:var(--hpe-red)">${msg}</div>
+  `;
+  showToast(msg, 'error');
+}
+
+function _parseCSVRows(text) {
+  var lines = text.split(/\r?\n/);
+  if (lines.length < 2) return [];
+  var headers = lines[0].split(',').map(h => h.replace(/^"|"$/g,'').trim());
+  var rows = [];
+  for (var i = 1; i < lines.length; i++) {
+    if (!lines[i].trim()) continue;
+    var vals = lines[i].split(',').map(v => v.replace(/^"|"$/g,'').trim());
+    var obj = {};
+    headers.forEach(function(h, idx){ obj[h] = vals[idx] || ''; });
+    rows.push(obj);
+  }
+  return rows;
+}
+
+// ---- Core computation engine ----
+// Expected columns (case-insensitive): Month, Week, Parameter, Result (Pass/Fail/NA),
+//   Hire_Type (HPE_Experienced / HPE_UR), Recruiter, PM, Stage, Criticality
+function _processRows(rows) {
+  // Helper: find column value case-insensitively
+  function col(row, name) {
+    var keys = Object.keys(row);
+    var k = keys.find(function(k){ return k.toLowerCase() === name.toLowerCase(); });
+    return k ? (row[k] || '') : '';
+  }
+
+  function calcAcc(pass, count) {
+    return count > 0 ? +((pass / count) * 100).toFixed(2) : 0;
+  }
+
+  // Month number map for sorting (Jan=10 ... Apr=13 per FY convention)
+  var MONTH_NUM = {jan:10,feb:11,mar:12,apr:13,may:14,jun:15,jul:16,aug:17,sep:18,oct:19,nov:7,dec:8};
+  function monthNum(m) {
+    return MONTH_NUM[(m||'').toLowerCase().slice(0,3)] || 99;
+  }
+
+  var HIRE_TYPES = ['HPE_Experienced', 'HPE_UR'];
+
+  // Classify result
+  function classifyResult(r) {
+    var v = (r||'').toString().trim().toLowerCase();
+    if (v === 'pass' || v === '1' || v === 'true' || v === 'yes') return 'pass';
+    if (v === 'na' || v === 'n/a' || v === 'not applicable') return 'na';
+    return 'fail';
+  }
+
+  // Bucket rows
+  var monthMap = {};   // key: Month
+  var weekMap  = {};   // key: "Month||Week"
+  var paramMap = {};   // key: Parameter
+  var recruiterMap = {};
+  var pmMap    = {};
+  var stageMap = {};
+  var critMap  = {};
+  var hireTypeMonthMap = { HPE_Experienced: {}, HPE_UR: {}, combined: {} };
+
+  var totalPass = 0, totalFail = 0, totalNA = 0, totalCount = 0;
+  var htTotals = { HPE_Experienced: {pass:0,fail:0,na:0,count:0}, HPE_UR: {pass:0,fail:0,na:0,count:0} };
+
+  rows.forEach(function(row) {
+    var month  = (col(row,'Month')||'').toString().trim();
+    var week   = parseInt(col(row,'Week')) || 1;
+    var param  = (col(row,'Parameter')||'').toString().trim();
+    var res    = classifyResult(col(row,'Result'));
+    var ht     = (col(row,'Hire_Type')||col(row,'HireType')||col(row,'hire_type')||'').toString().trim();
+    var rec    = (col(row,'Recruiter')||'').toString().trim();
+    var pm     = (col(row,'PM')||col(row,'Program Manager')||'').toString().trim();
+    var stage  = (col(row,'Stage')||'').toString().trim();
+    var crit   = (col(row,'Criticality')||'').toString().trim();
+
+    // Normalise hire type
+    if (!ht || (ht.toUpperCase() !== 'HPE_EXPERIENCED' && ht.toUpperCase() !== 'HPE_UR')) {
+      ht = 'HPE_Experienced'; // default bucket
+    }
+    ht = ht.toUpperCase() === 'HPE_UR' ? 'HPE_UR' : 'HPE_Experienced';
+
+    var isPass = res === 'pass', isNA = res === 'na', isFail = res === 'fail';
+    // NA rows excluded from accuracy denominator
+    var countable = !isNA;
+
+    if (countable) { totalCount++; if (isPass) totalPass++; if (isFail) totalFail++; }
+    totalNA += isNA ? 1 : 0;
+
+    // -- Month aggregation --
+    if (!monthMap[month]) monthMap[month] = {count:0,pass:0,fail:0,na:0};
+    if (countable) { monthMap[month].count++; if (isPass) monthMap[month].pass++; if (isFail) monthMap[month].fail++; }
+    monthMap[month].na += isNA ? 1 : 0;
+
+    // -- Week aggregation --
+    var wk = month + '||' + week;
+    if (!weekMap[wk]) weekMap[wk] = {month,week,count:0,pass:0,fail:0,na:0};
+    if (countable) { weekMap[wk].count++; if (isPass) weekMap[wk].pass++; if (isFail) weekMap[wk].fail++; }
+    weekMap[wk].na += isNA ? 1 : 0;
+
+    // -- Parameter aggregation --
+    if (param) {
+      if (!paramMap[param]) paramMap[param] = {count:0,pass:0,fail:0,na:0};
+      if (countable) { paramMap[param].count++; if (isPass) paramMap[param].pass++; if (isFail) paramMap[param].fail++; }
+      paramMap[param].na += isNA ? 1 : 0;
+    }
+
+    // -- Recruiter aggregation --
+    if (rec) {
+      if (!recruiterMap[rec]) recruiterMap[rec] = {count:0,pass:0,fail:0,na:0,pm:pm,months:{}};
+      if (countable) { recruiterMap[rec].count++; if (isPass) recruiterMap[rec].pass++; if (isFail) recruiterMap[rec].fail++; }
+      recruiterMap[rec].na += isNA ? 1 : 0;
+      if (!recruiterMap[rec].months[month]) recruiterMap[rec].months[month] = {count:0,pass:0,fail:0};
+      if (countable) { recruiterMap[rec].months[month].count++; if (isPass) recruiterMap[rec].months[month].pass++; if (isFail) recruiterMap[rec].months[month].fail++; }
+      if (pm && !recruiterMap[rec].pm) recruiterMap[rec].pm = pm;
+    }
+
+    // -- PM aggregation --
+    if (pm) {
+      if (!pmMap[pm]) pmMap[pm] = {count:0,pass:0,fail:0,na:0,recruiters:new Set()};
+      if (countable) { pmMap[pm].count++; if (isPass) pmMap[pm].pass++; if (isFail) pmMap[pm].fail++; }
+      pmMap[pm].na += isNA ? 1 : 0;
+      if (rec) pmMap[pm].recruiters.add(rec);
+    }
+
+    // -- Stage aggregation --
+    if (stage) {
+      if (!stageMap[stage]) stageMap[stage] = {count:0,pass:0,fail:0,na:0};
+      if (countable) { stageMap[stage].count++; if (isPass) stageMap[stage].pass++; if (isFail) stageMap[stage].fail++; }
+      stageMap[stage].na += isNA ? 1 : 0;
+    }
+
+    // -- Criticality aggregation --
+    if (crit) {
+      if (!critMap[crit]) critMap[crit] = {count:0,pass:0,fail:0,na:0};
+      if (countable) { critMap[crit].count++; if (isPass) critMap[crit].pass++; if (isFail) critMap[crit].fail++; }
+      critMap[crit].na += isNA ? 1 : 0;
+    }
+
+    // -- Hire Type month aggregation --
+    var htMap = hireTypeMonthMap[ht];
+    if (!htMap[month]) htMap[month] = {count:0,pass:0,fail:0,na:0};
+    if (countable) { htMap[month].count++; if (isPass) htMap[month].pass++; if (isFail) htMap[month].fail++; }
+    htMap[month].na += isNA ? 1 : 0;
+    // combined
+    if (!hireTypeMonthMap.combined[month]) hireTypeMonthMap.combined[month] = {count:0,pass:0,fail:0,na:0};
+    if (countable) { hireTypeMonthMap.combined[month].count++; if (isPass) hireTypeMonthMap.combined[month].pass++; if (isFail) hireTypeMonthMap.combined[month].fail++; }
+    hireTypeMonthMap.combined[month].na += isNA ? 1 : 0;
+
+    // Hire type totals
+    if (countable) { htTotals[ht].count++; if (isPass) htTotals[ht].pass++; if (isFail) htTotals[ht].fail++; }
+    htTotals[ht].na += isNA ? 1 : 0;
+  });
+
+  // Build month_stats
+  var month_stats = Object.keys(monthMap).map(function(m) {
+    var d = monthMap[m];
+    return {
+      Month_Number: monthNum(m), Month: m,
+      Opportunity_Count: d.count, Opportunity_Pass: d.pass,
+      Opportunity_Fail: d.fail, Opportunity_NA: d.na,
+      Accuracy: calcAcc(d.pass, d.count),
+      Error_Rate: d.count > 0 ? +((d.fail/d.count)*100).toFixed(2) : 0
+    };
+  }).sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+
+  // Build week_stats
+  var week_stats = Object.keys(weekMap).map(function(k) {
+    var d = weekMap[k];
+    var mn = monthNum(d.month);
+    return {
+      Month: d.month, Month_Number: mn, Week: d.week,
+      Opportunity_Count: d.count, Opportunity_Pass: d.pass,
+      Opportunity_Fail: d.fail, Opportunity_NA: d.na,
+      Accuracy: calcAcc(d.pass, d.count),
+      Week_Label: d.month + ' W' + d.week
+    };
+  }).sort(function(a,b){ return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week; });
+
+  // Build top_errors
+  var top_errors = Object.keys(paramMap).map(function(p) {
+    var d = paramMap[p];
+    return { Parameter: p, Opportunity_Fail: d.fail, Opportunity_Count: d.count,
+             Fail_Pct: d.count > 0 ? +((d.fail/d.count)*100).toFixed(2) : 0 };
+  }).sort(function(a,b){ return b.Opportunity_Fail - a.Opportunity_Fail; });
+
+  // Build recruiter_bottom (all recruiters, sorted by accuracy asc)
+  var allMonths = month_stats.map(function(m){ return m.Month; });
+  var recruiter_bottom = Object.keys(recruiterMap).map(function(r) {
+    var d = recruiterMap[r];
+    return { Recruiter: r, Avg_Accuracy: calcAcc(d.pass, d.count), Audit_Count: d.count, Errors: d.fail, PM: d.pm };
+  }).sort(function(a,b){ return a.Avg_Accuracy - b.Avg_Accuracy; });
+
+  // Build pm_stats
+  var pm_stats = Object.keys(pmMap).map(function(p) {
+    var d = pmMap[p];
+    return { PM: p, Avg_Accuracy: calcAcc(d.pass, d.count), Audit_Count: d.count };
+  }).sort(function(a,b){ return b.Avg_Accuracy - a.Avg_Accuracy; });
+
+  // Build stage_stats
+  var stage_stats = Object.keys(stageMap).map(function(s) {
+    var d = stageMap[s];
+    var tot = d.count + d.na;
+    return { Stage: s, Opportunity_Count: tot, Opportunity_Pass: d.pass,
+             Opportunity_Fail: d.fail, Opportunity_NA: d.na, Accuracy: calcAcc(d.pass, d.count) };
+  });
+
+  // Build crit_stats
+  var crit_stats = Object.keys(critMap).map(function(c) {
+    var d = critMap[c];
+    var tot = d.count + d.na;
+    return { Criticality: c, Opportunity_Count: tot, Opportunity_Pass: d.pass,
+             Opportunity_Fail: d.fail, Opportunity_NA: d.na, Accuracy: calcAcc(d.pass, d.count) };
+  });
+
+  // Build hire type month stats
+  function htMonthStats(htM) {
+    return Object.keys(htM).map(function(m) {
+      var d = htM[m];
+      return { Month: m, Month_Number: monthNum(m),
+               Opportunity_Count: d.count, Opportunity_Pass: d.pass,
+               Opportunity_Fail: d.fail, Opportunity_NA: d.na,
+               Accuracy: calcAcc(d.pass, d.count) };
+    }).sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  }
+
+  var hireTypeStats = {
+    HPE_Experienced: {
+      month_stats: htMonthStats(hireTypeMonthMap.HPE_Experienced),
+      totals: {
+        count: htTotals.HPE_Experienced.count,
+        pass:  htTotals.HPE_Experienced.pass,
+        fail:  htTotals.HPE_Experienced.fail,
+        na:    htTotals.HPE_Experienced.na,
+        accuracy: calcAcc(htTotals.HPE_Experienced.pass, htTotals.HPE_Experienced.count)
+      }
+    },
+    HPE_UR: {
+      month_stats: htMonthStats(hireTypeMonthMap.HPE_UR),
+      totals: {
+        count: htTotals.HPE_UR.count,
+        pass:  htTotals.HPE_UR.pass,
+        fail:  htTotals.HPE_UR.fail,
+        na:    htTotals.HPE_UR.na,
+        accuracy: calcAcc(htTotals.HPE_UR.pass, htTotals.HPE_UR.count)
+      }
+    }
+  };
+
+  // Build PERF_DATA recruiter_monthly with monthly breakdown
+  var recruiter_monthly = Object.keys(recruiterMap).map(function(r) {
+    var d = recruiterMap[r];
+    var mData = {};
+    allMonths.forEach(function(m) {
+      var md = d.months[m];
+      mData[m.toLowerCase()] = md && md.count > 0 ? calcAcc(md.pass, md.count) : null;
+    });
+    return Object.assign({ name: r, audits: d.count, errors: d.fail, pm: d.pm || '' }, mData);
+  });
+
+  // Build PM recruiter mapping
+  var pm_recruiters = {};
+  Object.keys(pmMap).forEach(function(p) {
+    pm_recruiters[p] = Array.from(pmMap[p].recruiters);
+  });
+
+  // Build param_weekly (16 weekly slots, 4 months × 4 weeks)
+  var param_weekly = {};
+  top_errors.forEach(function(pe) {
+    var slots = [];
+    ['Jan','Feb','Mar','Apr'].forEach(function(m) {
+      [1,2,3,4].forEach(function(w) {
+        var wk = weekMap[m + '||' + w];
+        if (!wk || wk.count === 0) { slots.push(0); return; }
+        var pErr = rows.filter(function(r) {
+          return (r.Month||'').toLowerCase().slice(0,3) === m.toLowerCase().slice(0,3) &&
+                 parseInt(r.Week) === w &&
+                 (r.Parameter||'').trim() === pe.Parameter &&
+                 classifyResult(r.Result) === 'fail';
+        }).length;
+        slots.push(wk.count > 0 ? +((pErr/wk.count)*100).toFixed(2) : 0);
+      });
+    });
+    param_weekly[pe.Parameter] = slots;
+  });
+
+  return {
+    overall: {
+      total_audits: totalCount, total_pass: totalPass, total_fail: totalFail, total_na: totalNA,
+      overall_accuracy: calcAcc(totalPass, totalCount),
+      error_rate: totalCount > 0 ? +((totalFail/totalCount)*100).toFixed(2) : 0,
+      fy: '2026'
+    },
+    month_stats, week_stats, top_errors, recruiter_bottom, pm_stats, stage_stats, crit_stats,
+    hireTypeStats,
+    perf: { recruiter_monthly, pm_recruiters, param_weekly },
+    rawRowCount: rows.length,
+    months: allMonths
+  };
+}
+
+function _injectDashboardData(result) {
+  // Patch DASHBOARD_DATA in-place
+  DASHBOARD_DATA.overall       = result.overall;
+  DASHBOARD_DATA.month_stats   = result.month_stats;
+  DASHBOARD_DATA.week_stats    = result.week_stats;
+  DASHBOARD_DATA.top_errors    = result.top_errors;
+  DASHBOARD_DATA.recruiter_bottom = result.recruiter_bottom;
+  DASHBOARD_DATA.pm_stats      = result.pm_stats;
+  DASHBOARD_DATA.stage_stats   = result.stage_stats;
+  DASHBOARD_DATA.crit_stats    = result.crit_stats;
+  DASHBOARD_DATA.hireTypeStats = result.hireTypeStats;
+
+  // Patch PERF_DATA in-place
+  if (result.perf.recruiter_monthly.length > 0)
+    PERF_DATA.recruiter_monthly = result.perf.recruiter_monthly;
+  if (Object.keys(result.perf.pm_recruiters).length > 0)
+    PERF_DATA.pm_recruiters = result.perf.pm_recruiters;
+  if (Object.keys(result.perf.param_weekly).length > 0)
+    PERF_DATA.param_weekly = result.perf.param_weekly;
+}
+
+function _fullDashboardRebuild() {
+  // Reset init guards so all tabs fully re-render
+  _execDone = false; _trendDone = false; _improveDone = false; _insightsDone = false; _perfDone = false;
+
+  // Rebuild currently-visible tab immediately
+  updateExecutiveKPIs();
+  updateExecutiveCharts();
+  _updateHireTypeSection();
+
+  // Rebuild other tabs lazily (they'll also re-init on next visit due to reset flags)
+  setTimeout(function() {
+    updateTrendCharts();
+    updateImprovementCharts();
+  }, 100);
+  setTimeout(function() {
+    buildRiskPanel();
+    buildScorecardPanel();
+    buildParamPanel();
+    buildPMPanel();
+    buildGoalsPanel();
+    buildAlerts();
+  }, 300);
+  setTimeout(function() {
+    buildWeeklyTable();
+    buildMonthTable();
+    buildHeatmap();
+  }, 500);
+}
+
+// ---- Update hire-type section in Executive Summary ----
+function _updateHireTypeSection() {
+  var ht = DASHBOARD_DATA.hireTypeStats;
+  if (!ht) return;
+  var expEl = document.getElementById('ht-exp-section');
+  var urEl  = document.getElementById('ht-ur-section');
+  if (!expEl || !urEl) return;
+
+  function renderHT(data, label, color) {
+    var t = data.totals;
+    var accColor = getAccColor(t.accuracy);
+    var monthRows = data.month_stats.map(function(m) {
+      var c = getAccColor(m.Accuracy);
+      return '<tr>'
+        + '<td style="padding:5px 8px;font-weight:600;color:var(--text-primary)">' + m.Month + '</td>'
+        + '<td style="padding:5px 8px;text-align:right">' + m.Opportunity_Count.toLocaleString() + '</td>'
+        + '<td style="padding:5px 8px;text-align:right;color:' + c + ';font-weight:700">' + m.Accuracy + '%</td>'
+        + '<td style="padding:5px 8px;text-align:right;color:var(--hpe-red)">' + m.Opportunity_Fail + '</td>'
+        + '</tr>';
+    }).join('');
+    return `
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+        <div style="width:10px;height:10px;border-radius:50%;background:${color}"></div>
+        <div style="font-size:13px;font-weight:700;color:var(--text-primary)">${label}</div>
+        <span class="acc-badge" style="background:${accColor}20;color:${accColor};border:1px solid ${accColor}40;border-radius:12px;padding:2px 10px;font-size:12px;font-weight:700;margin-left:auto">${t.accuracy}%</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:800;color:${color}">${t.count.toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Audits</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:800;color:var(--hpe-green)">${t.pass.toLocaleString()}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Passed</div>
+        </div>
+        <div style="background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center">
+          <div style="font-size:18px;font-weight:800;color:var(--hpe-red)">${t.fail}</div>
+          <div style="font-size:10px;color:var(--text-muted);margin-top:2px">Errors</div>
+        </div>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead><tr style="background:var(--surface-2);font-size:11px;color:var(--text-muted)">
+          <th style="padding:5px 8px;text-align:left;font-weight:600">Month</th>
+          <th style="padding:5px 8px;text-align:right;font-weight:600">Audits</th>
+          <th style="padding:5px 8px;text-align:right;font-weight:600">Accuracy</th>
+          <th style="padding:5px 8px;text-align:right;font-weight:600">Errors</th>
+        </tr></thead>
+        <tbody>${monthRows || '<tr><td colspan="4" style="padding:10px;text-align:center;color:var(--text-muted)">No data</td></tr>'}</tbody>
+      </table>
+    `;
+  }
+
+  expEl.innerHTML = renderHT(ht.HPE_Experienced, 'HPE Experienced', '#0D5DBF');
+  urEl.innerHTML  = renderHT(ht.HPE_UR, 'HPE UR (University Recruiting)', '#FF8300');
+
+  // Also update Data Management tab hire-type panel
+  var dmEl = document.getElementById('dmHireTypeContent');
+  if (!dmEl) return;
+  var expT = ht.HPE_Experienced.totals, urT = ht.HPE_UR.totals;
+  var expCol = getAccColor(expT.accuracy), urCol = getAccColor(urT.accuracy);
+
+  function compRow(label, exp, ur, fmt) {
+    fmt = fmt || function(v){ return v; };
+    return '<tr>'
+      + '<td style="padding:6px 10px;font-size:12px;color:var(--text-muted)">' + label + '</td>'
+      + '<td style="padding:6px 10px;text-align:center;font-size:12px;font-weight:700;color:#0D5DBF">' + fmt(exp) + '</td>'
+      + '<td style="padding:6px 10px;text-align:center;font-size:12px;font-weight:700;color:#FF8300">' + fmt(ur) + '</td>'
+      + '</tr>';
+  }
+
+  var expMonthRows = ht.HPE_Experienced.month_stats.map(function(m) {
+    var urM = ht.HPE_UR.month_stats.find(function(u){ return u.Month === m.Month; }) || {Accuracy:0,Opportunity_Count:0,Opportunity_Fail:0};
+    var ec = getAccColor(m.Accuracy), uc = getAccColor(urM.Accuracy);
+    return '<tr style="border-bottom:1px solid var(--border)">'
+      + '<td style="padding:7px 10px;font-weight:600;font-size:12px">' + m.Month + '</td>'
+      + '<td style="padding:7px 10px;text-align:center;font-size:12px;font-weight:700;color:' + ec + '">' + m.Accuracy + '%</td>'
+      + '<td style="padding:7px 10px;text-align:center;font-size:12px">' + m.Opportunity_Count.toLocaleString() + '</td>'
+      + '<td style="padding:7px 10px;text-align:center;font-size:12px;color:var(--hpe-red)">' + m.Opportunity_Fail + '</td>'
+      + '<td style="padding:7px 10px;text-align:center;font-size:12px;font-weight:700;color:' + uc + '">' + urM.Accuracy + '%</td>'
+      + '<td style="padding:7px 10px;text-align:center;font-size:12px">' + urM.Opportunity_Count.toLocaleString() + '</td>'
+      + '<td style="padding:7px 10px;text-align:center;font-size:12px;color:var(--hpe-red)">' + urM.Opportunity_Fail + '</td>'
+      + '</tr>';
+  }).join('');
+
+  dmEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+      <div style="border:2px solid #0D5DBF20;border-radius:10px;padding:16px;background:linear-gradient(135deg,#e8f0fb,#f0f4ff)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <i class="fas fa-user-tie" style="color:#0D5DBF;font-size:18px"></i>
+          <span style="font-size:14px;font-weight:700;color:var(--text-primary)">HPE Experienced</span>
+        </div>
+        <div style="font-size:32px;font-weight:900;color:${expCol};margin-bottom:4px">${expT.accuracy}%</div>
+        <div style="font-size:11px;color:var(--text-muted)">${expT.count.toLocaleString()} audits &nbsp;|&nbsp; ${expT.fail} errors &nbsp;|&nbsp; ${expT.na} NA</div>
+        <div style="margin-top:8px;padding:4px 10px;background:${expCol}15;border-radius:20px;display:inline-block;font-size:11px;font-weight:700;color:${expCol}">${getAccLabel(expT.accuracy)}</div>
+      </div>
+      <div style="border:2px solid #FF830020;border-radius:10px;padding:16px;background:linear-gradient(135deg,#fff3e6,#fff8f0)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+          <i class="fas fa-graduation-cap" style="color:#FF8300;font-size:18px"></i>
+          <span style="font-size:14px;font-weight:700;color:var(--text-primary)">HPE UR</span>
+        </div>
+        <div style="font-size:32px;font-weight:900;color:${urCol};margin-bottom:4px">${urT.accuracy}%</div>
+        <div style="font-size:11px;color:var(--text-muted)">${urT.count.toLocaleString()} audits &nbsp;|&nbsp; ${urT.fail} errors &nbsp;|&nbsp; ${urT.na} NA</div>
+        <div style="margin-top:8px;padding:4px 10px;background:${urCol}15;border-radius:20px;display:inline-block;font-size:11px;font-weight:700;color:${urCol}">${getAccLabel(urT.accuracy)}</div>
+      </div>
+    </div>
+    <div style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:12px">
+        <thead>
+          <tr style="background:var(--surface-2)">
+            <th style="padding:8px 10px;text-align:left;font-weight:600" rowspan="2">Month</th>
+            <th colspan="3" style="padding:8px 10px;text-align:center;color:#0D5DBF;font-weight:700;border-bottom:2px solid #0D5DBF">HPE Experienced</th>
+            <th colspan="3" style="padding:8px 10px;text-align:center;color:#FF8300;font-weight:700;border-bottom:2px solid #FF8300">HPE UR</th>
+          </tr>
+          <tr style="background:var(--surface-2);font-size:11px;color:var(--text-muted)">
+            <th style="padding:5px 10px;text-align:center;color:#0D5DBF">Accuracy</th>
+            <th style="padding:5px 10px;text-align:center">Audits</th>
+            <th style="padding:5px 10px;text-align:center">Errors</th>
+            <th style="padding:5px 10px;text-align:center;color:#FF8300">Accuracy</th>
+            <th style="padding:5px 10px;text-align:center">Audits</th>
+            <th style="padding:5px 10px;text-align:center">Errors</th>
+          </tr>
+        </thead>
+        <tbody>${expMonthRows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function _updateDataStatusPanel(result, file) {
+  var panel = document.getElementById('dataStatusPanel');
+  if (!panel) return;
+  var months = result.month_stats.map(function(m){ return m.Month; }).join(', ');
+  var expT = result.hireTypeStats.HPE_Experienced.totals;
+  var urT  = result.hireTypeStats.HPE_UR.totals;
+  var expAcc = expT.accuracy, urAcc = urT.accuracy;
+  var expCol = getAccColor(expAcc), urCol = getAccColor(urAcc);
+  panel.innerHTML = `
+    <div class="validation-item">
+      <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+      <div class="val-text"><strong>File loaded:</strong> ${file.name} (${(file.size/1024).toFixed(1)} KB)</div>
+    </div>
+    <div class="validation-item">
+      <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+      <div class="val-text"><strong>Total rows processed:</strong> ${result.rawRowCount.toLocaleString()} audit records</div>
+    </div>
+    <div class="validation-item">
+      <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+      <div class="val-text"><strong>Months detected:</strong> ${months || '—'}</div>
+    </div>
+    <div class="validation-item">
+      <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+      <div class="val-text"><strong>Parameters found:</strong> ${result.top_errors.length} unique audit parameters</div>
+    </div>
+    <div class="validation-item">
+      <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+      <div class="val-text"><strong>Recruiters detected:</strong> ${result.recruiter_bottom.length}</div>
+    </div>
+    <div class="validation-item">
+      <span class="val-icon" style="color:${expCol}">&#11044;</span>
+      <div class="val-text"><strong>HPE_Experienced:</strong> ${expT.count.toLocaleString()} audits &nbsp;|&nbsp; Accuracy: <strong style="color:${expCol}">${expAcc}%</strong></div>
+    </div>
+    <div class="validation-item">
+      <span class="val-icon" style="color:${urCol}">&#11044;</span>
+      <div class="val-text"><strong>HPE_UR:</strong> ${urT.count.toLocaleString()} audits &nbsp;|&nbsp; Accuracy: <strong style="color:${urCol}">${urAcc}%</strong></div>
+    </div>
+    <div class="validation-item">
+      <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
+      <div class="val-text"><strong>Last refreshed:</strong> <span id="dataLastRefresh">${new Date().toLocaleString()}</span></div>
+    </div>
+  `;
+
+  // Update data summary numbers
+  var dsAudit = document.getElementById('ds-audit-count');
+  var dsRec   = document.getElementById('ds-rec-count');
+  var dsMon   = document.getElementById('ds-month-count');
+  var dsPM    = document.getElementById('ds-pm-count');
+  if (dsAudit) dsAudit.textContent = result.overall.total_audits.toLocaleString();
+  if (dsRec)   dsRec.textContent   = result.recruiter_bottom.length;
+  if (dsMon)   dsMon.textContent   = result.month_stats.length;
+  if (dsPM)    dsPM.textContent    = result.pm_stats.length;
 }
 
 // ==================== EXPORT ====================
