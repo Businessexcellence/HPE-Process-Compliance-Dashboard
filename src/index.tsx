@@ -2710,20 +2710,18 @@ function getDashboardHTML(): string {
 
     <!-- Narrative Summary -->
     <div class="narrative-box">
-      <div class="narr-title">
+      <div class="narr-title" id="narrativeTitleEl">
         <i class="fas fa-file-alt" style="color:var(--hpe-blue)"></i>
         Narrative Summary — FY2026 YTD
       </div>
       <div class="narr-text" id="narrativeText">
         <p>HPE Talent Acquisition has processed <strong class="highlight">8,599 audit checkpoints</strong> across FY2026 (January through April), achieving an overall accuracy of <strong class="highlight">98.50%</strong> — <strong class="highlight">3.50 percentage points above</strong> the 95% organizational target.</p>
         <br>
-        <p>The <strong>accuracy trajectory has been predominantly positive</strong>: starting at 97.25% in January (HPE FY Month 10), improving sharply to 99.33% in January (Mon 10), sustaining at 99.43% in February, before a slight moderation to 98.49% in March. The March softening was largely attributable to a <strong class="warn-text">spike in "Target start date" failures</strong> (20 errors in March W2 alone), which has been flagged for CAPA action.</p>
+        <p>The <strong>accuracy trajectory has been predominantly positive</strong>: starting at 97.25% in January, sustaining at 99.43% in February, before a slight moderation to 98.49% in March. The March softening was largely attributable to a <strong class="warn-text">spike in "Target start date" failures</strong>, which has been flagged for CAPA action.</p>
         <br>
-        <p><strong>Post Selection audits</strong> (6,122 checks, 97.51% accuracy) constitute the majority of audit volume and carry most critical parameters including Offer Details, Interview Process, and Start Date validation. <strong>Pre Selection audits</strong> (2,477 checks, 99.39% accuracy) perform consistently well, with excellent compliance on scheduling and intake processes.</p>
+        <p><strong>Post Selection audits</strong> (6,122 checks, 97.51% accuracy) constitute the majority of audit volume. <strong>Pre Selection audits</strong> (2,477 checks, 99.39% accuracy) perform consistently well.</p>
         <br>
-        <p>At the recruiter level, <strong class="alert-text">Kusuma K remains the highest-risk recruiter</strong> with 88.04% accuracy over 276 audits — significantly below team average. The <strong>top-performing recruiters</strong> (Disharani Sahoo, Johnson Antony, Eluri Naga P Krishna) all sustain 99.7%+ accuracy, providing a best-practice benchmark for team training.</p>
-        <br>
-        <p>The AI forecast projects FY2026 closing accuracy between <strong class="highlight">98.6%–99.1%</strong> if current improvement measures are maintained, with the primary risk being unchecked "Target start date" errors continuing into Q1 FY2027.</p>
+        <p>At the recruiter level, <strong class="alert-text">Kusuma K remains the highest-risk recruiter</strong> with 88.04% accuracy — significantly below team average. Upload fresh data to regenerate this summary automatically.</p>
       </div>
     </div>
 
@@ -2731,8 +2729,8 @@ function getDashboardHTML(): string {
     <div class="chart-grid-2">
       <div class="card">
         <div class="card-title"><i class="fas fa-flag" style="color:var(--hpe-red)"></i> Predictive Risk Flags</div>
-        <div class="card-subtitle">AI-identified risks likely to impact next 4 weeks</div>
-        <div class="risk-flags">
+        <div class="card-subtitle">Risks identified from uploaded data — likely to impact next 4 weeks</div>
+        <div id="riskFlagsContainer" class="risk-flags">
           <div class="risk-flag high">
             <div class="risk-level high">HIGH</div>
             <div class="risk-text"><strong>Target Start Date parameter</strong> — 89.83% error rate. If unaddressed, projects to cause 15+ errors next month.</div>
@@ -2743,15 +2741,15 @@ function getDashboardHTML(): string {
           </div>
           <div class="risk-flag medium">
             <div class="risk-level medium">MEDIUM</div>
-            <div class="risk-text"><strong>Subin Sundar PM team</strong> — 97.4% accuracy, below team average. High volume (2,540 audits) amplifies impact.</div>
+            <div class="risk-text"><strong>Subin Sundar PM team</strong> — 97.4% accuracy, below team average. High volume amplifies impact.</div>
           </div>
           <div class="risk-flag medium">
             <div class="risk-level medium">MEDIUM</div>
-            <div class="risk-text"><strong>Source of hire errors rising</strong> — 18 failures, 2nd highest. Trend suggests process clarity issue.</div>
+            <div class="risk-text"><strong>Source of hire errors rising</strong> — 2nd highest error parameter. Trend suggests process clarity issue.</div>
           </div>
           <div class="risk-flag low">
             <div class="risk-level low">LOW</div>
-            <div class="risk-text"><strong>ERP Bonus parameter</strong> — 3.57% error rate in limited sample. Monitor in Q1 FY2027.</div>
+            <div class="risk-text"><strong>ERP Bonus parameter</strong> — Monitor in next quarter.</div>
           </div>
         </div>
       </div>
@@ -6014,94 +6012,41 @@ function initInsightsCharts() {
 
 // Fully data-driven Insights rebuild — called on init, upload, and hire type filter change
 function updateInsightsCharts() {
-  // ---- Action Recommendations (data-driven from top_errors + recruiter_bottom) ----
-  const recEl = document.getElementById('actionRecommendations');
-  if (recEl) {
-    var actions = [];
-    var priority = 1;
-    var impactColors = { HIGH: 'var(--hpe-red)', MED: 'var(--hpe-orange)', LOW: '#b8860b' };
-    // Top error parameter actions
-    var topErrs = (DASHBOARD_DATA.top_errors || []).filter(function(e){ return e.Opportunity_Fail > 0; });
-    if (topErrs.length > 0) {
-      var topErr = topErrs[0];
-      var totalErrs = topErrs.reduce(function(s,e){return s+e.Opportunity_Fail;},0);
-      var topPct = totalErrs > 0 ? ((topErr.Opportunity_Fail/totalErrs)*100).toFixed(0) : 0;
-      var estGain = totalErrs > 0 ? ((topErr.Opportunity_Fail / Math.max(1, DASHBOARD_DATA.overall.Opportunity_Count)) * 100).toFixed(2) : '0.00';
-      actions.push({ priority: priority++, impact: 'HIGH', color: impactColors.HIGH,
-        title: 'Fix "' + topErr.Parameter + '" validation',
-        detail: topPct + '% of all errors — highest priority fix',
-        est: '+' + estGain + '% accuracy' });
-    }
-    // Bottom recruiters
-    var botRec = (DASHBOARD_DATA.recruiter_bottom || []).slice(0, 3).filter(function(r){ return r.Avg_Accuracy < 97; });
-    if (botRec.length > 0) {
-      var names = botRec.map(function(r){ return r.Recruiter.split(' ').slice(0,2).join(' '); }).join(', ');
-      var avgAcc = (botRec.reduce(function(s,r){return s+r.Avg_Accuracy;},0)/botRec.length).toFixed(1);
-      actions.push({ priority: priority++, impact: 'HIGH', color: impactColors.HIGH,
-        title: 'Coach bottom ' + botRec.length + ' recruiter' + (botRec.length>1?'s':''),
-        detail: 'Focused training for: ' + names + ' (avg ' + avgAcc + '% accuracy)',
-        est: '+0.30% accuracy' });
-    }
-    // Second error parameter if available
-    if (topErrs.length > 1) {
-      var err2 = topErrs[1];
-      var estGain2 = DASHBOARD_DATA.overall.Opportunity_Count > 0 ? ((err2.Opportunity_Fail / DASHBOARD_DATA.overall.Opportunity_Count) * 100).toFixed(2) : '0.00';
-      actions.push({ priority: priority++, impact: 'MED', color: impactColors.MED,
-        title: 'Standardize "' + err2.Parameter + '"',
-        detail: err2.Opportunity_Fail + ' errors — implement validation checklist',
-        est: '+' + estGain2 + '% accuracy' });
-    }
-    // Stage with worst accuracy
-    var stgSorted = [...(DASHBOARD_DATA.stage_stats||[])].sort(function(a,b){ return a.Accuracy - b.Accuracy; });
-    if (stgSorted.length > 0 && stgSorted[0].Accuracy < 98) {
-      actions.push({ priority: priority++, impact: 'MED', color: impactColors.MED,
-        title: stgSorted[0].Stage + ' process review',
-        detail: stgSorted[0].Accuracy + '% accuracy — ' + stgSorted[0].Opportunity_Fail + ' errors to address',
-        est: 'Process alignment' });
-    }
-    // Hire type gap insight
-    var htExp = DASHBOARD_DATA.hireTypeStats && DASHBOARD_DATA.hireTypeStats.HPE_Experienced;
-    var htUR  = DASHBOARD_DATA.hireTypeStats && DASHBOARD_DATA.hireTypeStats.HPE_UR;
-    if (htExp && htUR) {
-      var gap = Math.abs(htExp.totals.accuracy - htUR.totals.accuracy);
-      if (gap > 0.5) {
-        var lower  = htExp.totals.accuracy < htUR.totals.accuracy ? 'HPE Experienced' : 'HPE UR';
-        var lowerAcc = Math.min(htExp.totals.accuracy, htUR.totals.accuracy);
-        actions.push({ priority: priority++, impact: 'LOW', color: impactColors.LOW,
-          title: lower + ' hire type gap (' + gap.toFixed(1) + '%)',
-          detail: lower + ' at ' + lowerAcc + '% — targeted process alignment recommended',
-          est: 'Equity improvement' });
-      }
-    }
-    // Fallback if no data
-    if (actions.length === 0) {
-      actions.push({ priority: 1, impact: 'LOW', color: impactColors.LOW,
-        title: 'Upload data to generate recommendations',
-        detail: 'Use Data Management tab to upload your Excel audit file',
-        est: '' });
-    }
-    recEl.innerHTML = actions.map(function(a){ return (
-      '<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)">'
-      + '<div style="width:22px;height:22px;border-radius:50%;background:' + a.color + ';color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px">' + a.priority + '</div>'
-      + '<div style="flex:1">'
-      + '<div style="font-size:13px;font-weight:600;color:var(--text-primary)">' + a.title + '</div>'
-      + '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + a.detail + '</div>'
-      + '</div>'
-      + (a.est ? '<div style="font-size:11px;font-weight:700;color:var(--hpe-green);white-space:nowrap">' + a.est + '</div>' : '')
-      + '</div>'
-    ); }).join('');
-  }
+  var ov      = DASHBOARD_DATA.overall        || {};
+  var topErrs = (DASHBOARD_DATA.top_errors    || []).filter(function(e){ return e.Opportunity_Fail > 0; });
+  var botRec  = (DASHBOARD_DATA.recruiter_bottom || []).slice(0, 3).filter(function(r){ return r.Avg_Accuracy < 97; });
+  var allRec  = DASHBOARD_DATA.recruiter_bottom || [];
+  var stgStats= DASHBOARD_DATA.stage_stats    || [];
+  var pmStats = DASHBOARD_DATA.pm_stats       || [];
+  var htExp   = DASHBOARD_DATA.hireTypeStats && DASHBOARD_DATA.hireTypeStats.HPE_Experienced;
+  var htUR    = DASHBOARD_DATA.hireTypeStats && DASHBOARD_DATA.hireTypeStats.HPE_UR;
+  var totalCount = ov.Opportunity_Count || 0;
+  var totalFail  = ov.Opportunity_Fail  || 0;
+  var overallAcc = ov.Accuracy          || 0;
+  var totalErrs  = topErrs.reduce(function(s,e){ return s + e.Opportunity_Fail; }, 0);
 
-  // ---- Forecast Detail Chart (data-driven from getFilteredWeeks / linear regression) ----
-  destroyChart('forecastDetailChart');
-  const fdCtx = document.getElementById('forecastDetailChart');
-  if (!fdCtx) return;
+  // Month stats for trajectory description
+  var sortedMonths = [...(DASHBOARD_DATA.month_stats||[])].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  var firstMon = sortedMonths[0];
+  var lastMon  = sortedMonths[sortedMonths.length-1];
+  var worstMon = sortedMonths.length > 0 ? [...sortedMonths].sort(function(a,b){ return a.Accuracy - b.Accuracy; })[0] : null;
+  var topRecPerf = [...allRec].sort(function(a,b){ return b.Avg_Accuracy - a.Avg_Accuracy; }).slice(0,3);
+  var worstRec   = allRec.length > 0 ? allRec[allRec.length-1] : null;
+  var topErr1    = topErrs[0] || null;
+  var topErr2    = topErrs[1] || null;
+  var stgSorted  = [...stgStats].sort(function(a,b){ return a.Accuracy - b.Accuracy; });
+  var worstStg   = stgSorted[0] || null;
+  var bestStg    = stgSorted[stgSorted.length-1] || null;
+
+  var htGap = (htExp && htUR) ? Math.abs(htExp.totals.accuracy - htUR.totals.accuracy) : 0;
+  var lowerHT = (htExp && htUR && htExp.totals.accuracy < htUR.totals.accuracy) ? 'HPE Experienced' : 'HPE UR';
+  var lowerHTAcc = (htExp && htUR) ? Math.min(htExp.totals.accuracy, htUR.totals.accuracy) : 0;
+
+  // Forecast values from linear regression on week stats
   var srcWeeks = getHireTypeWeekStats().slice().sort(function(a,b){
     return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
   });
   var allActual = srcWeeks.map(function(w){ return w.Accuracy; });
-  var allLabels = srcWeeks.map(function(w){ return w.Week_Label; });
-  // Compute linear regression on actual data for forecast
   var n = allActual.length;
   var forecastBase = [], forecastOpt = [], forecastPes = [];
   if (n >= 2) {
@@ -6112,17 +6057,239 @@ function updateInsightsCharts() {
     for (var f=1;f<=4;f++) {
       var proj = +(intercept + slope*(n-1+f)).toFixed(2);
       forecastBase.push(Math.min(100, Math.max(80, proj)));
-      forecastOpt.push(Math.min(100, Math.max(80, +(proj + 0.3).toFixed(2))));
-      forecastPes.push(Math.min(100, Math.max(80, +(proj - 0.4).toFixed(2))));
+      forecastOpt.push(Math.min(100, Math.max(80, +(proj+0.3).toFixed(2))));
+      forecastPes.push(Math.min(100, Math.max(80, +(proj-0.4).toFixed(2))));
     }
   } else {
-    var lastAcc = allActual.length > 0 ? allActual[allActual.length-1] : 97;
-    forecastBase = [lastAcc, lastAcc, lastAcc, lastAcc];
-    forecastOpt  = [+(lastAcc+0.3).toFixed(2),+(lastAcc+0.3).toFixed(2),+(lastAcc+0.3).toFixed(2),+(lastAcc+0.3).toFixed(2)];
-    forecastPes  = [+(lastAcc-0.4).toFixed(2),+(lastAcc-0.4).toFixed(2),+(lastAcc-0.4).toFixed(2),+(lastAcc-0.4).toFixed(2)];
+    var lastAcc2 = allActual.length > 0 ? allActual[allActual.length-1] : 97;
+    for (var fi=0;fi<4;fi++) {
+      forecastBase.push(lastAcc2);
+      forecastOpt.push(Math.min(100,+(lastAcc2+0.3).toFixed(2)));
+      forecastPes.push(Math.max(80, +(lastAcc2-0.4).toFixed(2)));
+    }
   }
+  var fcLow  = Math.min.apply(null, forecastPes).toFixed(1);
+  var fcHigh = Math.max.apply(null, forecastOpt).toFixed(1);
+  var htLabel = getHireTypeLabel();
+  var aboveTarget = overallAcc - 95;
+  var fyRange = (firstMon && lastMon && firstMon.Month !== lastMon.Month)
+    ? firstMon.Month + ' through ' + lastMon.Month
+    : (firstMon ? firstMon.Month : 'this period');
+
+  // ======== NARRATIVE SUMMARY ========
+  var titleEl = document.getElementById('narrativeTitleEl');
+  var narEl   = document.getElementById('narrativeText');
+  if (titleEl) {
+    titleEl.innerHTML = '<i class="fas fa-file-alt" style="color:var(--hpe-blue)"></i> Narrative Summary'
+      + (ACTIVE_HIRE_TYPE !== 'all' ? ' \u2014 ' + htLabel : ' \u2014 FY YTD')
+      + (sortedMonths.length > 0 ? ' (' + fyRange + ')' : '');
+  }
+  if (narEl) {
+    var p1 = '<p>HPE Talent Acquisition has processed <strong class="highlight">'
+      + totalCount.toLocaleString() + ' audit checkpoints</strong>'
+      + (fyRange ? ' across ' + fyRange : '')
+      + (ACTIVE_HIRE_TYPE !== 'all' ? ' (' + htLabel + ')' : '')
+      + ', achieving an overall accuracy of <strong class="highlight">' + overallAcc + '%</strong>'
+      + (aboveTarget > 0
+          ? ' \u2014 <strong class="highlight">' + aboveTarget.toFixed(2) + ' percentage points above</strong> the 95% organizational target.'
+          : ' \u2014 <strong class="warn-text">' + Math.abs(aboveTarget).toFixed(2) + ' percentage points below</strong> the 95% target.')
+      + '</p>';
+
+    var trajParts = [];
+    if (firstMon) trajParts.push('starting at ' + firstMon.Accuracy + '% in ' + firstMon.Month);
+    if (lastMon && lastMon !== firstMon) trajParts.push((lastMon.Accuracy >= (firstMon ? firstMon.Accuracy : 0) ? 'improving to ' : 'moderating to ') + lastMon.Accuracy + '% in ' + lastMon.Month);
+    var worstMonStr = (worstMon && sortedMonths.length > 1 && worstMon.Accuracy < overallAcc)
+      ? ' The ' + worstMon.Month + ' dip to ' + worstMon.Accuracy + '% (' + worstMon.Opportunity_Fail + ' errors) is the lowest point and a CAPA priority.' : '';
+    var p2 = '<p>The <strong>accuracy trajectory</strong>: ' + (trajParts.length > 0 ? trajParts.join(', ') + '.' : 'data available.') + worstMonStr + '</p>';
+
+    var stgStr = '';
+    if (stgStats.length > 0) {
+      var stgDesc = stgStats.map(function(s){
+        return '<strong>' + s.Stage + '</strong> (' + s.Opportunity_Count.toLocaleString() + ' checks, ' + s.Accuracy + '% accuracy)';
+      }).join('; ');
+      stgStr = '<p>' + stgDesc + '.</p>';
+    }
+
+    var recStr = '';
+    if (worstRec || topRecPerf.length > 0) {
+      var riskPart = worstRec
+        ? '<strong class="alert-text">' + worstRec.Recruiter + ' is the highest-risk recruiter</strong> with '
+          + worstRec.Avg_Accuracy + '% accuracy across ' + (worstRec.Audit_Count||0).toLocaleString() + ' audits \u2014 significantly below team average.'
+        : '';
+      var topPart = topRecPerf.length > 0
+        ? ' Top performers: <strong>' + topRecPerf.map(function(r){ return r.Recruiter; }).join(', ')
+          + '</strong> all sustain ' + Math.min.apply(null, topRecPerf.map(function(r){return r.Avg_Accuracy;})) + '%+ accuracy.'
+        : '';
+      recStr = '<p>' + riskPart + topPart + '</p>';
+    }
+
+    var htStr = '';
+    if (htExp && htUR && htGap > 0.1) {
+      htStr = '<p>Hire type split: <strong>HPE Experienced</strong> at ' + htExp.totals.accuracy + '% ('
+        + (htExp.totals.total||0).toLocaleString() + ' audits) vs <strong>HPE UR</strong> at '
+        + htUR.totals.accuracy + '% (' + (htUR.totals.total||0).toLocaleString() + ' audits).'
+        + (htGap > 0.5 ? ' A <strong class="warn-text">' + htGap.toFixed(1) + '% gap</strong> exists between hire types — targeted alignment recommended.' : '')
+        + '</p>';
+    }
+
+    var p5 = '<p>The forecast projects FY closing accuracy between <strong class="highlight">'
+      + fcLow + '%\u2013' + fcHigh + '%</strong> if current improvement measures are maintained'
+      + (topErr1 ? ', with primary risk from unchecked <em>' + topErr1.Parameter + '</em> errors' : '')
+      + '.</p>';
+
+    narEl.innerHTML = p1 + '<br>' + p2 + (stgStr ? '<br>' + stgStr : '') + (recStr ? '<br>' + recStr : '') + (htStr ? '<br>' + htStr : '') + '<br>' + p5;
+  }
+
+  // ======== PREDICTIVE RISK FLAGS ========
+  var rfEl = document.getElementById('riskFlagsContainer');
+  if (rfEl) {
+    var flags = [];
+
+    // Flag 1: worst parameter
+    if (topErr1) {
+      var errPct = totalCount > 0 ? ((topErr1.Opportunity_Fail/totalCount)*100).toFixed(2) : '0';
+      var projNext = Math.round(topErr1.Opportunity_Fail * 1.1);
+      flags.push({ level: 'high',
+        text: '<strong>' + topErr1.Parameter + ' parameter</strong> \u2014 '
+          + topErr1.Opportunity_Fail + ' errors (' + errPct + '% error rate).'
+          + ' If unaddressed, projects to cause ' + projNext + '+ errors next period.' });
+    }
+
+    // Flag 2: worst recruiter
+    if (worstRec && worstRec.Avg_Accuracy < 95) {
+      flags.push({ level: 'high',
+        text: '<strong>' + worstRec.Recruiter + ' (Recruiter)</strong> \u2014 '
+          + worstRec.Avg_Accuracy + '% accuracy across '
+          + (worstRec.Audit_Count||0).toLocaleString() + ' audits. Sustained below-target performance.' });
+    }
+
+    // Flag 3: worst PM
+    var pmSorted = [...pmStats].sort(function(a,b){ return a.Avg_Accuracy - b.Avg_Accuracy; });
+    var worstPM = pmSorted[0];
+    if (worstPM && worstPM.Avg_Accuracy < 99) {
+      flags.push({ level: 'medium',
+        text: '<strong>' + worstPM.PM + ' PM team</strong> \u2014 '
+          + worstPM.Avg_Accuracy + '% accuracy'
+          + (worstPM.Audit_Count ? ', ' + worstPM.Audit_Count.toLocaleString() + ' audits' : '')
+          + '. High volume amplifies accuracy impact.' });
+    }
+
+    // Flag 4: second error parameter
+    if (topErr2) {
+      flags.push({ level: 'medium',
+        text: '<strong>' + topErr2.Parameter + ' errors rising</strong> \u2014 '
+          + topErr2.Opportunity_Fail + ' failures, 2nd highest. Process clarity review recommended.' });
+    }
+
+    // Flag 5: hire type gap
+    if (htGap > 1.0) {
+      flags.push({ level: htGap > 2 ? 'high' : 'medium',
+        text: '<strong>' + lowerHT + ' hire type at ' + lowerHTAcc + '%</strong> \u2014 '
+          + htGap.toFixed(1) + '% gap vs other hire type. Targeted process alignment needed.' });
+    }
+
+    // Flag 6: worst stage
+    if (worstStg && worstStg.Accuracy < 98) {
+      flags.push({ level: 'low',
+        text: '<strong>' + worstStg.Stage + ' stage</strong> \u2014 '
+          + worstStg.Accuracy + '% accuracy, ' + worstStg.Opportunity_Fail + ' errors. Monitor in next period.' });
+    }
+
+    // Flag 7: forecast negative slope
+    if (forecastBase.length > 1 && forecastBase[forecastBase.length-1] < forecastBase[0]) {
+      flags.push({ level: 'medium',
+        text: '<strong>Declining accuracy trend detected</strong> \u2014 forecast shows '
+          + forecastBase[0].toFixed(1) + '% \u2192 ' + forecastBase[forecastBase.length-1].toFixed(1)
+          + '%. Proactive intervention recommended.' });
+    }
+
+    // Fallback
+    if (flags.length === 0) {
+      flags.push({ level: 'low', text: '<strong>No significant risks detected</strong> \u2014 upload data to generate risk analysis.' });
+    }
+
+    rfEl.innerHTML = flags.map(function(f){
+      return '<div class="risk-flag ' + f.level + '">'
+        + '<div class="risk-level ' + f.level + '">' + f.level.toUpperCase() + '</div>'
+        + '<div class="risk-text">' + f.text + '</div>'
+        + '</div>';
+    }).join('');
+  }
+
+  // ======== ACTION RECOMMENDATIONS ========
+  var recEl = document.getElementById('actionRecommendations');
+  if (recEl) {
+    var actions = [];
+    var priority = 1;
+    var impactColors = { HIGH: 'var(--hpe-red)', MED: 'var(--hpe-orange)', LOW: '#b8860b' };
+
+    if (topErr1) {
+      var topPct = totalErrs > 0 ? ((topErr1.Opportunity_Fail/totalErrs)*100).toFixed(0) : 0;
+      var estGain = totalCount > 0 ? ((topErr1.Opportunity_Fail/totalCount)*100).toFixed(2) : '0.00';
+      actions.push({ priority: priority++, impact: 'HIGH', color: impactColors.HIGH,
+        title: 'Fix "' + topErr1.Parameter + '" validation',
+        detail: topPct + '% of all errors — highest priority fix',
+        est: '+' + estGain + '% accuracy' });
+    }
+    if (botRec.length > 0) {
+      var names2 = botRec.map(function(r){ return r.Recruiter.split(' ').slice(0,2).join(' '); }).join(', ');
+      var avgAcc2 = (botRec.reduce(function(s,r){return s+r.Avg_Accuracy;},0)/botRec.length).toFixed(1);
+      actions.push({ priority: priority++, impact: 'HIGH', color: impactColors.HIGH,
+        title: 'Coach bottom ' + botRec.length + ' recruiter' + (botRec.length>1?'s':''),
+        detail: 'Focused training: ' + names2 + ' (avg ' + avgAcc2 + '%)',
+        est: '+0.30% accuracy' });
+    }
+    if (topErr2) {
+      var estGain3 = totalCount > 0 ? ((topErr2.Opportunity_Fail/totalCount)*100).toFixed(2) : '0.00';
+      actions.push({ priority: priority++, impact: 'MED', color: impactColors.MED,
+        title: 'Standardize "' + topErr2.Parameter + '"',
+        detail: topErr2.Opportunity_Fail + ' errors — implement validation checklist',
+        est: '+' + estGain3 + '% accuracy' });
+    }
+    if (worstStg && worstStg.Accuracy < 98) {
+      actions.push({ priority: priority++, impact: 'MED', color: impactColors.MED,
+        title: worstStg.Stage + ' process review',
+        detail: worstStg.Accuracy + '% accuracy — ' + worstStg.Opportunity_Fail + ' errors to address',
+        est: 'Process alignment' });
+    }
+    if (htGap > 0.5) {
+      actions.push({ priority: priority++, impact: 'LOW', color: impactColors.LOW,
+        title: lowerHT + ' hire type gap (' + htGap.toFixed(1) + '%)',
+        detail: lowerHT + ' at ' + lowerHTAcc + '% — targeted process alignment',
+        est: 'Equity improvement' });
+    }
+    if (worstPM && worstPM.Avg_Accuracy < 99) {
+      actions.push({ priority: priority++, impact: 'LOW', color: impactColors.LOW,
+        title: worstPM.PM + ' team coaching',
+        detail: worstPM.Avg_Accuracy + '% accuracy — schedule process review session',
+        est: 'Team alignment' });
+    }
+    if (actions.length === 0) {
+      actions.push({ priority: 1, impact: 'LOW', color: impactColors.LOW,
+        title: 'Upload data to generate recommendations',
+        detail: 'Use Data Management tab to upload your Excel audit file',
+        est: '' });
+    }
+    recEl.innerHTML = actions.map(function(a){
+      return '<div style="display:flex;align-items:flex-start;gap:10px;padding:12px 0;border-bottom:1px solid var(--border)">'
+        + '<div style="width:22px;height:22px;border-radius:50%;background:' + a.color + ';color:white;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;margin-top:2px">' + a.priority + '</div>'
+        + '<div style="flex:1">'
+        + '<div style="font-size:13px;font-weight:600;color:var(--text-primary)">' + a.title + '</div>'
+        + '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">' + a.detail + '</div>'
+        + '</div>'
+        + (a.est ? '<div style="font-size:11px;font-weight:700;color:var(--hpe-green);white-space:nowrap">' + a.est + '</div>' : '')
+        + '</div>';
+    }).join('');
+  }
+
+  // ======== FORECAST DETAIL CHART ========
+  destroyChart('forecastDetailChart');
+  var fdCtx = document.getElementById('forecastDetailChart');
+  if (!fdCtx) return;
+  var allLabels = srcWeeks.map(function(w){ return w.Week_Label; });
   var futureLabels = ['Next W1','Next W2','Next W3','Next W4'];
   var chartLabels  = allLabels.concat(futureLabels);
+  var lastActual   = allActual[allActual.length-1] || null;
   charts['forecastDetailChart'] = new Chart(fdCtx.getContext('2d'), {
     type: 'line',
     data: {
@@ -6132,14 +6299,14 @@ function updateInsightsCharts() {
           borderColor:'#01A982', borderWidth:2.5, pointRadius:4,
           pointBackgroundColor:'#01A982', tension:0.4, fill:false },
         { label: 'Base Forecast',
-          data: allActual.slice(0,-1).map(function(){return null;}).concat([allActual[allActual.length-1]]).concat(forecastBase),
+          data: allActual.slice(0,-1).map(function(){return null;}).concat([lastActual]).concat(forecastBase),
           borderColor:'#FF8300', borderDash:[5,3], borderWidth:2, pointRadius:5,
           pointBackgroundColor:'#FF8300', tension:0.3, fill:false },
         { label: 'Optimistic',
-          data: allActual.slice(0,-1).map(function(){return null;}).concat([allActual[allActual.length-1]]).concat(forecastOpt),
+          data: allActual.slice(0,-1).map(function(){return null;}).concat([lastActual]).concat(forecastOpt),
           borderColor:'#4fc3a1', borderDash:[3,3], borderWidth:1.5, pointRadius:3, tension:0.3, fill:false },
         { label: 'Pessimistic',
-          data: allActual.slice(0,-1).map(function(){return null;}).concat([allActual[allActual.length-1]]).concat(forecastPes),
+          data: allActual.slice(0,-1).map(function(){return null;}).concat([lastActual]).concat(forecastPes),
           borderColor:'#e06060', borderDash:[3,3], borderWidth:1.5, pointRadius:3, tension:0.3, fill:false },
         { label: '95% Target', data: chartLabels.map(function(){return 95;}),
           borderColor:'#C54E4B', borderDash:[8,4], borderWidth:1.5, pointRadius:0, fill:false }
