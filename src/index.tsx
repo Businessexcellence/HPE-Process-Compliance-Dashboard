@@ -1310,6 +1310,26 @@ function getDashboardHTML(): string {
       border-color: var(--hpe-green);
       color: white;
     }
+    /* Hire Type toggle buttons */
+    .ht-btn {
+      padding: 5px 13px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: white;
+      font-size: 11px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-family: 'Inter', sans-serif;
+      color: var(--text-secondary);
+      letter-spacing: 0.2px;
+    }
+    .ht-btn:hover { border-color: #0D5DBF; color: #0D5DBF; }
+    .ht-btn.ht-all.active   { background:#425563; border-color:#425563; color:white; }
+    .ht-btn.ht-exp.active   { background:#0D5DBF; border-color:#0D5DBF; color:white; }
+    .ht-btn.ht-ur.active    { background:#FF8300; border-color:#FF8300; color:white; }
+    html.dark .ht-btn { background:#1a2332; border-color:#2a3a4a; color:var(--text-muted); }
+    .ht-divider { width:1px; height:22px; background:var(--border); margin:0 4px; }
     .filter-select {
       padding: 6px 12px;
       border-radius: 6px;
@@ -1920,6 +1940,11 @@ function getDashboardHTML(): string {
         <select class="filter-select" id="execWeekSelect" onchange="applyGlobalFilter('week',this.value,null,'exec')" style="display:none">
           <option value="all">All Weeks</option>
         </select>
+        <div class="ht-divider"></div>
+        <span style="font-size:11px;color:var(--text-muted);font-weight:600">HIRE TYPE:</span>
+        <button class="ht-btn ht-all active" id="htBtnAll" onclick="applyHireTypeFilter('all')">All</button>
+        <button class="ht-btn ht-exp"        id="htBtnExp" onclick="applyHireTypeFilter('HPE_Experienced')">Experienced</button>
+        <button class="ht-btn ht-ur"         id="htBtnUR"  onclick="applyHireTypeFilter('HPE_UR')">UR</button>
         <div style="width:1px;height:24px;background:var(--border);margin:0 4px"></div>
         <div class="export-btn-group">
           <button class="btn-export-pdf" id="btnExportPDF" onclick="openExportModal('pdf')" title="Export as PDF report">
@@ -4664,7 +4689,64 @@ const DASHBOARD_DATA = {
     {id: 'CAPA-001', date: '2026-05-06', bot_action: 'Offer revoked; hire reason updated; profile merged', undo_reason: 'Incorrect hire reason', root_cause: 'Resume screening gap', corrective: 'Merged candidate profile in WD; changed hire reason to Rehire from Contract Conversion.', preventive: 'Strengthen resume and pre-offer checks; cross-check prior records using phone/email before offer.', owner: 'Ranjana Rani', target_date: '2026-05-06', close_date: '2026-05-06', status: 'Closed', aging: 0},
     {id: 'CAPA-1197539', date: '2026-05-12', bot_action: 'Relocation package updated as IET; revised offer released', undo_reason: 'Relocation package not updated', root_cause: 'Inadequate pre-offer checks', corrective: 'Updated relocation package as IET and released corrected offer in WD.', preventive: 'Use mandatory pre-offer checklist; add reviewer approval for internal moves; verify legal entity fields.', owner: 'Sunil Kumar Pooja', target_date: '2026-05-12', close_date: '2026-05-12', status: 'Closed', aging: 0},
     {id: 'CAPA-1192202/1202869', date: '2026-05-10', bot_action: 'Start date updated in MIS', undo_reason: 'MIS SharePoint not updated', root_cause: 'MIS not updated with revised start date', corrective: 'Updated MIS start date and processed candidate to RFH.', preventive: 'Verify start date before RFH against latest addendum; update MIS immediately; run OBS refresher.', owner: 'Malvika and Ashwini Miniyar', target_date: '2026-05-10', close_date: '2026-05-10', status: 'Closed', aging: 0}
-  ]
+  ],
+  // Hire-type-split data (seed values; replaced on file upload)
+  hireTypeStats: {
+    HPE_Experienced: {
+      month_stats: [
+        {Month_Number:10, Month:'Jan', Opportunity_Count:842,  Opportunity_Pass:839,  Opportunity_Fail:3,  Opportunity_NA:0,  Accuracy:99.64, Error_Rate:0.36},
+        {Month_Number:11, Month:'Feb', Opportunity_Count:1348, Opportunity_Pass:1341, Opportunity_Fail:7,  Opportunity_NA:0,  Accuracy:99.48, Error_Rate:0.52},
+        {Month_Number:12, Month:'Mar', Opportunity_Count:2186, Opportunity_Pass:2156, Opportunity_Fail:30, Opportunity_NA:0,  Accuracy:98.63, Error_Rate:1.37},
+        {Month_Number:13, Month:'Apr', Opportunity_Count:1521, Opportunity_Pass:1480, Opportunity_Fail:41, Opportunity_NA:0,  Accuracy:97.30, Error_Rate:2.70}
+      ],
+      week_stats: [
+        {Month:'Jan',Month_Number:10,Week:1,Opportunity_Count:93, Opportunity_Pass:93, Opportunity_Fail:0,Opportunity_NA:0,Accuracy:100.00,Week_Label:'Jan W1'},
+        {Month:'Jan',Month_Number:10,Week:2,Opportunity_Count:356,Opportunity_Pass:354,Opportunity_Fail:2,Opportunity_NA:0,Accuracy:99.44,Week_Label:'Jan W2'},
+        {Month:'Jan',Month_Number:10,Week:3,Opportunity_Count:300,Opportunity_Pass:300,Opportunity_Fail:1,Opportunity_NA:0,Accuracy:99.67,Week_Label:'Jan W3'},
+        {Month:'Jan',Month_Number:10,Week:4,Opportunity_Count:93, Opportunity_Pass:92, Opportunity_Fail:0,Opportunity_NA:0,Accuracy:100.00,Week_Label:'Jan W4'},
+        {Month:'Feb',Month_Number:11,Week:1,Opportunity_Count:342,Opportunity_Pass:342,Opportunity_Fail:0,Opportunity_NA:0,Accuracy:100.00,Week_Label:'Feb W1'},
+        {Month:'Feb',Month_Number:11,Week:2,Opportunity_Count:316,Opportunity_Pass:315,Opportunity_Fail:2,Opportunity_NA:0,Accuracy:99.37,Week_Label:'Feb W2'},
+        {Month:'Feb',Month_Number:11,Week:3,Opportunity_Count:293,Opportunity_Pass:290,Opportunity_Fail:3,Opportunity_NA:0,Accuracy:98.98,Week_Label:'Feb W3'},
+        {Month:'Feb',Month_Number:11,Week:4,Opportunity_Count:397,Opportunity_Pass:394,Opportunity_Fail:2,Opportunity_NA:0,Accuracy:99.50,Week_Label:'Feb W4'},
+        {Month:'Mar',Month_Number:12,Week:1,Opportunity_Count:580,Opportunity_Pass:573,Opportunity_Fail:7,Opportunity_NA:0,Accuracy:98.79,Week_Label:'Mar W1'},
+        {Month:'Mar',Month_Number:12,Week:2,Opportunity_Count:522,Opportunity_Pass:509,Opportunity_Fail:13,Opportunity_NA:0,Accuracy:97.51,Week_Label:'Mar W2'},
+        {Month:'Mar',Month_Number:12,Week:3,Opportunity_Count:421,Opportunity_Pass:416,Opportunity_Fail:5,Opportunity_NA:0,Accuracy:98.81,Week_Label:'Mar W3'},
+        {Month:'Mar',Month_Number:12,Week:4,Opportunity_Count:663,Opportunity_Pass:658,Opportunity_Fail:5,Opportunity_NA:0,Accuracy:99.25,Week_Label:'Mar W4'},
+        {Month:'Apr',Month_Number:13,Week:1,Opportunity_Count:362,Opportunity_Pass:361,Opportunity_Fail:1,Opportunity_NA:0,Accuracy:99.72,Week_Label:'Apr W1'},
+        {Month:'Apr',Month_Number:13,Week:2,Opportunity_Count:440,Opportunity_Pass:435,Opportunity_Fail:5,Opportunity_NA:0,Accuracy:98.86,Week_Label:'Apr W2'},
+        {Month:'Apr',Month_Number:13,Week:3,Opportunity_Count:462,Opportunity_Pass:434,Opportunity_Fail:28,Opportunity_NA:0,Accuracy:93.94,Week_Label:'Apr W3'},
+        {Month:'Apr',Month_Number:13,Week:4,Opportunity_Count:257,Opportunity_Pass:250,Opportunity_Fail:7,Opportunity_NA:0,Accuracy:97.28,Week_Label:'Apr W4'}
+      ],
+      totals: { count:5897, pass:5816, fail:81, na:0, accuracy:98.63 }
+    },
+    HPE_UR: {
+      month_stats: [
+        {Month_Number:10, Month:'Jan', Opportunity_Count:386,  Opportunity_Pass:341,  Opportunity_Fail:5,  Opportunity_NA:40, Accuracy:98.56, Error_Rate:1.44},
+        {Month_Number:11, Month:'Feb', Opportunity_Count:613,  Opportunity_Pass:580,  Opportunity_Fail:4,  Opportunity_NA:29, Accuracy:99.32, Error_Rate:0.68},
+        {Month_Number:12, Month:'Mar', Opportunity_Count:1005, Opportunity_Pass:985,  Opportunity_Fail:18, Opportunity_NA:2,  Accuracy:98.12, Error_Rate:1.88},
+        {Month_Number:13, Month:'Apr', Opportunity_Count:698,  Opportunity_Pass:678,  Opportunity_Fail:20, Opportunity_NA:0,  Accuracy:97.13, Error_Rate:2.87}
+      ],
+      week_stats: [
+        {Month:'Jan',Month_Number:10,Week:1,Opportunity_Count:42, Opportunity_Pass:42, Opportunity_Fail:0,Opportunity_NA:0, Accuracy:100.00,Week_Label:'Jan W1'},
+        {Month:'Jan',Month_Number:10,Week:2,Opportunity_Count:159,Opportunity_Pass:154,Opportunity_Fail:5,Opportunity_NA:0, Accuracy:96.86,Week_Label:'Jan W2'},
+        {Month:'Jan',Month_Number:10,Week:3,Opportunity_Count:135,Opportunity_Pass:134,Opportunity_Fail:0,Opportunity_NA:0, Accuracy:100.00,Week_Label:'Jan W3'},
+        {Month:'Jan',Month_Number:10,Week:4,Opportunity_Count:50, Opportunity_Pass:11, Opportunity_Fail:0,Opportunity_NA:40,Accuracy:100.00,Week_Label:'Jan W4'},
+        {Month:'Feb',Month_Number:11,Week:1,Opportunity_Count:156,Opportunity_Pass:156,Opportunity_Fail:0,Opportunity_NA:0, Accuracy:100.00,Week_Label:'Feb W1'},
+        {Month:'Feb',Month_Number:11,Week:2,Opportunity_Count:145,Opportunity_Pass:143,Opportunity_Fail:1,Opportunity_NA:0, Accuracy:99.31,Week_Label:'Feb W2'},
+        {Month:'Feb',Month_Number:11,Week:3,Opportunity_Count:133,Opportunity_Pass:115,Opportunity_Fail:1,Opportunity_NA:17,Accuracy:99.14,Week_Label:'Feb W3'},
+        {Month:'Feb',Month_Number:11,Week:4,Opportunity_Count:179,Opportunity_Pass:166,Opportunity_Fail:2,Opportunity_NA:12,Accuracy:98.81,Week_Label:'Feb W4'},
+        {Month:'Mar',Month_Number:12,Week:1,Opportunity_Count:265,Opportunity_Pass:262,Opportunity_Fail:1,Opportunity_NA:2, Accuracy:99.62,Week_Label:'Mar W1'},
+        {Month:'Mar',Month_Number:12,Week:2,Opportunity_Count:238,Opportunity_Pass:231,Opportunity_Fail:7,Opportunity_NA:0, Accuracy:97.05,Week_Label:'Mar W2'},
+        {Month:'Mar',Month_Number:12,Week:3,Opportunity_Count:192,Opportunity_Pass:188,Opportunity_Fail:4,Opportunity_NA:0, Accuracy:97.92,Week_Label:'Mar W3'},
+        {Month:'Mar',Month_Number:12,Week:4,Opportunity_Count:310,Opportunity_Pass:304,Opportunity_Fail:6,Opportunity_NA:0, Accuracy:98.06,Week_Label:'Mar W4'},
+        {Month:'Apr',Month_Number:13,Week:1,Opportunity_Count:166,Opportunity_Pass:165,Opportunity_Fail:1,Opportunity_NA:0, Accuracy:99.40,Week_Label:'Apr W1'},
+        {Month:'Apr',Month_Number:13,Week:2,Opportunity_Count:202,Opportunity_Pass:199,Opportunity_Fail:3,Opportunity_NA:0, Accuracy:98.51,Week_Label:'Apr W2'},
+        {Month:'Apr',Month_Number:13,Week:3,Opportunity_Count:212,Opportunity_Pass:197,Opportunity_Fail:15,Opportunity_NA:0,Accuracy:92.92,Week_Label:'Apr W3'},
+        {Month:'Apr',Month_Number:13,Week:4,Opportunity_Count:118,Opportunity_Pass:117,Opportunity_Fail:1,Opportunity_NA:0, Accuracy:99.15,Week_Label:'Apr W4'}
+      ],
+      totals: { count:2702, pass:2584, fail:47, na:71, accuracy:98.22 }
+    }
+  }
 };
 
 // ==================== CHART REGISTRY ====================
@@ -4849,7 +4931,8 @@ function buildMonthTable() {
   const tbody = document.getElementById('monthSummaryTable');
   if (!tbody) return;
   const months = getFilteredMonths();
-  const allSorted = [...DASHBOARD_DATA.month_stats].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  // Use same hire-type source for MoM baseline
+  const allSorted = [...getHireTypeMonthStats()].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
   let prevAcc = null;
   tbody.innerHTML = months.map(function(m) {
     // Find previous month in full list for MoM
@@ -4887,70 +4970,8 @@ function initTrendCharts() {
   var months = getFilteredMonths().sort(function(a,b){ return a.Month_Number - b.Month_Number; });
   var weeks  = getFilteredWeeks();
 
-  // Monthly trend line
-  destroyChart('monthlyTrendChart');
-  const mtCtx = document.getElementById('monthlyTrendChart').getContext('2d');
-  charts['monthlyTrendChart'] = new Chart(mtCtx, {
-    type: 'line',
-    data: {
-      labels: months.map(m => m.Month + ' 2026'),
-      datasets: [
-        {
-          label: 'Accuracy %',
-          data: months.map(m => m.Accuracy),
-          borderColor: '#01A982',
-          backgroundColor: 'rgba(1,169,130,0.12)',
-          tension: 0.4,
-          fill: true,
-          pointRadius: 6,
-          pointBackgroundColor: '#01A982',
-          pointBorderColor: 'white',
-          pointBorderWidth: 2,
-          yAxisID: 'y',
-          order: 1
-        },
-        {
-          label: 'Error Rate %',
-          data: months.map(m => m.Error_Rate),
-          borderColor: '#C54E4B',
-          backgroundColor: 'rgba(197,78,75,0.08)',
-          tension: 0.4,
-          fill: false,
-          pointRadius: 5,
-          pointBackgroundColor: '#C54E4B',
-          borderDash: [],
-          yAxisID: 'y2',
-          order: 2,
-          type: 'bar'
-        },
-        {
-          label: '95% Target',
-          data: months.map(() => 95),
-          borderColor: '#FF8300',
-          borderDash: [8,4],
-          borderWidth: 2,
-          pointRadius: 0,
-          fill: false,
-          yAxisID: 'y',
-          order: 0
-        }
-      ]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      interaction: { mode: 'index', intersect: false },
-      plugins: {
-        legend: { position: 'top', labels: { font: {size:12}, padding: 16, boxWidth: 14 } },
-        tooltip: { backgroundColor: '#1a2532', padding: 12, cornerRadius: 8 }
-      },
-      scales: {
-        y: { min: 95, max: 100, position: 'left', ticks: { callback: v => v + '%', font:{size:11} }, grid: { color: 'rgba(0,0,0,0.06)' } },
-        y2: { min: 0, max: 5, position: 'right', ticks: { callback: v => v + '%', font:{size:11} }, grid: { display: false } },
-        x: { ticks: { font: {size:12} }, grid: { display: false } }
-      }
-    }
-  });
+  // Monthly trend line — delegate to updateTrendCharts for unified dual-series logic
+  updateTrendCharts();
   
   // Heatmap
   buildHeatmap();
@@ -5448,7 +5469,8 @@ function initImprovementCharts() {
 function buildDeltaTable() {
   const el = document.getElementById('deltaTable');
   if (!el) return;
-  const months = DASHBOARD_DATA.month_stats.sort((a,b) => a.Month_Number - b.Month_Number);
+  // Use hire-type-filtered months for delta table
+  const months = getFilteredMonths().sort(function(a,b){ return a.Month_Number - b.Month_Number; });
   let prevAcc = null;
   let html = '<div style="display:flex;flex-direction:column;gap:8px">';
   months.forEach(m => {
@@ -6187,10 +6209,53 @@ function initInsightsCharts() {
 // ==================== UNIFIED GLOBAL FILTER ENGINE ====================
 // Single source of truth for all period filters across Executive, Trends, Improvement tabs
 var ACTIVE_FILTER = { mode: 'fy', value: 'all' }; // mode: 'fy'|'month'|'week'
+var ACTIVE_HIRE_TYPE = 'all'; // 'all' | 'HPE_Experienced' | 'HPE_UR'
+
+// Helper: get the month_stats array for the current hire type filter
+function getHireTypeMonthStats() {
+  if (ACTIVE_HIRE_TYPE === 'HPE_Experienced') return DASHBOARD_DATA.hireTypeStats.HPE_Experienced.month_stats;
+  if (ACTIVE_HIRE_TYPE === 'HPE_UR')          return DASHBOARD_DATA.hireTypeStats.HPE_UR.month_stats;
+  return DASHBOARD_DATA.month_stats; // combined
+}
+// Helper: get the week_stats array for the current hire type filter
+function getHireTypeWeekStats() {
+  if (ACTIVE_HIRE_TYPE === 'HPE_Experienced') return DASHBOARD_DATA.hireTypeStats.HPE_Experienced.week_stats;
+  if (ACTIVE_HIRE_TYPE === 'HPE_UR')          return DASHBOARD_DATA.hireTypeStats.HPE_UR.week_stats;
+  return DASHBOARD_DATA.week_stats; // combined
+}
+// Human-readable label for current hire type
+function getHireTypeLabel() {
+  if (ACTIVE_HIRE_TYPE === 'HPE_Experienced') return 'HPE Experienced';
+  if (ACTIVE_HIRE_TYPE === 'HPE_UR')          return 'HPE UR';
+  return 'All Hire Types';
+}
+
+// Apply hire type filter and refresh all charts
+function applyHireTypeFilter(ht) {
+  ACTIVE_HIRE_TYPE = ht;
+  // Update button active states
+  ['htBtnAll','htBtnExp','htBtnUR'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  var activeId = ht === 'HPE_Experienced' ? 'htBtnExp' : ht === 'HPE_UR' ? 'htBtnUR' : 'htBtnAll';
+  var activeEl = document.getElementById(activeId);
+  if (activeEl) activeEl.classList.add('active');
+  // Repopulate week dropdowns with hire-type-specific week labels
+  populateWeekOptions('execWeekSelect');
+  populateWeekOptions('trendsWeekSelect');
+  populateWeekOptions('improveWeekSelect');
+  // Rebuild all visualisations
+  updateExecutiveKPIs();
+  updateExecutiveCharts();
+  if (_trendDone)   { updateTrendCharts(); rebuildCriticalBarChart(); }
+  if (_improveDone) { updateImprovementCharts(); }
+  if (_insightsDone){ /* rebuild forecast */ }
+}
 
 // Helper: get filtered week_stats based on current ACTIVE_FILTER
 function getFilteredWeeks() {
-  var all = [...DASHBOARD_DATA.week_stats].sort(function(a,b) {
+  var all = [...getHireTypeWeekStats()].sort(function(a,b) {
     return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
   });
   if (ACTIVE_FILTER.mode === 'fy' || ACTIVE_FILTER.value === 'all') return all;
@@ -6201,12 +6266,13 @@ function getFilteredWeeks() {
 
 // Helper: get filtered month_stats based on current ACTIVE_FILTER
 function getFilteredMonths() {
-  var all = [...DASHBOARD_DATA.month_stats].sort(function(a,b) { return a.Month_Number - b.Month_Number; });
+  var all = [...getHireTypeMonthStats()].sort(function(a,b) { return a.Month_Number - b.Month_Number; });
   if (ACTIVE_FILTER.mode === 'fy' || ACTIVE_FILTER.value === 'all') return all;
   if (ACTIVE_FILTER.mode === 'month') return all.filter(function(m) { return m.Month === ACTIVE_FILTER.value; });
   if (ACTIVE_FILTER.mode === 'week') {
     // For week filter on monthly view, show only the month that contains that week
-    var w = DASHBOARD_DATA.week_stats.find(function(x) { return x.Week_Label === ACTIVE_FILTER.value; });
+    var ws = getHireTypeWeekStats();
+    var w = ws.find(function(x) { return x.Week_Label === ACTIVE_FILTER.value; });
     return w ? all.filter(function(m) { return m.Month === w.Month; }) : all;
   }
   return all;
@@ -6216,7 +6282,7 @@ function getFilteredMonths() {
 function populateWeekOptions(selectId) {
   var sel = document.getElementById(selectId);
   if (!sel) return;
-  var weeks = [...DASHBOARD_DATA.week_stats].sort(function(a,b) {
+  var weeks = [...getHireTypeWeekStats()].sort(function(a,b) {
     return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
   });
   var html = '<option value="all">All Weeks</option>';
@@ -6397,7 +6463,7 @@ function updateExecutiveKPIs() {
   setText('kpi-accuracy', accuracy + '%');
   setHtml('kpi-accuracy-delta', '<i class="fas fa-' + (accDeltaClass==='delta-up'?'arrow-up':'arrow-down') + '"></i> ' + accDelta);
   setClass('kpi-accuracy-delta', 'kpi-delta ' + accDeltaClass);
-  setText('kpi-accuracy-sub', 'Target: 95.00% | ' + periodLabel);
+  setText('kpi-accuracy-sub', 'Target: 95.00% | ' + periodLabel + (ACTIVE_HIRE_TYPE !== 'all' ? ' | ' + getHireTypeLabel() : ''));
 
   setText('kpi-total', totalCount.toLocaleString());
   setHtml('kpi-total-delta', '<i class="fas fa-clipboard-list"></i> ' + periodLabel);
@@ -6475,28 +6541,55 @@ function updateExecutiveCharts() {
   var labels = weeks.map(function(w){ return w.Week_Label; });
   var accData = weeks.map(function(w){ return w.Accuracy; });
 
-  // Sparkline
+  // Sparkline — dual series when "All" hire type
   destroyChart('sparklineChart');
   var spEl = document.getElementById('sparklineChart');
   if (spEl) {
+    var spDatasets;
+    if (ACTIVE_HIRE_TYPE === 'all') {
+      // Show combined line + Exp + UR as separate thin lines
+      var expWeeks = [...DASHBOARD_DATA.hireTypeStats.HPE_Experienced.week_stats]
+        .sort(function(a,b){return a.Month_Number!==b.Month_Number?a.Month_Number-b.Month_Number:a.Week-b.Week;})
+        .filter(function(w){return weeks.some(function(fw){return fw.Week_Label===w.Week_Label;});});
+      var urWeeks  = [...DASHBOARD_DATA.hireTypeStats.HPE_UR.week_stats]
+        .sort(function(a,b){return a.Month_Number!==b.Month_Number?a.Month_Number-b.Month_Number:a.Week-b.Week;})
+        .filter(function(w){return weeks.some(function(fw){return fw.Week_Label===w.Week_Label;});});
+      spDatasets = [
+        { label: 'Combined', data: accData, borderColor:'#01A982', backgroundColor:'rgba(1,169,130,0.08)',
+          tension:0.4, fill:true, pointRadius:3, borderWidth:2,
+          pointBackgroundColor: accData.map(function(a){return a<95?'#C54E4B':a<98?'#FF8300':'#01A982';}),
+          pointBorderColor:'white', pointBorderWidth:1 },
+        { label: 'HPE Experienced', data: expWeeks.map(function(w){return w.Accuracy;}),
+          borderColor:'#0D5DBF', borderWidth:1.5, tension:0.4, fill:false, pointRadius:3,
+          pointBackgroundColor:'#0D5DBF', pointBorderColor:'white', pointBorderWidth:1 },
+        { label: 'HPE UR', data: urWeeks.map(function(w){return w.Accuracy;}),
+          borderColor:'#FF8300', borderWidth:1.5, tension:0.4, fill:false, pointRadius:3,
+          pointBackgroundColor:'#FF8300', pointBorderColor:'white', pointBorderWidth:1, borderDash:[3,2] },
+        { label: '95% Target', data: labels.map(function(){return 95;}),
+          borderColor:'#C54E4B', borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false }
+      ];
+    } else {
+      var htColor = ACTIVE_HIRE_TYPE==='HPE_Experienced' ? '#0D5DBF' : '#FF8300';
+      spDatasets = [
+        { label: getHireTypeLabel() + ' Accuracy %', data: accData, borderColor:htColor,
+          backgroundColor: ACTIVE_HIRE_TYPE==='HPE_Experienced' ? 'rgba(13,93,191,0.1)' : 'rgba(255,131,0,0.1)',
+          tension:0.4, fill:true, pointRadius:4,
+          pointBackgroundColor: accData.map(function(a){return a<95?'#C54E4B':a<98?'#FF8300':htColor;}),
+          pointBorderColor:'white', pointBorderWidth:2, pointHoverRadius:7 },
+        { label: '95% Target', data: labels.map(function(){return 95;}),
+          borderColor:'#C54E4B', borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false }
+      ];
+    }
     charts['sparklineChart'] = new Chart(spEl.getContext('2d'), {
       type: 'line',
-      data: {
-        labels: labels,
-        datasets: [
-          { label: 'Accuracy %', data: accData, borderColor: '#01A982', backgroundColor: 'rgba(1,169,130,0.1)',
-            tension: 0.4, fill: true, pointRadius: 4,
-            pointBackgroundColor: accData.map(function(a){ return a < 95 ? '#C54E4B' : a < 98 ? '#FF8300' : '#01A982'; }),
-            pointBorderColor: 'white', pointBorderWidth: 2, pointHoverRadius: 7 },
-          { label: '95% Target', data: labels.map(function(){ return 95; }),
-            borderColor: '#C54E4B', borderDash: [5,5], borderWidth: 1.5, pointRadius: 0, fill: false }
-        ]
-      },
+      data: { labels: labels, datasets: spDatasets },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: {display:false}, tooltip: {mode:'index'} },
+        plugins: { legend: { display: ACTIVE_HIRE_TYPE==='all', position:'top', labels:{font:{size:10},boxWidth:10,padding:8} },
+          tooltip: {mode:'index'} },
         scales: {
-          y: { min: Math.min(91, Math.floor(Math.min(...accData)) - 1), max: 100, ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
+          y: { min: Math.min(91, Math.floor(Math.min(...accData)) - 1), max: 100,
+            ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
           x: { ticks: {font:{size:10}, maxRotation:45}, grid:{display:false} }
         }
       }
@@ -6509,29 +6602,56 @@ function updateExecutiveCharts() {
 
 // ---- UPDATE ACCURACY TRENDS CHARTS ----
 function updateTrendCharts() {
-  if (!_trendDone) return; // not initialized yet, initTrendCharts will build with current filter
+  // Called both from initTrendCharts (first build) and from filter changes
   var weeks  = getFilteredWeeks();
   var months = getFilteredMonths();
 
-  // Monthly trend chart
+  // Monthly trend chart — dual-series when "All" hire type, single-series when filtered
   destroyChart('monthlyTrendChart');
   var mtEl = document.getElementById('monthlyTrendChart');
   if (mtEl && months.length > 0) {
+    var mtDatasets;
+    if (ACTIVE_HIRE_TYPE === 'all') {
+      // Show Experienced + UR as separate lines
+      var expMonths = [...DASHBOARD_DATA.hireTypeStats.HPE_Experienced.month_stats]
+        .sort(function(a,b){return a.Month_Number-b.Month_Number;})
+        .filter(function(m){ return months.some(function(fm){return fm.Month===m.Month;}); });
+      var urMonths  = [...DASHBOARD_DATA.hireTypeStats.HPE_UR.month_stats]
+        .sort(function(a,b){return a.Month_Number-b.Month_Number;})
+        .filter(function(m){ return months.some(function(fm){return fm.Month===m.Month;}); });
+      mtDatasets = [
+        { label: 'HPE Experienced', data: expMonths.map(function(m){return m.Accuracy;}),
+          borderColor:'#0D5DBF', backgroundColor:'rgba(13,93,191,0.08)', tension:0.4, fill:true,
+          pointRadius:6, pointBackgroundColor:'#0D5DBF', pointBorderColor:'white', pointBorderWidth:2, yAxisID:'y', order:1 },
+        { label: 'HPE UR', data: urMonths.map(function(m){return m.Accuracy;}),
+          borderColor:'#FF8300', backgroundColor:'rgba(255,131,0,0.08)', tension:0.4, fill:true,
+          pointRadius:6, pointBackgroundColor:'#FF8300', pointBorderColor:'white', pointBorderWidth:2, yAxisID:'y', order:2 },
+        { label: 'Combined Error Rate %', data: months.map(function(m){return m.Error_Rate;}),
+          borderColor:'#C54E4B', backgroundColor:'rgba(197,78,75,0.08)', tension:0.4,
+          type:'bar', yAxisID:'y2', order:3 },
+        { label: '95% Target', data: months.map(function(){return 95;}),
+          borderColor:'#94a3b8', borderDash:[8,4], borderWidth:1.5, pointRadius:0, fill:false, yAxisID:'y', order:0 }
+      ];
+    } else {
+      mtDatasets = [
+        { label: getHireTypeLabel() + ' Accuracy %', data: months.map(function(m){return m.Accuracy;}),
+          borderColor: ACTIVE_HIRE_TYPE==='HPE_Experienced' ? '#0D5DBF' : '#FF8300',
+          backgroundColor: ACTIVE_HIRE_TYPE==='HPE_Experienced' ? 'rgba(13,93,191,0.12)' : 'rgba(255,131,0,0.12)',
+          tension:0.4, fill:true,
+          pointRadius:6, pointBackgroundColor: ACTIVE_HIRE_TYPE==='HPE_Experienced' ? '#0D5DBF' : '#FF8300',
+          pointBorderColor:'white', pointBorderWidth:2, yAxisID:'y', order:1 },
+        { label: 'Error Rate %', data: months.map(function(m){return m.Error_Rate;}),
+          borderColor:'#C54E4B', backgroundColor:'rgba(197,78,75,0.08)', tension:0.4,
+          type:'bar', yAxisID:'y2', order:2 },
+        { label: '95% Target', data: months.map(function(){return 95;}),
+          borderColor:'#FF8300', borderDash:[8,4], borderWidth:2, pointRadius:0, fill:false, yAxisID:'y', order:0 }
+      ];
+    }
     charts['monthlyTrendChart'] = new Chart(mtEl.getContext('2d'), {
       type: 'line',
       data: {
         labels: months.map(function(m){ return m.Month + ' 2026'; }),
-        datasets: [
-          { label: 'Accuracy %', data: months.map(function(m){ return m.Accuracy; }),
-            borderColor: '#01A982', backgroundColor: 'rgba(1,169,130,0.12)', tension: 0.4, fill: true,
-            pointRadius: 6, pointBackgroundColor: '#01A982', pointBorderColor: 'white', pointBorderWidth: 2,
-            yAxisID: 'y', order: 1 },
-          { label: 'Error Rate %', data: months.map(function(m){ return m.Error_Rate; }),
-            borderColor: '#C54E4B', backgroundColor: 'rgba(197,78,75,0.08)', tension: 0.4,
-            type: 'bar', yAxisID: 'y2', order: 2 },
-          { label: '95% Target', data: months.map(function(){ return 95; }),
-            borderColor: '#FF8300', borderDash: [8,4], borderWidth: 2, pointRadius: 0, fill: false, yAxisID: 'y', order: 0 }
-        ]
+        datasets: mtDatasets
       },
       options: {
         responsive: true, maintainAspectRatio: false,
@@ -6629,6 +6749,56 @@ function updateImprovementCharts() {
   if (!_improveDone) return;
   buildForecastChart();
   buildDeltaTable();
+  // Rebuild pareto, recruiter, PM, stage error charts with current hire type filter
+  var errors = DASHBOARD_DATA.top_errors.filter(function(e){ return e.Opportunity_Fail > 0; });
+  var totalErrors = errors.reduce(function(s,e){return s+e.Opportunity_Fail;},0);
+  var cumulative = 0;
+  var cumulativeData = errors.map(function(e){ cumulative+=e.Opportunity_Fail; return +((cumulative/totalErrors)*100).toFixed(1); });
+  destroyChart('paretoChart');
+  var pEl = document.getElementById('paretoChart');
+  if (pEl) {
+    charts['paretoChart'] = new Chart(pEl.getContext('2d'), {
+      type:'bar',
+      data:{
+        labels: errors.map(function(e){ return e.Parameter.length>20?e.Parameter.substring(0,20)+'...':e.Parameter; }),
+        datasets:[
+          { label:'Error Count', data:errors.map(function(e){return e.Opportunity_Fail;}),
+            backgroundColor:errors.map(function(e,i){return i===0?'#C54E4B':i<3?'#FF8300':'#425563';}),
+            borderRadius:4, yAxisID:'y' },
+          { label:'Cumulative %', data:cumulativeData, type:'line', borderColor:'#0D5DBF',
+            borderWidth:2, pointRadius:4, pointBackgroundColor:'#0D5DBF',
+            fill:false, tension:0.3, yAxisID:'y2' }
+        ]
+      },
+      options:{ responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}}},
+        scales:{ y:{ticks:{font:{size:10}},title:{display:true,text:'Error Count',font:{size:10}}},
+          y2:{position:'right',min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}},grid:{display:false}},
+          x:{ticks:{font:{size:9},maxRotation:45}} }
+      }
+    });
+  }
+  // Recruiter chart — include hire type label in chart title
+  var recData = DASHBOARD_DATA.recruiter_bottom.slice(0,10);
+  destroyChart('recruiterErrorChart');
+  var rEl = document.getElementById('recruiterErrorChart');
+  if (rEl) {
+    charts['recruiterErrorChart'] = new Chart(rEl.getContext('2d'), {
+      type:'bar',
+      data:{
+        labels: recData.map(function(r){return r.Recruiter;}),
+        datasets:[{ label: getHireTypeLabel()+' — Avg Accuracy %',
+          data: recData.map(function(r){return r.Avg_Accuracy;}),
+          backgroundColor: recData.map(function(r){return r.Avg_Accuracy<92?'#C54E4B':r.Avg_Accuracy<95?'#FF8300':'#425563';}),
+          borderRadius:4 }]
+      },
+      options:{ indexAxis:'y', responsive:true, maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{ x:{min:85,max:100,ticks:{callback:function(v){return v+'%';},font:{size:10}}},
+          y:{ticks:{font:{size:10}}} }
+      }
+    });
+  }
 }
 
 // ==================== OLD FILTER STUBS (kept for any residual calls) ====================
@@ -6877,6 +7047,7 @@ function _processSheets(paramRows, recRows) {
   var stageMap = {};
   var critMap  = {};
   var hireTypeMonthMap = { HPE_Experienced:{}, HPE_UR:{}, combined:{} };
+  var hireTypeWeekMap  = { HPE_Experienced:{}, HPE_UR:{} };
   var htTotals = { HPE_Experienced:{pass:0,fail:0,na:0,count:0}, HPE_UR:{pass:0,fail:0,na:0,count:0} };
   var totalPass = 0, totalFail = 0, totalNA = 0, totalCount = 0;
 
@@ -6963,6 +7134,13 @@ function _processSheets(paramRows, recRows) {
 
       htTotals[ht].count += oppCnt; htTotals[ht].pass += oppPass;
       htTotals[ht].fail  += oppFail; htTotals[ht].na  += oppNA;
+
+      // Hire Type × Week
+      var wkKey = month + '||' + week;
+      var htWM = hireTypeWeekMap[ht];
+      if (!htWM[wkKey]) htWM[wkKey] = {month:month, week:week, count:0, pass:0, fail:0, na:0};
+      htWM[wkKey].count += oppCnt; htWM[wkKey].pass += oppPass;
+      htWM[wkKey].fail  += oppFail; htWM[wkKey].na  += oppNA;
     }
   });
 
@@ -7057,13 +7235,29 @@ function _processSheets(paramRows, recRows) {
       return { Month: m, Month_Number: monthNum(m),
                Opportunity_Count: d.count, Opportunity_Pass: d.pass,
                Opportunity_Fail: d.fail, Opportunity_NA: d.na,
-               Accuracy: calcAcc(d.pass, d.count) };
+               Accuracy: calcAcc(d.pass, d.count),
+               Error_Rate: d.count > 0 ? +((d.fail/d.count)*100).toFixed(2) : 0 };
     }).sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  }
+
+  // Build per-hire-type week_stats from hireTypeWeekMap
+  function htWeekStats(htWM) {
+    return Object.keys(htWM).map(function(k) {
+      var d = htWM[k];
+      return {
+        Month: d.month, Month_Number: monthNum(d.month), Week: d.week,
+        Opportunity_Count: d.count, Opportunity_Pass: d.pass,
+        Opportunity_Fail: d.fail, Opportunity_NA: d.na,
+        Accuracy: calcAcc(d.pass, d.count),
+        Week_Label: d.month + ' W' + d.week
+      };
+    }).sort(function(a,b){ return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week; });
   }
 
   var hireTypeStats = {
     HPE_Experienced: {
       month_stats: htMonthStats(hireTypeMonthMap.HPE_Experienced),
+      week_stats: htWeekStats(hireTypeWeekMap.HPE_Experienced),
       totals: {
         count: htTotals.HPE_Experienced.count, pass: htTotals.HPE_Experienced.pass,
         fail:  htTotals.HPE_Experienced.fail,  na:   htTotals.HPE_Experienced.na,
@@ -7072,6 +7266,7 @@ function _processSheets(paramRows, recRows) {
     },
     HPE_UR: {
       month_stats: htMonthStats(hireTypeMonthMap.HPE_UR),
+      week_stats: htWeekStats(hireTypeWeekMap.HPE_UR),
       totals: {
         count: htTotals.HPE_UR.count, pass: htTotals.HPE_UR.pass,
         fail:  htTotals.HPE_UR.fail,  na:   htTotals.HPE_UR.na,
@@ -7177,8 +7372,16 @@ function _injectDashboardData(result) {
 }
 
 function _fullDashboardRebuild() {
-  // Reset init guards so all tabs fully re-render
+  // Reset init guards and hire type filter so all tabs fully re-render
   _execDone = false; _trendDone = false; _improveDone = false; _insightsDone = false; _perfDone = false;
+  // Reset hire type toggle to All on new upload
+  ACTIVE_HIRE_TYPE = 'all';
+  ['htBtnAll','htBtnExp','htBtnUR'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  var htAll = document.getElementById('htBtnAll');
+  if (htAll) htAll.classList.add('active');
 
   // Rebuild currently-visible tab immediately
   updateExecutiveKPIs();
