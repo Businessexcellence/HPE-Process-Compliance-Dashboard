@@ -2104,33 +2104,17 @@ function getDashboardHTML(): string {
     </div>
 
     <!-- Summary Trend Sparkline — now monthly -->
-    <div class="row-2">
-      <div class="card">
-        <div class="card-title"><i class="fas fa-chart-line"></i> Monthly Accuracy Trend</div>
-        <div class="acc-legend-bar">
-          <span class="alb-title">Accuracy Key:</span>
-          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
-          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
-          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
-        </div>
-        <div class="card-subtitle" id="sparklineSubtitle">Monthly accuracy — Experienced vs UR with 95% target line</div>
-        <div class="chart-container" style="height:180px">
-          <canvas id="sparklineChart"></canvas>
-        </div>
+    <div class="card card-full mb-20">
+      <div class="card-title"><i class="fas fa-chart-line"></i> Monthly Accuracy Trend</div>
+      <div class="acc-legend-bar">
+        <span class="alb-title">Accuracy Key:</span>
+        <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+        <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+        <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
       </div>
-      <div class="card">
-        <div class="card-title"><i class="fas fa-layer-group"></i> Pre-Selection Stage Distribution</div>
-        <div class="card-subtitle">Pre-selection audit pass / fail / N&#8288;A breakdown</div>
-        <div class="chart-container" style="height:180px">
-          <canvas id="stagePreChart"></canvas>
-        </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><i class="fas fa-layer-group"></i> Post-Selection Stage Distribution</div>
-        <div class="card-subtitle">Post-selection audit pass / fail / N&#8288;A breakdown</div>
-        <div class="chart-container" style="height:180px">
-          <canvas id="stagePostChart"></canvas>
-        </div>
+      <div class="card-subtitle" id="sparklineSubtitle">Monthly accuracy — Experienced vs UR with 95% target line</div>
+      <div class="chart-container" style="height:220px">
+        <canvas id="sparklineChart"></canvas>
       </div>
     </div>
 
@@ -2224,35 +2208,24 @@ function getDashboardHTML(): string {
       </div>
     </div>
 
-    <!-- Week heatmap + Stage comparison -->
-    <div class="chart-grid-2">
-      <div class="card">
-        <div class="card-title"><i class="fas fa-th"></i> Weekly Accuracy Heatmap</div>
-        <div class="card-subtitle">Color-coded accuracy bands by week — hover for details</div>
-        <div id="heatmapContainer" style="margin-top:16px"></div>
-        <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap">
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)">
-            <div style="width:14px;height:14px;border-radius:3px;background:#01A982"></div> ≥99%
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)">
-            <div style="width:14px;height:14px;border-radius:3px;background:#4fc3a1"></div> 98-99%
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)">
-            <div style="width:14px;height:14px;border-radius:3px;background:#FF8300"></div> 95-98%
-          </div>
-          <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)">
-            <div style="width:14px;height:14px;border-radius:3px;background:#C54E4B"></div> &lt;95%
-          </div>
+    <!-- Weekly Accuracy Heatmap — full width -->
+    <div class="card card-full mb-20">
+      <div class="card-title"><i class="fas fa-th"></i> Weekly Accuracy Heatmap</div>
+      <div class="card-subtitle">Color-coded accuracy bands by week — hover for details</div>
+      <div id="heatmapContainer" style="margin-top:16px"></div>
+      <div style="display:flex;gap:12px;margin-top:14px;flex-wrap:wrap">
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)">
+          <div style="width:14px;height:14px;border-radius:3px;background:#01A982"></div> ≥99%
         </div>
-      </div>
-      <div class="card">
-        <div class="card-title"><i class="fas fa-layer-group"></i> Pre vs Post Selection Accuracy</div>
-        <div class="card-subtitle">Stage-wise performance comparison</div>
-        <div class="chart-container" style="height:200px">
-          <canvas id="stageComparisonChart"></canvas>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)">
+          <div style="width:14px;height:14px;border-radius:3px;background:#4fc3a1"></div> 98-99%
         </div>
-        <div class="divider"></div>
-        <div id="stageStatsCards"></div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)">
+          <div style="width:14px;height:14px;border-radius:3px;background:#FF8300"></div> 95-98%
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted)">
+          <div style="width:14px;height:14px;border-radius:3px;background:#C54E4B"></div> &lt;95%
+        </div>
       </div>
     </div>
 
@@ -4779,7 +4752,9 @@ const DASHBOARD_DATA = {
       ],
       totals: { count:2702, pass:2584, fail:47, na:71, accuracy:98.22 }
     }
-  }
+  },
+  // Per-hire-type parameter errors by week — populated from uploaded data; seed = empty (no split available for seed data)
+  weekly_param_errors_by_ht: { HPE_Experienced: {}, HPE_UR: {} }
 };
 
 // ==================== CHART REGISTRY ====================
@@ -4841,8 +4816,8 @@ function switchTab(tabName, el) {
   
   // 150ms: enough for CSS display:block to propagate so canvas has real dimensions
   setTimeout(function() {
-    if (tabName === 'executive')   { if (!_execDone)    { _execDone    = true; initExecutiveCharts(); }    else { updateExecutiveKPIs(); updateExecutiveCharts(); reflowCharts(['sparklineChart','stagePreChart','stagePostChart']); } }
-    if (tabName === 'trends')      { if (!_trendDone)   { _trendDone   = true; initTrendCharts(); }         else { updateTrendCharts(); reflowCharts(['stageComparisonChart','criticalBarChart']); } }
+    if (tabName === 'executive')   { if (!_execDone)    { _execDone    = true; initExecutiveCharts(); }    else { updateExecutiveKPIs(); updateExecutiveCharts(); reflowCharts(['sparklineChart']); } }
+    if (tabName === 'trends')      { if (!_trendDone)   { _trendDone   = true; initTrendCharts(); }         else { updateTrendCharts(); reflowCharts(['criticalBarChart']); } }
     if (tabName === 'improvement') { if (!_improveDone) { _improveDone = true; initImprovementCharts(); }  else { updateImprovementCharts(); reflowCharts(['paretoChart','recruiterErrorChart','pmChart','stageErrorChart']); } }
     if (tabName === 'capa')        { initCAPACharts(); }
     if (tabName === 'insights')    { if (!_insightsDone){ _insightsDone= true; initInsightsCharts(); }     else { reflowCharts(['accuracyRadarChart','errorHeatChart']); } }
@@ -4872,44 +4847,6 @@ function initExecutiveCharts() {
   updateExecutiveKPIs();
   // Filter-aware sparkline + month table
   updateExecutiveCharts();
-
-  // Pre-Selection bar chart
-  destroyChart('stagePreChart');
-  var stagePreEl = document.getElementById('stagePreChart');
-  if (stagePreEl) {
-    var preStage = DASHBOARD_DATA.stage_stats.find(function(s){ return s.Stage === 'Pre Selection'; }) || {};
-    charts['stagePreChart'] = new Chart(stagePreEl.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: ['Pass', 'Fail', 'N/A'],
-        datasets: [{ label: 'Pre-Selection', data: [preStage.Opportunity_Pass||2438, preStage.Opportunity_Fail||36, preStage.Opportunity_NA||3], backgroundColor: ['#01A982','#C54E4B','#94a3b8'], borderRadius: 5 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.label + ': ' + c.raw.toLocaleString(); } } } },
-        scales: { y: { beginAtZero: true, max: Math.ceil((preStage.Opportunity_Pass||2438)*1.15), ticks: { font:{size:10} } }, x: { ticks: { font:{size:10} } } }
-      }
-    });
-  }
-
-  // Post-Selection bar chart
-  destroyChart('stagePostChart');
-  var stagePostEl = document.getElementById('stagePostChart');
-  if (stagePostEl) {
-    var postStage = DASHBOARD_DATA.stage_stats.find(function(s){ return s.Stage === 'Post Selection'; }) || {};
-    charts['stagePostChart'] = new Chart(stagePostEl.getContext('2d'), {
-      type: 'bar',
-      data: {
-        labels: ['Pass', 'Fail', 'N/A'],
-        datasets: [{ label: 'Post-Selection', data: [postStage.Opportunity_Pass||5962, postStage.Opportunity_Fail||92, postStage.Opportunity_NA||68], backgroundColor: ['#0D5DBF','#FF8300','#94a3b8'], borderRadius: 5 }]
-      },
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { callbacks: { label: function(c){ return c.label + ': ' + c.raw.toLocaleString(); } } } },
-        scales: { y: { beginAtZero: true, max: Math.ceil((postStage.Opportunity_Pass||5962)*1.15), ticks: { font:{size:10} } }, x: { ticks: { font:{size:10} } } }
-      }
-    });
-  }
 
   // Month summary table (filter-aware via buildMonthTable)
   buildMonthTable();
@@ -5036,51 +4973,6 @@ function initTrendCharts() {
   
   // Heatmap
   buildHeatmap();
-  
-  // Stage comparison — dynamic from DASHBOARD_DATA.stage_stats
-  destroyChart('stageComparisonChart');
-  const scCtx = document.getElementById('stageComparisonChart').getContext('2d');
-  var stgData = DASHBOARD_DATA.stage_stats;
-  var stgLabels = stgData.map(function(s){ return s.Stage; });
-  var stgPass = stgData.map(function(s){ return s.Opportunity_Count > 0 ? +((s.Opportunity_Pass/s.Opportunity_Count)*100).toFixed(1) : 0; });
-  var stgFail = stgData.map(function(s){ return s.Opportunity_Count > 0 ? +((s.Opportunity_Fail/s.Opportunity_Count)*100).toFixed(1) : 0; });
-  var stgNA   = stgData.map(function(s){ return s.Opportunity_Count > 0 ? +((s.Opportunity_NA/s.Opportunity_Count)*100).toFixed(1) : 0; });
-  charts['stageComparisonChart'] = new Chart(scCtx, {
-    type: 'bar',
-    data: {
-      labels: stgLabels,
-      datasets: [
-        { label: 'Pass %', data: stgPass, backgroundColor: '#01A982' },
-        { label: 'Fail %', data: stgFail, backgroundColor: '#C54E4B' },
-        { label: 'N/A %',  data: stgNA,   backgroundColor: '#94a3b8' }
-      ]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: {
-        legend: { position: 'top', labels: {font:{size:11}, boxWidth:12} },
-        tooltip: { callbacks: { label: function(ctx) { return ctx.dataset.label + ': ' + ctx.parsed.y + '%'; } } }
-      },
-      scales: {
-        x: { stacked: true, grid: {display:false} },
-        y: { stacked: true, min: 0, max: 100, ticks: { callback: function(v){ return v + '%'; }, font:{size:11} }, title: { display: true, text: '% of Audits' } }
-      }
-    }
-  });
-  
-  // Stage stats cards
-  const stageCardsEl = document.getElementById('stageStatsCards');
-  if (stageCardsEl) {
-    stageCardsEl.innerHTML = DASHBOARD_DATA.stage_stats.map(s => \`
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">
-        <div>
-          <div style="font-size:13px;font-weight:600;color:var(--text-primary)">\${s.Stage}</div>
-          <div style="font-size:11px;color:var(--text-muted)">\${s.Opportunity_Count.toLocaleString()} audits</div>
-        </div>
-        \${getAccBadge(s.Accuracy)}
-      </div>
-    \`).join('');
-  }
   
   // Critical vs Non-Critical bar chart, Weekly Error chart, and Drill table
   // are all handled by updateTrendCharts() called above — no need to duplicate here.
@@ -5216,13 +5108,27 @@ function showParamBreakdown(weekLabel) {
   const tableEl = document.getElementById('paramBreakdownTable');
   if (!card) return;
 
-  const w = DASHBOARD_DATA.week_stats.find(x => x.Week_Label === weekLabel);
+  // Use hire-type-aware week source (Trends tab local filter)
+  const weekSrc = (typeof getTrendsWeekStats === 'function') ? getTrendsWeekStats() : DASHBOARD_DATA.week_stats;
+  const w = weekSrc.find(x => x.Week_Label === weekLabel)
+         || DASHBOARD_DATA.week_stats.find(x => x.Week_Label === weekLabel);
   if (!w) return;
 
-  const params = (WEEKLY_PARAM_ERRORS[weekLabel] || []).filter(p => p.f > 0);
-  const totalFail = w.Opportunity_Fail;
+  // Choose param error source: hire-type-specific if filtered, combined seed otherwise
+  var htLabel = (typeof getTrendsHireTypeLabel === 'function') ? getTrendsHireTypeLabel() : 'All';
+  var htFilter = (typeof TRENDS_HIRE_TYPE !== 'undefined') ? TRENDS_HIRE_TYPE : 'all';
+  var htParamErrors = DASHBOARD_DATA.weekly_param_errors_by_ht || {};
+  var useHtParams = htFilter !== 'all'
+    && htParamErrors[htFilter]
+    && Object.keys(htParamErrors[htFilter]).length > 0;
+  var params = useHtParams
+    ? (htParamErrors[htFilter][weekLabel] || []).filter(p => p.f > 0)
+    : (WEEKLY_PARAM_ERRORS[weekLabel] || []).filter(p => p.f > 0);
 
-  titleEl.innerHTML = '<i class="fas fa-layer-group"></i> Parameter Breakdown \u2014 ' + weekLabel;
+  const totalFail = w.Opportunity_Fail;
+  var htNote = htFilter !== 'all' ? ' — ' + htLabel : '';
+
+  titleEl.innerHTML = '<i class="fas fa-layer-group"></i> Parameter Breakdown \u2014 ' + weekLabel + htNote;
   subEl.textContent = totalFail + ' error(s) across ' + params.length + ' parameter(s) | ' + w.Opportunity_Count + ' total audits | ' + w.Accuracy + '% accuracy';
 
   if (params.length === 0) {
@@ -7688,6 +7594,8 @@ function _processSheets(paramRows, recRows) {
   var hireTypeMonthMap = { HPE_Experienced:{}, HPE_UR:{}, combined:{} };
   var hireTypeWeekMap  = { HPE_Experienced:{}, HPE_UR:{} };
   var htTotals = { HPE_Experienced:{pass:0,fail:0,na:0,count:0}, HPE_UR:{pass:0,fail:0,na:0,count:0} };
+  // Per-hire-type parameter errors by week: {HPE_Experienced: {'Jan W1': {paramName: failCount}}}
+  var htParamWeekMap = { HPE_Experienced:{}, HPE_UR:{} };
   var totalPass = 0, totalFail = 0, totalNA = 0, totalCount = 0;
 
   paramRows.forEach(function(row) {
@@ -7780,6 +7688,15 @@ function _processSheets(paramRows, recRows) {
       if (!htWM[wkKey]) htWM[wkKey] = {month:month, week:week, count:0, pass:0, fail:0, na:0};
       htWM[wkKey].count += oppCnt; htWM[wkKey].pass += oppPass;
       htWM[wkKey].fail  += oppFail; htWM[wkKey].na  += oppNA;
+
+      // Hire Type × Week × Parameter (for hire-type-aware param breakdown)
+      if (param && oppFail > 0) {
+        var weekLbl = month + ' W' + week;
+        var htPWM = htParamWeekMap[ht];
+        if (!htPWM[weekLbl]) htPWM[weekLbl] = {};
+        if (!htPWM[weekLbl][param]) htPWM[weekLbl][param] = 0;
+        htPWM[weekLbl][param] += oppFail;
+      }
     }
   });
 
@@ -7914,6 +7831,23 @@ function _processSheets(paramRows, recRows) {
     }
   };
 
+  // Convert htParamWeekMap to array-of-{p,f} format matching WEEKLY_PARAM_ERRORS
+  function buildHtParamWeekErrors(htPWM) {
+    var result = {};
+    Object.keys(htPWM).forEach(function(weekLbl) {
+      var paramObj = htPWM[weekLbl];
+      result[weekLbl] = Object.keys(paramObj)
+        .map(function(p){ return {p: p, f: paramObj[p]}; })
+        .filter(function(x){ return x.f > 0; })
+        .sort(function(a,b){ return b.f - a.f; });
+    });
+    return result;
+  }
+  var weekly_param_errors_by_ht = {
+    HPE_Experienced: buildHtParamWeekErrors(htParamWeekMap.HPE_Experienced),
+    HPE_UR:          buildHtParamWeekErrors(htParamWeekMap.HPE_UR)
+  };
+
   // Recruiter bottom (sorted by avg accuracy asc)
   var allMonths = month_stats.map(function(m){ return m.Month; });
   var recruiter_bottom = Object.keys(recruiterMap).map(function(r) {
@@ -7981,7 +7915,7 @@ function _processSheets(paramRows, recRows) {
       fy: '2026'
     },
     month_stats, week_stats, top_errors, recruiter_bottom, pm_stats, stage_stats, crit_stats,
-    hireTypeStats,
+    hireTypeStats, weekly_param_errors_by_ht,
     perf: { recruiter_monthly, pm_recruiters, param_weekly },
     rawParamRows: paramRows.length,
     rawRecRows:   recRows.length,
@@ -8000,6 +7934,7 @@ function _injectDashboardData(result) {
   DASHBOARD_DATA.stage_stats   = result.stage_stats;
   DASHBOARD_DATA.crit_stats    = result.crit_stats;
   DASHBOARD_DATA.hireTypeStats = result.hireTypeStats;
+  DASHBOARD_DATA.weekly_param_errors_by_ht = result.weekly_param_errors_by_ht;
 
   // Patch PERF_DATA in-place
   if (result.perf.recruiter_monthly.length > 0)
@@ -8044,40 +7979,6 @@ function _fullDashboardRebuild() {
     rebuildCriticalBarChart();
     buildHeatmap();
     buildWeeklyTable();
-    // Stage comparison chart
-    var scEl = document.getElementById('stageComparisonChart');
-    if (scEl) {
-      destroyChart('stageComparisonChart');
-      var stgData = DASHBOARD_DATA.stage_stats;
-      var stgLabels = stgData.map(function(s){ return s.Stage; });
-      var stgPass = stgData.map(function(s){ return s.Opportunity_Count > 0 ? +((s.Opportunity_Pass/s.Opportunity_Count)*100).toFixed(1) : 0; });
-      var stgFail = stgData.map(function(s){ return s.Opportunity_Count > 0 ? +((s.Opportunity_Fail/s.Opportunity_Count)*100).toFixed(1) : 0; });
-      var stgNA   = stgData.map(function(s){ return s.Opportunity_Count > 0 ? +((s.Opportunity_NA/s.Opportunity_Count)*100).toFixed(1) : 0; });
-      charts['stageComparisonChart'] = new Chart(scEl.getContext('2d'), {
-        type:'bar', data:{ labels:stgLabels,
-          datasets:[
-            {label:'Pass %',data:stgPass,backgroundColor:'#01A982'},
-            {label:'Fail %',data:stgFail,backgroundColor:'#C54E4B'},
-            {label:'N/A %',data:stgNA,backgroundColor:'#94a3b8'}
-          ]},
-        options:{ responsive:true, maintainAspectRatio:false,
-          plugins:{legend:{position:'top',labels:{font:{size:11},boxWidth:12}},
-            tooltip:{callbacks:{label:function(ctx){return ctx.dataset.label+': '+ctx.parsed.y+'%';}}}},
-          scales:{x:{stacked:true,grid:{display:false}},
-            y:{stacked:true,min:0,max:100,ticks:{callback:function(v){return v+'%';},font:{size:11}},title:{display:true,text:'% of Audits'}}}
-        }
-      });
-    }
-    // Stage stats cards
-    var stageCardsEl = document.getElementById('stageStatsCards');
-    if (stageCardsEl) {
-      stageCardsEl.innerHTML = DASHBOARD_DATA.stage_stats.map(function(s){
-        return '<div style="display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)">'
-          + '<div><div style="font-size:13px;font-weight:600;color:var(--text-primary)">' + s.Stage + '</div>'
-          + '<div style="font-size:11px;color:var(--text-muted)">' + s.Opportunity_Count.toLocaleString() + ' audits</div></div>'
-          + getAccBadge(s.Accuracy) + '</div>';
-      }).join('');
-    }
   }, 100);
 
   // Rebuild Improvement + Insights tabs
