@@ -160,6 +160,8 @@
     html.dark .insight-icon.warning{ background: rgba(255,131,0,0.15); }
     html.dark .insight-icon.alert  { background: rgba(197,78,75,0.15); }
     html.dark .insight-icon.info   { background: rgba(13,93,191,0.18); }
+    html.dark .insight-icon.purple { background: rgba(124,58,237,0.15); }
+    html.dark .insight-icon.teal   { background: rgba(0,151,167,0.15); }
     html.dark .insight-text { color: var(--text-secondary); }
     html.dark .insight-text strong { color: var(--text-primary); }
 
@@ -711,6 +713,10 @@
     .insight-icon.warning { background: #fff3e6; color: var(--hpe-orange); }
     .insight-icon.alert { background: #fceaea; color: var(--hpe-red); }
     .insight-icon.info { background: #e8f0fb; color: var(--hpe-blue); }
+    .insight-icon.purple { background: #f3e8ff; color: #7c3aed; }
+    .insight-icon.teal   { background: #e0f7fa; color: #0097a7; }
+    .insight-item.purple { border-left-color: #7c3aed; }
+    .insight-item.teal   { border-left-color: #0097a7; }
     .insight-text { font-size: 13px; color: var(--text-secondary); line-height: 1.5; }
     .insight-text strong { color: var(--text-primary); }
     
@@ -2081,63 +2087,78 @@
       </div>
     </div>
 
-    <!-- Summary Trend Sparkline -->
+    <!-- Summary Trend Sparkline — now monthly -->
     <div class="row-2">
       <div class="card">
-        <div class="card-title"><i class="fas fa-chart-line"></i> 16-Week Accuracy Trend</div>
+        <div class="card-title"><i class="fas fa-chart-line"></i> Monthly Accuracy Trend</div>
         <div class="acc-legend-bar">
           <span class="alb-title">Accuracy Key:</span>
           <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
           <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
           <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
         </div>
-        <div class="card-subtitle">Weekly accuracy performance FY2026 with 95% target line</div>
+        <div class="card-subtitle" id="sparklineSubtitle">Monthly accuracy — Experienced vs UR with 95% target line</div>
         <div class="chart-container" style="height:180px">
           <canvas id="sparklineChart"></canvas>
         </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="fas fa-layer-group"></i> Pre-Selection Stage Distribution</div>
-        <div class="card-subtitle">Pre-selection audit pass / fail / N⁠A breakdown</div>
+        <div class="card-subtitle">Pre-selection audit pass / fail / N&#8288;A breakdown</div>
         <div class="chart-container" style="height:180px">
           <canvas id="stagePreChart"></canvas>
         </div>
       </div>
       <div class="card">
         <div class="card-title"><i class="fas fa-layer-group"></i> Post-Selection Stage Distribution</div>
-        <div class="card-subtitle">Post-selection audit pass / fail / N⁠A breakdown</div>
+        <div class="card-subtitle">Post-selection audit pass / fail / N&#8288;A breakdown</div>
         <div class="chart-container" style="height:180px">
           <canvas id="stagePostChart"></canvas>
         </div>
       </div>
     </div>
 
-    <!-- Month-wise Summary Table -->
+    <!-- Month-wise Summary Table — split Experienced / UR -->
     <div class="card card-full">
       <div class="card-title"><i class="fas fa-table"></i> Monthly Performance Summary</div>
       <div class="acc-legend-bar">
-          <span class="alb-title">Accuracy Key:</span>
-          <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
-          <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
-          <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
-        </div>
-        <div class="card-subtitle">FY2026 month-over-month performance breakdown</div>
-      <div class="table-container">
+        <span class="alb-title">Accuracy Key:</span>
+        <span class="acc-legend-item ali-green">&#9679; &gt;98% — Performance Excellence</span>
+        <span class="acc-legend-item ali-amber">&#9679; 95–98% — Performance Watch</span>
+        <span class="acc-legend-item ali-red">&#9679; &lt;95% — Performance Below Target</span>
+      </div>
+      <div class="card-subtitle">Month-over-month breakdown split by hire type</div>
+      <!-- Tab toggle -->
+      <div style="display:flex;gap:6px;margin:10px 0 8px 0">
+        <button id="monthTabAll" class="filter-btn active" onclick="switchMonthTab('all',this)" style="font-size:12px;padding:5px 14px">All Combined</button>
+        <button id="monthTabExp" class="filter-btn" onclick="switchMonthTab('exp',this)" style="font-size:12px;padding:5px 14px;background:#e8f0fb;color:#0D5DBF;border-color:#0D5DBF">HPE Experienced</button>
+        <button id="monthTabUR"  class="filter-btn" onclick="switchMonthTab('ur',this)"  style="font-size:12px;padding:5px 14px;background:#fff3e6;color:#FF8300;border-color:#FF8300">HPE UR</button>
+      </div>
+      <!-- Combined table -->
+      <div id="monthTableAll" class="table-container">
         <table>
-          <thead>
-            <tr>
-              <th>Month</th>
-              <th>Total Audits</th>
-              <th>Passed</th>
-              <th>Failed</th>
-              <th>N/A</th>
-              <th>Accuracy %</th>
-              <th>Error %</th>
-              <th>Pass %</th>
-              <th>MoM Change</th>
-            </tr>
-          </thead>
+          <thead><tr>
+            <th>Month</th><th>Total Audits</th><th>Passed</th><th>Failed</th><th>N/A</th><th>Accuracy %</th><th>Error %</th><th>Pass %</th><th>MoM Change</th>
+          </tr></thead>
           <tbody id="monthSummaryTable"></tbody>
+        </table>
+      </div>
+      <!-- Experienced table -->
+      <div id="monthTableExp" class="table-container" style="display:none">
+        <table>
+          <thead><tr style="background:#e8f0fb">
+            <th style="color:#0D5DBF">Month</th><th>Total Audits</th><th>Passed</th><th>Failed</th><th>N/A</th><th>Accuracy %</th><th>Error %</th><th>Pass %</th><th>MoM Change</th>
+          </tr></thead>
+          <tbody id="monthSummaryExp"></tbody>
+        </table>
+      </div>
+      <!-- UR table -->
+      <div id="monthTableUR" class="table-container" style="display:none">
+        <table>
+          <thead><tr style="background:#fff3e6">
+            <th style="color:#FF8300">Month</th><th>Total Audits</th><th>Passed</th><th>Failed</th><th>N/A</th><th>Accuracy %</th><th>Error %</th><th>Pass %</th><th>MoM Change</th>
+          </tr></thead>
+          <tbody id="monthSummaryUR"></tbody>
         </table>
       </div>
     </div>
@@ -4909,16 +4930,10 @@ function drawGauge(canvasId, value, color) {
   ctx.stroke();
 }
 
-function buildMonthTable() {
-  const tbody = document.getElementById('monthSummaryTable');
-  if (!tbody) return;
-  const months = getFilteredMonths();
-  // Use same hire-type source for MoM baseline
-  const allSorted = [...getHireTypeMonthStats()].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
-  let prevAcc = null;
-  tbody.innerHTML = months.map(function(m) {
-    // Find previous month in full list for MoM
-    var idx = allSorted.findIndex(function(x){ return x.Month === m.Month; });
+// Helper: render month rows for a given month_stats array
+function _buildMonthRows(monthStats) {
+  var allSorted = [...monthStats].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  return allSorted.map(function(m, idx) {
     var prev = idx > 0 ? allSorted[idx-1] : null;
     var momChange = prev !== null ? (m.Accuracy - prev.Accuracy).toFixed(2) : null;
     var momHtml = momChange !== null
@@ -4930,9 +4945,8 @@ function buildMonthTable() {
       : '<span style="color:var(--text-muted)">—</span>';
     var applicable = m.Opportunity_Count - m.Opportunity_NA;
     var passRate = applicable > 0 ? +((m.Opportunity_Pass / applicable) * 100).toFixed(2) : 0;
-    var errCol = getAccColor ? getAccColor(m.Accuracy) : '#C54E4B';
     return '<tr>'
-      + '<td><strong>' + m.Month + ' 2026</strong></td>'
+      + '<td><strong>' + m.Month + '</strong></td>'
       + '<td>' + m.Opportunity_Count.toLocaleString() + '</td>'
       + '<td style="color:var(--hpe-green);font-weight:600">' + m.Opportunity_Pass.toLocaleString() + '</td>'
       + '<td style="color:var(--hpe-red);font-weight:600">' + m.Opportunity_Fail + '</td>'
@@ -4943,6 +4957,41 @@ function buildMonthTable() {
       + '<td>' + momHtml + '</td>'
       + '</tr>';
   }).join('');
+}
+
+function buildMonthTable() {
+  // Combined (filter-aware)
+  var tbody = document.getElementById('monthSummaryTable');
+  if (tbody) tbody.innerHTML = _buildMonthRows(getFilteredMonths().sort(function(a,b){ return a.Month_Number - b.Month_Number; }));
+
+  // HPE Experienced
+  var tbodyExp = document.getElementById('monthSummaryExp');
+  var expMs = DASHBOARD_DATA.hireTypeStats && DASHBOARD_DATA.hireTypeStats.HPE_Experienced
+    ? DASHBOARD_DATA.hireTypeStats.HPE_Experienced.month_stats : [];
+  if (tbodyExp) tbodyExp.innerHTML = expMs.length > 0 ? _buildMonthRows(expMs) : '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px">No HPE Experienced data available</td></tr>';
+
+  // HPE UR
+  var tbodyUR = document.getElementById('monthSummaryUR');
+  var urMs = DASHBOARD_DATA.hireTypeStats && DASHBOARD_DATA.hireTypeStats.HPE_UR
+    ? DASHBOARD_DATA.hireTypeStats.HPE_UR.month_stats : [];
+  if (tbodyUR) tbodyUR.innerHTML = urMs.length > 0 ? _buildMonthRows(urMs) : '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:20px">No HPE UR data available</td></tr>';
+}
+
+// Tab switcher for Monthly Performance Summary
+function switchMonthTab(tab, btn) {
+  ['monthTableAll','monthTableExp','monthTableUR'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+  ['monthTabAll','monthTabExp','monthTabUR'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (el) el.classList.remove('active');
+  });
+  var showId = tab === 'exp' ? 'monthTableExp' : tab === 'ur' ? 'monthTableUR' : 'monthTableAll';
+  var actId  = tab === 'exp' ? 'monthTabExp'   : tab === 'ur' ? 'monthTabUR'   : 'monthTabAll';
+  var showEl = document.getElementById(showId);
+  if (showEl) showEl.style.display = '';
+  if (btn) btn.classList.add('active');
 }
 
 // ==================== TREND CHARTS ====================
@@ -6496,15 +6545,32 @@ function _buildAuditIntelligenceSnapshot() {
   var worstMon = sortedMonths.length > 1 ? [...sortedMonths].sort(function(a,b){ return a.Accuracy - b.Accuracy; })[0] : null;
   var bestMon  = sortedMonths.length > 1 ? [...sortedMonths].sort(function(a,b){ return b.Accuracy - a.Accuracy; })[0] : null;
 
+  // Best week = highest accuracy; Worst week = highest error rate (lowest accuracy)
   var worstWeek = srcWeeks.length > 0 ? [...srcWeeks].sort(function(a,b){ return a.Accuracy - b.Accuracy; })[0] : null;
   var bestWeek  = srcWeeks.length > 0 ? [...srcWeeks].sort(function(a,b){ return b.Accuracy - a.Accuracy; })[0] : null;
 
-  var topErr1   = topErrs[0] || null;
-  var topErr2   = topErrs[1] || null;
-  var worstRec  = botRec.length > 0 ? botRec[botRec.length - 1] : null;
-  var botRec3   = botRec.slice(0, 3).filter(function(r){ return r.Avg_Accuracy < 97; });
+  // Top error parameters sorted by error rate %
+  var topErrsByRate = [...topErrs].sort(function(a,b){
+    var rA = a.Opportunity_Count > 0 ? a.Opportunity_Fail / a.Opportunity_Count : 0;
+    var rB = b.Opportunity_Count > 0 ? b.Opportunity_Fail / b.Opportunity_Count : 0;
+    return rB - rA;
+  });
+  var topErr1ByRate = topErrsByRate[0] || null;
+  var topErr2ByRate = topErrsByRate[1] || null;
+
+  // Recruiter lists: sorted asc = worst first, desc = best first
+  var recSortedAsc  = [...botRec].sort(function(a,b){ return a.Avg_Accuracy - b.Avg_Accuracy; });
+  var recSortedDesc = [...botRec].sort(function(a,b){ return b.Avg_Accuracy - a.Avg_Accuracy; });
+
+  // Top performers: top 3 highest accuracy recruiters
+  var topRec3 = recSortedDesc.slice(0, 3);
+
+  // Focus recruiters: bottom performers below 97% threshold (up to 3)
+  var focusRec = recSortedAsc.filter(function(r){ return r.Avg_Accuracy < 97; }).slice(0, 3);
+
   var worstStg  = stgStats.length > 0 ? [...stgStats].sort(function(a,b){ return a.Accuracy - b.Accuracy; })[0] : null;
   var worstPM   = pmStats.length > 0  ? [...pmStats].sort(function(a,b){ return a.Avg_Accuracy - b.Avg_Accuracy; })[0] : null;
+  var bestPM    = pmStats.length > 0  ? [...pmStats].sort(function(a,b){ return b.Avg_Accuracy - a.Avg_Accuracy; })[0] : null;
 
   // Trend direction: compare last month vs first month
   var trendUp   = lastMon && firstMon && lastMon.Accuracy > firstMon.Accuracy;
@@ -6522,9 +6588,18 @@ function _buildAuditIntelligenceSnapshot() {
 
   // Helper to build one insight item HTML
   function insightItem(type, icon, boldText, bodyText) {
-    // type: 'green'|'alert'|'warning'|'info'
-    var iconMap = { green:'trending-up', alert:'exclamation-circle', warning:'user-times', info:'chart-bar', blue:'info-circle', orange:'fire' };
-    var ic = iconMap[type] || 'info-circle';
+    var faIconMap = {
+      green:   'trending-up',
+      alert:   'exclamation-circle',
+      warning: 'user-times',
+      info:    'chart-bar',
+      blue:    'info-circle',
+      orange:  'fire',
+      purple:  'star',
+      teal:    'users'
+    };
+    // Use explicit icon override if provided, otherwise derive from type
+    var ic = icon || faIconMap[type] || 'info-circle';
     return '<div class="insight-item ' + (type !== 'green' ? type : '') + '">'
       + '<div class="insight-icon ' + type + '"><i class="fas fa-' + ic + '"></i></div>'
       + '<div class="insight-text"><strong>' + boldText + '</strong> ' + bodyText + '</div>'
@@ -6539,12 +6614,13 @@ function _buildAuditIntelligenceSnapshot() {
     items.push(insightItem('green', 'trending-up',
       'Overall Accuracy ' + overallAcc + '% — ' + aboveTarget + 'pp Above Target:',
       totalCount.toLocaleString() + ' audits processed' + (fyRange ? ' (' + fyRange + ')' : '') + '.'
-      + (totalFail > 0 ? ' ' + totalFail + ' total errors recorded across all parameters.' : ' Zero errors recorded — perfect compliance.')
+      + (totalFail > 0 ? ' ' + totalFail.toLocaleString() + ' total errors recorded across all parameters.' : ' Zero errors recorded — perfect compliance.')
     ));
   } else {
     items.push(insightItem('alert', 'exclamation-circle',
       'Overall Accuracy ' + overallAcc + '% — ' + Math.abs(aboveTarget) + 'pp Below Target:',
-      totalCount.toLocaleString() + ' audits. Immediate corrective action required to reach 95% target.'
+      totalCount.toLocaleString() + ' audits processed' + (fyRange ? ' (' + fyRange + ')' : '') + '.'
+      + ' Immediate corrective action required to reach 95% target.'
     ));
   }
 
@@ -6552,105 +6628,189 @@ function _buildAuditIntelligenceSnapshot() {
   if (sortedMonths.length >= 2 && lastMon && firstMon) {
     var momDiff = +(lastMon.Accuracy - firstMon.Accuracy).toFixed(2);
     if (!trendUp && !trendFlat && worstMon) {
-      // Declining — show dip detail
       items.push(insightItem('warning', 'user-times',
         'Accuracy Dip in ' + lastMon.Month + ' — Action Required:',
-        'Accuracy moved from ' + firstMon.Accuracy + '% in ' + firstMon.Month
-        + ' to ' + lastMon.Accuracy + '% in ' + lastMon.Month
+        'Accuracy moved from ' + firstMon.Accuracy + '% (' + firstMon.Month + ')'
+        + ' to ' + lastMon.Accuracy + '% (' + lastMon.Month + ')'
         + ' (' + (momDiff >= 0 ? '+' : '') + momDiff + '%).'
         + (worstMon && worstMon.Accuracy === lastMon.Accuracy
-          ? ' This is the lowest month in the period.'
+          ? ' ' + lastMon.Month + ' is the lowest-performing month in the period.'
           : ' Lowest point: ' + worstMon.Month + ' at ' + worstMon.Accuracy + '%.')
         + ' Root cause analysis recommended.'
       ));
     } else {
-      // Improving or flat
       items.push(insightItem('green', 'trending-up',
-        (trendFlat ? 'Accuracy Stable' : 'Positive Accuracy Trend') + ' (' + firstMon.Month + '→' + lastMon.Month + '):',
+        (trendFlat ? 'Accuracy Stable' : 'Positive Accuracy Trend') + ' (' + firstMon.Month + ' → ' + lastMon.Month + '):',
         firstMon.Accuracy + '% → ' + lastMon.Accuracy + '% ('
         + (momDiff >= 0 ? '+' : '') + momDiff + '%).'
-        + (bestMon ? ' Best month: ' + bestMon.Month + ' at ' + bestMon.Accuracy + '%.' : '')
+        + (bestMon ? ' Peak month: ' + bestMon.Month + ' at ' + bestMon.Accuracy + '%.' : '')
       ));
     }
   }
 
-  // ── 3. Top error parameter ──
-  if (topErr1) {
-    var errShare = totalErrors > 0 ? ((topErr1.Opportunity_Fail / totalErrors) * 100).toFixed(1) : '0';
-    var errRate  = topErr1.Opportunity_Count > 0
-      ? ((topErr1.Opportunity_Fail / topErr1.Opportunity_Count) * 100).toFixed(1) : '0';
+  // ── 3. Weekly performance extremes — Best & Worst week ──
+  if (srcWeeks.length > 0) {
+    var bw = bestWeek;
+    var ww = worstWeek;
+    var sameWeek = bw && ww && bw.Week_Label === ww.Week_Label;
+    if (bw && ww && !sameWeek) {
+      var wwErrRate = ww.Opportunity_Count > 0
+        ? ((ww.Opportunity_Fail / ww.Opportunity_Count) * 100).toFixed(1) : '0';
+      var bwErrRate = bw.Opportunity_Count > 0
+        ? ((bw.Opportunity_Fail / bw.Opportunity_Count) * 100).toFixed(1) : '0';
+      var weekType = ww.Accuracy < 95 ? 'alert' : 'warning';
+      items.push(insightItem(weekType, 'fire',
+        'Weekly Accuracy Extremes:',
+        '⬆️ Best: ' + bw.Week_Label + ' at ' + bw.Accuracy + '% ('
+        + bw.Opportunity_Count + ' audits, ' + bwErrRate + '% error rate).'
+        + ' ⬇️ Worst: ' + ww.Week_Label + ' at ' + ww.Accuracy + '% ('
+        + ww.Opportunity_Count + ' audits, ' + wwErrRate + '% error rate, '
+        + ww.Opportunity_Fail + ' errors).'
+        + (ww.Accuracy < 95 ? ' This week fell below the 95% compliance threshold — urgent review required.' : '')
+      ));
+    } else if (bw) {
+      // Only one week or identical best/worst
+      var bwEr = bw.Opportunity_Count > 0
+        ? ((bw.Opportunity_Fail / bw.Opportunity_Count) * 100).toFixed(1) : '0';
+      items.push(insightItem('green', 'trending-up',
+        'Weekly Performance — ' + bw.Week_Label + ':',
+        bw.Accuracy + '% accuracy across ' + bw.Opportunity_Count + ' audits (' + bwEr + '% error rate).'
+      ));
+    }
+  }
+
+  // ── 4. Parameter with highest error rate ──
+  if (topErr1ByRate) {
+    var errRate1  = topErr1ByRate.Opportunity_Count > 0
+      ? ((topErr1ByRate.Opportunity_Fail / topErr1ByRate.Opportunity_Count) * 100).toFixed(1) : '0';
+    var errShare1 = totalErrors > 0
+      ? ((topErr1ByRate.Opportunity_Fail / totalErrors) * 100).toFixed(1) : '0';
+    var errRate2Str = '';
+    if (topErr2ByRate) {
+      var errRate2 = topErr2ByRate.Opportunity_Count > 0
+        ? ((topErr2ByRate.Opportunity_Fail / topErr2ByRate.Opportunity_Count) * 100).toFixed(1) : '0';
+      errRate2Str = ' 2nd: “' + topErr2ByRate.Parameter + '” at ' + errRate2 + '% error rate ('
+        + topErr2ByRate.Opportunity_Fail + ' failures).';
+    }
     items.push(insightItem('alert', 'exclamation-circle',
-      '"' + topErr1.Parameter + '" — Critical Error Parameter:',
-      topErr1.Opportunity_Fail + ' failures'
-      + (topErr1.Opportunity_Count > 0 ? ' (' + errRate + '% error rate on ' + topErr1.Opportunity_Count + ' audits)' : '')
-      + '. Accounts for ' + errShare + '% of all errors.'
-      + (topErr2 ? ' 2nd highest: "' + topErr2.Parameter + '" with ' + topErr2.Opportunity_Fail + ' failures.' : '')
-      + ' Immediate validation fix recommended.'
+      '“' + topErr1ByRate.Parameter + '” — Highest Error Rate Parameter:',
+      errRate1 + '% error rate — ' + topErr1ByRate.Opportunity_Fail + ' failures out of '
+      + topErr1ByRate.Opportunity_Count.toLocaleString() + ' audits.'
+      + ' Accounts for ' + errShare1 + '% of all recorded errors.'
+      + errRate2Str
+      + ' Immediate validation process fix recommended.'
     ));
   }
 
-  // ── 4. Worst week spike ──
-  if (worstWeek && worstWeek.Accuracy < 97) {
-    items.push(insightItem('warning', 'fire',
-      worstWeek.Week_Label + ' Accuracy Spike Detected:',
-      'Accuracy dropped to ' + worstWeek.Accuracy + '% — the lowest week in the selected period.'
-      + ' ' + worstWeek.Opportunity_Fail + ' errors across ' + worstWeek.Opportunity_Count + ' audits.'
-      + (bestWeek && bestWeek.Week_Label !== worstWeek.Week_Label
-        ? ' Best week: ' + bestWeek.Week_Label + ' at ' + bestWeek.Accuracy + '%.' : '')
+  // ── 5. Top-performing recruiters ──
+  if (topRec3.length > 0) {
+    var topNames = topRec3.map(function(r){
+      return r.Recruiter + ' (' + r.Avg_Accuracy + '%)';
+    }).join(', ');
+    var topAudits = topRec3.reduce(function(s,r){ return s + (r.Audit_Count||0); }, 0);
+    items.push(insightItem('purple', 'star',
+      'Top-Performing Recruiters:',
+      topRec3.length + ' recruiter' + (topRec3.length > 1 ? 's' : '') + ' leading the team in compliance accuracy: '
+      + topNames + '.'
+      + (topAudits > 0 ? ' Combined ' + topAudits.toLocaleString() + ' audits processed at above-average accuracy.' : '')
+      + ' Share best practices with the broader team for performance uplift.'
     ));
   }
 
-  // ── 5. Recruiter performance gap ──
-  if (botRec3.length > 0) {
-    var names = botRec3.map(function(r){ return r.Recruiter + ' (' + r.Avg_Accuracy + '%)'; }).join(', ');
-    var avgTeam = totalCount > 0 ? overallAcc : 0;
+  // ── 6. Recruiters needing focus — with their PM ──
+  if (focusRec.length > 0) {
+    var focusLines = focusRec.map(function(r){
+      var pmName = r.PM || (function(){
+        // Fallback: look up from PERF_DATA.recruiter_monthly by name match
+        var match = (PERF_DATA.recruiter_monthly || []).find(function(x){
+          return x.name && r.Recruiter && x.name.toLowerCase() === r.Recruiter.toLowerCase();
+        });
+        return match ? (match.pm || '') : '';
+      })();
+      return r.Recruiter + ' (' + r.Avg_Accuracy + '%'
+        + (r.Audit_Count ? ', ' + r.Audit_Count.toLocaleString() + ' audits' : '')
+        + ', ' + (r.Errors || 0) + ' errors'
+        + (pmName ? ', PM: ' + pmName : '')
+        + ')';
+    }).join('; ');
+    var pmSet = {};
+    focusRec.forEach(function(r){
+      var pmName = r.PM || (function(){
+        var match = (PERF_DATA.recruiter_monthly || []).find(function(x){
+          return x.name && r.Recruiter && x.name.toLowerCase() === r.Recruiter.toLowerCase();
+        });
+        return match ? (match.pm || '') : '';
+      })();
+      if (pmName) pmSet[pmName] = true;
+    });
+    var pmList = Object.keys(pmSet);
     items.push(insightItem('warning', 'user-times',
-      'Recruiter Performance Gap:',
-      botRec3.length + ' recruiter' + (botRec3.length > 1 ? 's' : '') + ' significantly below team average of ' + avgTeam + '%: '
-      + names + '.'
-      + (botRec3[0].Audit_Count ? ' ' + botRec3[0].Recruiter + ' has ' + (botRec3[0].Audit_Count||0).toLocaleString() + ' audits at ' + botRec3[0].Avg_Accuracy + '%.' : '')
-      + ' Targeted coaching recommended.'
+      'Recruiters Needing Focused Attention (' + focusRec.length + '):',
+      focusLines + '.'
+      + (pmList.length > 0
+        ? ' Escalate to Program Manager' + (pmList.length > 1 ? 's' : '') + ': '
+          + pmList.join(', ') + ' for targeted coaching and process review.'
+        : ' Immediate coaching intervention recommended.')
     ));
   }
 
-  // ── 6. Stage accuracy gap ──
+  // ── 7. Stage accuracy gap ──
   if (stgStats.length >= 2 && worstStg) {
     var bestStg2 = [...stgStats].sort(function(a,b){ return b.Accuracy - a.Accuracy; })[0];
     var stgGap   = +(bestStg2.Accuracy - worstStg.Accuracy).toFixed(2);
     if (stgGap > 0.5) {
       items.push(insightItem('info', 'chart-bar',
         'Stage Accuracy Gap (' + stgGap + 'pp):',
-        worstStg.Stage + ' at ' + worstStg.Accuracy + '% (' + worstStg.Opportunity_Count.toLocaleString() + ' audits, '
+        worstStg.Stage + ' at ' + worstStg.Accuracy + '% ('
+        + worstStg.Opportunity_Count.toLocaleString() + ' audits, '
         + worstStg.Opportunity_Fail + ' errors) vs '
         + bestStg2.Stage + ' at ' + bestStg2.Accuracy + '%.'
-        + ' Focus process improvements on ' + worstStg.Stage + '.'
+        + ' Focus process improvements on the ' + worstStg.Stage + ' stage.'
       ));
     }
   }
 
-  // ── 7. Hire type gap ──
+  // ── 8. Experienced vs UR — dedicated accuracy comparison ──
   if (htExp && htUR) {
-    var htGap2 = +(Math.abs(htExp.totals.accuracy - htUR.totals.accuracy)).toFixed(2);
-    if (htGap2 > 0.3) {
-      var lower2  = htExp.totals.accuracy < htUR.totals.accuracy ? 'HPE Experienced' : 'HPE UR';
-      var higher2 = htExp.totals.accuracy > htUR.totals.accuracy ? 'HPE Experienced' : 'HPE UR';
-      var lowerA  = Math.min(htExp.totals.accuracy, htUR.totals.accuracy);
-      var higherA = Math.max(htExp.totals.accuracy, htUR.totals.accuracy);
-      items.push(insightItem('info', 'info-circle',
-        'Hire Type Gap — ' + htGap2 + 'pp Difference:',
-        higher2 + ' leads at ' + higherA + '% vs ' + lower2 + ' at ' + lowerA + '%.'
-        + (htGap2 > 1 ? ' Targeted process alignment for ' + lower2 + ' is recommended.' : '')
-      ));
-    }
+    var expAcc  = htExp.totals.accuracy;
+    var urAcc   = htUR.totals.accuracy;
+    var expCnt  = htExp.totals.count  || htExp.totals.total  || 0;
+    var urCnt   = htUR.totals.count   || htUR.totals.total   || 0;
+    var expFail = htExp.totals.fail   || 0;
+    var urFail  = htUR.totals.fail    || 0;
+    var htGap2  = +(Math.abs(expAcc - urAcc)).toFixed(2);
+    var expErrRate = expCnt > 0 ? ((expFail / expCnt) * 100).toFixed(2) : '0';
+    var urErrRate  = urCnt  > 0 ? ((urFail  / urCnt)  * 100).toFixed(2) : '0';
+    var higherType = expAcc >= urAcc ? 'HPE Experienced' : 'HPE UR';
+    var lowerType  = expAcc >= urAcc ? 'HPE UR' : 'HPE Experienced';
+    var higherAcc  = Math.max(expAcc, urAcc);
+    var lowerAcc   = Math.min(expAcc, urAcc);
+    var itemType2  = htGap2 > 1 ? 'warning' : 'teal';
+    items.push(insightItem(itemType2, 'users',
+      'Experienced vs UR Accuracy Breakdown:',
+      'HPE Experienced: ' + expAcc + '% accuracy ('
+      + (expCnt > 0 ? expCnt.toLocaleString() + ' audits, ' : '')
+      + expFail + ' errors, ' + expErrRate + '% error rate).'
+      + ' HPE UR: ' + urAcc + '% accuracy ('
+      + (urCnt > 0 ? urCnt.toLocaleString() + ' audits, ' : '')
+      + urFail + ' errors, ' + urErrRate + '% error rate).'
+      + (htGap2 > 0.1
+        ? ' Gap: ' + htGap2 + 'pp — ' + higherType + ' leads by ' + htGap2 + 'pp over ' + lowerType + '.'
+          + (htGap2 > 1 ? ' Targeted process alignment for ' + lowerType + ' is recommended.' : '')
+        : ' Both hire types are performing at near-identical accuracy levels.')
+    ));
   }
 
-  // ── 8. PM team ──
+  // ── 9. Worst PM team ──
   if (worstPM && worstPM.Avg_Accuracy < 99) {
+    var pmGap = bestPM && bestPM.PM !== worstPM.PM
+      ? +(bestPM.Avg_Accuracy - worstPM.Avg_Accuracy).toFixed(2) : 0;
     items.push(insightItem('info', 'chart-bar',
-      worstPM.PM + ' PM Team — Below Average:',
+      worstPM.PM + ' PM Team — Lowest Team Accuracy:',
       worstPM.Avg_Accuracy + '% accuracy'
-      + (worstPM.Audit_Count ? ' across ' + worstPM.Audit_Count.toLocaleString() + ' audits' : '')
-      + '. Consider a team process review to close the gap.'
+      + (worstPM.Audit_Count ? ' across ' + worstPM.Audit_Count.toLocaleString() + ' audits.' : '.')
+      + (pmGap > 0 ? ' ' + pmGap + 'pp behind top PM team (' + bestPM.PM + ' at ' + bestPM.Avg_Accuracy + '%).' : '')
+      + ' Consider a team process review and coaching session to close the performance gap.'
     ));
   }
 
@@ -6843,66 +7003,77 @@ function setClass(id, cls) { var el = document.getElementById(id); if (el) el.cl
 
 // ---- UPDATE EXECUTIVE CHARTS ----
 function updateExecutiveCharts() {
-  var weeks = getFilteredWeeks();
-  var labels = weeks.map(function(w){ return w.Week_Label; });
-  var accData = weeks.map(function(w){ return w.Accuracy; });
+  // Monthly Accuracy Trend (replaces 16-week sparkline)
+  var months = getFilteredMonths().sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  var mLabels = months.map(function(m){ return m.Month; });
 
-  // Sparkline — dual series when "All" hire type
   destroyChart('sparklineChart');
   var spEl = document.getElementById('sparklineChart');
   if (spEl) {
     var spDatasets;
+    var subEl2 = document.getElementById('sparklineSubtitle');
     if (ACTIVE_HIRE_TYPE === 'all') {
-      // Show combined line + Exp + UR as separate thin lines
-      var expWeeks = [...DASHBOARD_DATA.hireTypeStats.HPE_Experienced.week_stats]
-        .sort(function(a,b){return a.Month_Number!==b.Month_Number?a.Month_Number-b.Month_Number:a.Week-b.Week;})
-        .filter(function(w){return weeks.some(function(fw){return fw.Week_Label===w.Week_Label;});});
-      var urWeeks  = [...DASHBOARD_DATA.hireTypeStats.HPE_UR.week_stats]
-        .sort(function(a,b){return a.Month_Number!==b.Month_Number?a.Month_Number-b.Month_Number:a.Week-b.Week;})
-        .filter(function(w){return weeks.some(function(fw){return fw.Week_Label===w.Week_Label;});});
+      // Experienced + UR + combined lines
+      var expMs = [...DASHBOARD_DATA.hireTypeStats.HPE_Experienced.month_stats]
+        .sort(function(a,b){ return a.Month_Number - b.Month_Number; })
+        .filter(function(m){ return months.some(function(fm){ return fm.Month === m.Month; }); });
+      var urMs = [...DASHBOARD_DATA.hireTypeStats.HPE_UR.month_stats]
+        .sort(function(a,b){ return a.Month_Number - b.Month_Number; })
+        .filter(function(m){ return months.some(function(fm){ return fm.Month === m.Month; }); });
       spDatasets = [
-        { label: 'Combined', data: accData, borderColor:'#01A982', backgroundColor:'rgba(1,169,130,0.08)',
-          tension:0.4, fill:true, pointRadius:3, borderWidth:2,
-          pointBackgroundColor: accData.map(function(a){return a<95?'#C54E4B':a<98?'#FF8300':'#01A982';}),
-          pointBorderColor:'white', pointBorderWidth:1 },
-        { label: 'HPE Experienced', data: expWeeks.map(function(w){return w.Accuracy;}),
-          borderColor:'#0D5DBF', borderWidth:1.5, tension:0.4, fill:false, pointRadius:3,
-          pointBackgroundColor:'#0D5DBF', pointBorderColor:'white', pointBorderWidth:1 },
-        { label: 'HPE UR', data: urWeeks.map(function(w){return w.Accuracy;}),
-          borderColor:'#FF8300', borderWidth:1.5, tension:0.4, fill:false, pointRadius:3,
-          pointBackgroundColor:'#FF8300', pointBorderColor:'white', pointBorderWidth:1, borderDash:[3,2] },
-        { label: '95% Target', data: labels.map(function(){return 95;}),
-          borderColor:'#C54E4B', borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false }
+        { label: 'Combined', data: months.map(function(m){ return m.Accuracy; }),
+          borderColor:'#01A982', backgroundColor:'rgba(1,169,130,0.07)',
+          tension:0.4, fill:false, pointRadius:5, borderWidth:2.5,
+          pointBackgroundColor: months.map(function(m){ return m.Accuracy<95?'#C54E4B':m.Accuracy<98?'#FF8300':'#01A982'; }),
+          pointBorderColor:'white', pointBorderWidth:2 },
+        { label: 'HPE Experienced', data: expMs.map(function(m){ return m.Accuracy; }),
+          borderColor:'#0D5DBF', backgroundColor:'rgba(13,93,191,0.06)',
+          tension:0.4, fill:false, pointRadius:5, borderWidth:2,
+          pointBackgroundColor:'#0D5DBF', pointBorderColor:'white', pointBorderWidth:2, borderDash:[4,2] },
+        { label: 'HPE UR', data: urMs.map(function(m){ return m.Accuracy; }),
+          borderColor:'#FF8300', backgroundColor:'rgba(255,131,0,0.06)',
+          tension:0.4, fill:false, pointRadius:5, borderWidth:2,
+          pointBackgroundColor:'#FF8300', pointBorderColor:'white', pointBorderWidth:2, borderDash:[2,2] },
+        { label: '95% Target', data: mLabels.map(function(){ return 95; }),
+          borderColor:'#C54E4B', borderDash:[6,4], borderWidth:1.5, pointRadius:0, fill:false }
       ];
+      if (subEl2) subEl2.textContent = 'Monthly accuracy — Experienced vs UR with 95% target line';
     } else {
-      var htColor = ACTIVE_HIRE_TYPE==='HPE_Experienced' ? '#0D5DBF' : '#FF8300';
+      var htColor2 = ACTIVE_HIRE_TYPE==='HPE_Experienced' ? '#0D5DBF' : '#FF8300';
+      var htBg2    = ACTIVE_HIRE_TYPE==='HPE_Experienced' ? 'rgba(13,93,191,0.1)' : 'rgba(255,131,0,0.1)';
       spDatasets = [
-        { label: getHireTypeLabel() + ' Accuracy %', data: accData, borderColor:htColor,
-          backgroundColor: ACTIVE_HIRE_TYPE==='HPE_Experienced' ? 'rgba(13,93,191,0.1)' : 'rgba(255,131,0,0.1)',
-          tension:0.4, fill:true, pointRadius:4,
-          pointBackgroundColor: accData.map(function(a){return a<95?'#C54E4B':a<98?'#FF8300':htColor;}),
-          pointBorderColor:'white', pointBorderWidth:2, pointHoverRadius:7 },
-        { label: '95% Target', data: labels.map(function(){return 95;}),
-          borderColor:'#C54E4B', borderDash:[5,5], borderWidth:1.5, pointRadius:0, fill:false }
+        { label: getHireTypeLabel() + ' Accuracy %', data: months.map(function(m){ return m.Accuracy; }),
+          borderColor: htColor2, backgroundColor: htBg2,
+          tension:0.4, fill:true, pointRadius:5, borderWidth:2.5,
+          pointBackgroundColor: months.map(function(m){ return m.Accuracy<95?'#C54E4B':m.Accuracy<98?'#FF8300':htColor2; }),
+          pointBorderColor:'white', pointBorderWidth:2 },
+        { label: '95% Target', data: mLabels.map(function(){ return 95; }),
+          borderColor:'#C54E4B', borderDash:[6,4], borderWidth:1.5, pointRadius:0, fill:false }
       ];
+      if (subEl2) subEl2.textContent = getHireTypeLabel() + ' — monthly accuracy with 95% target line';
     }
+    var accVals = months.map(function(m){ return m.Accuracy; });
+    var minAcc  = accVals.length > 0 ? Math.min.apply(null, accVals) : 90;
     charts['sparklineChart'] = new Chart(spEl.getContext('2d'), {
       type: 'line',
-      data: { labels: labels, datasets: spDatasets },
+      data: { labels: mLabels, datasets: spDatasets },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: ACTIVE_HIRE_TYPE==='all', position:'top', labels:{font:{size:10},boxWidth:10,padding:8} },
-          tooltip: {mode:'index'} },
+        plugins: {
+          legend: { display: true, position:'top', labels:{font:{size:10},boxWidth:10,padding:8} },
+          tooltip: { mode:'index',
+            callbacks: { label: function(ctx){ return ctx.dataset.label + ': ' + ctx.parsed.y + '%'; } } }
+        },
         scales: {
-          y: { min: Math.min(91, Math.floor(Math.min(...accData)) - 1), max: 100,
+          y: { min: Math.max(85, Math.floor(minAcc) - 2), max: 100,
             ticks: { callback: function(v){ return v+'%'; }, font:{size:11} } },
-          x: { ticks: {font:{size:10}, maxRotation:45}, grid:{display:false} }
+          x: { ticks: {font:{size:11}, maxRotation:0}, grid:{display:false} }
         }
       }
     });
   }
 
-  // Rebuild month table filtered
+  // Rebuild month tables (all three: combined, Exp, UR)
   buildMonthTable();
 }
 
