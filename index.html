@@ -7644,6 +7644,7 @@ function _initHistoryOnLoad() {
 }
 
 
+function handleFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
   _doParseFile(file);
@@ -9919,19 +9920,19 @@ function runExportPDF() {
       var months = D.month_stats.slice().sort(function(a,b){ return a.Month_Number - b.Month_Number; });
 
       // ── helpers ────────────────────────────────────────────────
-      function addPage() { doc.addPage(); return margin; }
-      function hline(y, col) {
+      var addPage = function() { doc.addPage(); return margin; };
+      var hline = function(y, col) {
         doc.setDrawColor(col||'#e5e7eb'); doc.setLineWidth(0.3);
         doc.line(margin, y, PW - margin, y);
         return y + 4;
-      }
-      function badge(x, y, text, bgHex, textHex) {
+      };
+      var badge = function(x, y, text, bgHex, textHex) {
         var tw = doc.getTextWidth(text);
         doc.setFillColor(bgHex); doc.roundedRect(x, y-3.5, tw+8, 5.5, 1.5, 1.5, 'F');
         doc.setTextColor(textHex); doc.setFontSize(7); doc.setFont('helvetica','bold');
         doc.text(text, x+4, y); doc.setTextColor('#1a2332');
-      }
-      function secHeader(doc2, title, icon, y) {
+      };
+      var secHeader = function(doc2, title, icon, y) {
         doc2.setFillColor('#f0fff8'); doc2.roundedRect(margin, y, contentW, 8, 2, 2, 'F');
         doc2.setFillColor('#01A982'); doc2.roundedRect(margin, y, 3, 8, 1, 1, 'F');
         doc2.setFontSize(9); doc2.setFont('helvetica','bold'); doc2.setTextColor('#01A982');
@@ -9939,15 +9940,15 @@ function runExportPDF() {
         var safeIcon = icon.split('').filter(function(c){return c.charCodeAt(0)<=255;}).join('');
         doc2.text((safeIcon ? safeIcon + '  ' : '') + title, margin + 6, y + 5.5);
         doc2.setTextColor('#1a2332'); return y + 12;
-      }
+      };
 
       var cy = margin; // current Y
       var step = 0, totalSteps = Object.keys(sec).filter(function(k){ return sec[k]; }).length + 1;
 
-      function progress(msg) {
+      var progress = function(msg) {
         step++;
         setExportProgress('📄', 'Generating PDF…', msg, (step/totalSteps)*90);
-      }
+      };
 
       // ── PAGE 1: COVER ──────────────────────────────────────────
       if (sec.cover) {
