@@ -2873,6 +2873,28 @@ function getDashboardHTML(): string {
       </div>
     </div>
 
+    <!-- Upload History -->
+    <div class="card card-full" id="uploadHistoryCard">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px">
+        <div>
+          <div class="card-title" style="margin-bottom:2px"><i class="fas fa-history"></i> Upload History</div>
+          <div class="card-subtitle">All previously uploaded files are merged into the dashboard automatically</div>
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+          <span id="historyMergeLabel" style="font-size:11px;color:var(--text-muted);font-style:italic"></span>
+          <button onclick="clearAllHistory()" style="padding:6px 14px;border-radius:6px;border:1px solid var(--hpe-red);background:transparent;color:var(--hpe-red);font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;gap:5px" title="Remove all stored uploads — dashboard reverts to seed data">
+            <i class="fas fa-trash-alt"></i> Clear All History
+          </button>
+        </div>
+      </div>
+      <div id="uploadHistoryList" style="margin-top:14px">
+        <div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">
+          <i class="fas fa-inbox" style="font-size:28px;opacity:0.3;display:block;margin-bottom:8px"></i>
+          No upload history yet — upload a file to begin building your historical dataset
+        </div>
+      </div>
+    </div>
+
     <!-- Column Format Guide -->
     <div class="card card-full">
       <div class="card-title"><i class="fas fa-table"></i> Expected File Format — Two Required Sheets</div>
@@ -7381,7 +7403,263 @@ function refreshDashboard() {
 // Stores last-uploaded parsed data split by hire type
 var UPLOADED_DATA = null;
 
-function handleFileUpload(event) {
+// ==================== HISTORICAL DATA STORE (IndexedDB) ====================
+// Each upload is stored as a record: {id (auto), fileName, uploadedAt, paramRows, recRows}
+// On each new upload all stored records are merged before processing.
+// Dedup key for param rows : Client|Month|Week|Parameter|Stage|Critical/Non Critical
+// Dedup key for recruiter rows: Recruiter Name|Month|Week|Parameter
+
+var _idb = null; // cached IDBDatabase handle
+
+function _openHistoryDB(callback) {
+  if (_idb) { callback(_idb); return; }
+  var req = indexedDB.open('hpe_upload_history', 1);
+  req.onupgradeneeded = function(e) {
+    var db = e.target.result;
+    if (!db.objectStoreNames.contains('uploads')) {
+      var store = db.createObjectStore('uploads', {keyPath:'id', autoIncrement:true});
+      store.createIndex('uploadedAt', 'uploadedAt', {unique:false});
+    }
+  };
+  req.onsuccess = function(e) { _idb = e.target.result; callback(_idb); };
+  req.onerror   = function()  { console.warn('IDB open failed'); callback(null); };
+}
+
+function _historyAddUpload(record, callback) {
+  _openHistoryDB(function(db) {
+    if (!db) { callback(null); return; }
+    var tx = db.transaction('uploads', 'readwrite');
+    var req = tx.objectStore('uploads').add(record);
+    req.onsuccess = function(e) { callback(e.target.result); };
+    req.onerror   = function()  { callback(null); };
+  });
+}
+
+function _historyGetAll(callback) {
+  _openHistoryDB(function(db) {
+    if (!db) { callback([]); return; }
+    var tx = db.transaction('uploads', 'readonly');
+    var req = tx.objectStore('uploads').getAll();
+    req.onsuccess = function(e) { callback(e.target.result || []); };
+    req.onerror   = function()  { callback([]); };
+  });
+}
+
+function _historyDeleteRecord(id, callback) {
+  _openHistoryDB(function(db) {
+    if (!db) { callback(); return; }
+    var tx = db.transaction('uploads', 'readwrite');
+    tx.objectStore('uploads').delete(id);
+    tx.oncomplete = function() { callback(); };
+    tx.onerror    = function() { callback(); };
+  });
+}
+
+function _historyClearAll(callback) {
+  _openHistoryDB(function(db) {
+    if (!db) { callback(); return; }
+    var tx = db.transaction('uploads', 'readwrite');
+    tx.objectStore('uploads').clear();
+    tx.oncomplete = function() { callback(); };
+    tx.onerror    = function() { callback(); };
+  });
+}
+
+// Merge raw rows from all stored uploads — deduplication by composite key
+// Later uploads override earlier ones for the same key (newest wins)
+function _mergeRawRows(allRecords) {
+  // param-row dedup: Client|Month|Week|Parameter|Stage|Crit
+  var paramMap = {}; // key → row
+  var recMap   = {}; // key → row
+
+  // Process records oldest-first so newer uploads override older ones
+  allRecords.slice().sort(function(a,b){ return a.uploadedAt - b.uploadedAt; }).forEach(function(rec) {
+    (rec.paramRows || []).forEach(function(row) {
+      var k = _paramRowKey(row);
+      paramMap[k] = row;
+    });
+    (rec.recRows || []).forEach(function(row) {
+      var k = _recRowKey(row);
+      recMap[k] = row;
+    });
+  });
+
+  return {
+    paramRows: Object.values(paramMap),
+    recRows:   Object.values(recMap)
+  };
+}
+
+function _paramRowKey(row) {
+  // Normalised key — handles varying column name casing
+  function g(row, variants) {
+    var keys = Object.keys(row);
+    for (var i = 0; i < variants.length; i++) {
+      var target = variants[i].toLowerCase().replace(/\\s+/g,'');
+      var k = keys.find(function(k){ return k.toLowerCase().replace(/\\s+/g,'') === target; });
+      if (k !== undefined && row[k] !== undefined && row[k] !== null) return String(row[k]).trim();
+    }
+    return '';
+  }
+  return [
+    g(row,['Client','client','hire_type','HireType']),
+    g(row,['Month','month']),
+    g(row,['Week','week']),
+    g(row,['Parameter','parameter']),
+    g(row,['Stage','stage']),
+    g(row,['Critical/Non Critical','Criticality','criticality','critical'])
+  ].join('|');
+}
+
+function _recRowKey(row) {
+  function g(row, variants) {
+    var keys = Object.keys(row);
+    for (var i = 0; i < variants.length; i++) {
+      var target = variants[i].toLowerCase().replace(/\\s+/g,'');
+      var k = keys.find(function(k){ return k.toLowerCase().replace(/\\s+/g,'') === target; });
+      if (k !== undefined && row[k] !== undefined && row[k] !== null) return String(row[k]).trim();
+    }
+    return '';
+  }
+  return [
+    g(row,['Recruiter Name','RecruiterName','Recruiter','recruiter']),
+    g(row,['Client','client','hire_type','HireType']),
+    g(row,['Month','month']),
+    g(row,['Week','week']),
+    g(row,['Parameter','parameter'])
+  ].join('|');
+}
+
+// ---- History UI helpers ----
+function _renderHistoryList(records) {
+  var container = document.getElementById('uploadHistoryList');
+  var label     = document.getElementById('historyMergeLabel');
+  if (!container) return;
+
+  if (!records || records.length === 0) {
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px">'
+      + '<i class="fas fa-inbox" style="font-size:28px;opacity:0.3;display:block;margin-bottom:8px"></i>'
+      + 'No upload history yet — upload a file to begin building your historical dataset</div>';
+    if (label) label.textContent = '';
+    return;
+  }
+
+  if (label) label.textContent = records.length + ' file' + (records.length > 1 ? 's' : '') + ' merged';
+
+  // Sort newest-first for display
+  var sorted = records.slice().sort(function(a,b){ return b.uploadedAt - a.uploadedAt; });
+
+  var rows = sorted.map(function(rec) {
+    var dt  = new Date(rec.uploadedAt).toLocaleString();
+    var pct = rec.paramRows ? rec.paramRows.length.toLocaleString() : '0';
+    var rct = rec.recRows   ? rec.recRows.length.toLocaleString()   : '0';
+    // Determine months covered
+    var months = _getMonthsFromRows(rec.paramRows || []);
+    return '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;padding:10px 12px;border-radius:8px;border:1px solid var(--border);background:var(--surface);margin-bottom:8px">'
+      + '<div style="display:flex;align-items:center;gap:12px;flex:1;min-width:0">'
+      +   '<i class="fas fa-file-excel" style="color:var(--hpe-green);font-size:18px;flex-shrink:0"></i>'
+      +   '<div style="min-width:0">'
+      +     '<div style="font-size:13px;font-weight:600;color:var(--text-primary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + _esc(rec.fileName) + '</div>'
+      +     '<div style="font-size:11px;color:var(--text-muted);margin-top:2px">'
+      +       dt + ' &nbsp;|&nbsp; '
+      +       pct + ' param rows &nbsp;|&nbsp; '
+      +       rct + ' recruiter rows'
+      +       (months ? ' &nbsp;|&nbsp; <span style="color:var(--hpe-green);font-weight:600">' + _esc(months) + '</span>' : '')
+      +     '</div>'
+      +   '</div>'
+      + '</div>'
+      + '<button onclick="removeHistoryRecord(' + rec.id + ')" '
+      +   'style="flex-shrink:0;padding:4px 10px;border-radius:5px;border:1px solid var(--border);background:transparent;color:var(--text-muted);font-size:11px;cursor:pointer;display:flex;align-items:center;gap:4px" '
+      +   'title="Remove this upload from history">'
+      +   '<i class="fas fa-times"></i> Remove'
+      + '</button>'
+      + '</div>';
+  }).join('');
+
+  container.innerHTML = rows;
+}
+
+function _getMonthsFromRows(paramRows) {
+  if (!paramRows || paramRows.length === 0) return '';
+  var seen = {};
+  paramRows.forEach(function(row) {
+    var keys = Object.keys(row);
+    var mk = keys.find(function(k){ return k.toLowerCase().trim() === 'month'; });
+    if (mk && row[mk]) seen[String(row[mk]).trim()] = true;
+  });
+  return Object.keys(seen).join(', ');
+}
+
+function _esc(s) {
+  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Remove one record from history and rebuild
+function removeHistoryRecord(id) {
+  _historyDeleteRecord(id, function() {
+    _historyGetAll(function(records) {
+      _renderHistoryList(records);
+      _rebuildFromHistory(records);
+    });
+  });
+}
+
+// Clear all history records and revert to seed data
+function clearAllHistory() {
+  if (!confirm('Remove all upload history? The dashboard will revert to seed data.')) return;
+  _historyClearAll(function() {
+    _renderHistoryList([]);
+    // Revert to seed state — reload page is simplest and safest
+    showToast('Upload history cleared — reverting to seed data', 'warning');
+    setTimeout(function(){ window.location.reload(); }, 1200);
+  });
+}
+
+// After every add/remove, re-merge all stored records and rebuild dashboard
+function _rebuildFromHistory(records) {
+  if (!records || records.length === 0) return;
+  var merged = _mergeRawRows(records);
+  if (merged.paramRows.length === 0) return;
+
+  // Normalise merged rows
+  var normRows = function(rows) {
+    return rows.map(function(r) {
+      var n = {};
+      Object.keys(r).forEach(function(k){
+        n[k.trim()] = (typeof r[k] === 'string') ? r[k].trim() : r[k];
+      });
+      return n;
+    });
+  };
+  var pRows = normRows(merged.paramRows);
+  var rRows = normRows(merged.recRows);
+
+  var result = _processSheets(pRows, rRows);
+  UPLOADED_DATA = result;
+  _injectDashboardData(result);
+  _fullDashboardRebuild();
+
+  // Update status panel with a synthetic merged-file descriptor
+  var totalPRows = records.reduce(function(s,r){ return s + (r.paramRows ? r.paramRows.length : 0); }, 0);
+  var totalRRows = records.reduce(function(s,r){ return s + (r.recRows   ? r.recRows.length   : 0); }, 0);
+  _updateDataStatusPanel(result, {
+    name: records.length + ' merged file(s) — ' + pRows.length.toLocaleString() + ' unique param rows',
+    size: 0
+  }, totalPRows, totalRRows, records);
+}
+
+// ---- On page load: restore history from IndexedDB ----
+function _initHistoryOnLoad() {
+  _historyGetAll(function(records) {
+    _renderHistoryList(records);
+    if (records && records.length > 0) {
+      _rebuildFromHistory(records);
+      showToast('Historical data restored — ' + records.length + ' file(s) merged', 'info');
+    }
+  });
+}
+
+
   const file = event.target.files[0];
   if (!file) return;
   _doParseFile(file);
@@ -7445,7 +7723,7 @@ function _doParseFile(file) {
       }
 
       // Normalise all keys: trim whitespace
-      function normRows(rows) {
+      var normRows = function(rows) {
         return rows.map(function(r) {
           var n = {};
           Object.keys(r).forEach(function(k){
@@ -7453,7 +7731,7 @@ function _doParseFile(file) {
           });
           return n;
         });
-      }
+      };
       paramRows = normRows(paramRows);
       recRows   = normRows(recRows);
 
@@ -7469,33 +7747,70 @@ function _doParseFile(file) {
         return;
       }
 
-      // Process both sheets
-      var result = _processSheets(paramRows, recRows);
-      UPLOADED_DATA = result;
+      // Store this upload in IndexedDB, then merge all history and rebuild
+      var newRecord = {
+        fileName:   file.name,
+        uploadedAt: Date.now(),
+        paramRows:  paramRows,
+        recRows:    recRows
+      };
 
-      _injectDashboardData(result);
-      _fullDashboardRebuild();
+      _historyAddUpload(newRecord, function(newId) {
+        _historyGetAll(function(allRecords) {
+          // Merge all stored records (dedup by composite key)
+          var merged = _mergeRawRows(allRecords);
 
-      var totalRows = paramRows.length + recRows.length;
-      zone.innerHTML = \`
-        <div class="upload-icon" style="color:var(--hpe-green)"><i class="fas fa-check-circle"></i></div>
-        <div class="upload-title" style="color:var(--hpe-green)">Loaded: \${file.name}</div>
-        <div class="upload-subtitle">
-          Parameter sheet: \${paramRows.length.toLocaleString()} rows &nbsp;|&nbsp;
-          Recruiter sheet: \${recRows.length.toLocaleString()} rows &nbsp;|&nbsp;
-          Dashboard fully updated &mdash; drop another file to refresh
-        </div>
-      \`;
+          // Normalise merged rows
+          var normMerged = function(rows) {
+            return rows.map(function(r) {
+              var n = {};
+              Object.keys(r).forEach(function(k){
+                n[k.trim()] = (typeof r[k] === 'string') ? r[k].trim() : r[k];
+              });
+              return n;
+            });
+          };
+          var pRows = normMerged(merged.paramRows);
+          var rRows = normMerged(merged.recRows);
 
-      _updateDataStatusPanel(result, file, paramRows.length, recRows.length);
+          var result = _processSheets(pRows, rRows);
+          UPLOADED_DATA = result;
 
-      const now = new Date();
-      var rt = document.getElementById('refreshTime');
-      if (rt) rt.textContent = 'Last refreshed: ' + now.toLocaleTimeString();
-      var dlr = document.getElementById('dataLastRefresh');
-      if (dlr) dlr.textContent = now.toLocaleString();
+          _injectDashboardData(result);
+          _fullDashboardRebuild();
 
-      showToast('Dashboard updated — ' + paramRows.length.toLocaleString() + ' parameter rows, ' + recRows.length.toLocaleString() + ' recruiter rows', 'success');
+          // Compute totals across all stored uploads for display
+          var totalPRows = allRecords.reduce(function(s,r){ return s + (r.paramRows ? r.paramRows.length : 0); }, 0);
+          var totalRRows = allRecords.reduce(function(s,r){ return s + (r.recRows   ? r.recRows.length   : 0); }, 0);
+
+          var zoneLabel = allRecords.length > 1
+            ? file.name + ' + ' + (allRecords.length - 1) + ' earlier file(s)'
+            : file.name;
+          zone.innerHTML = \`
+            <div class="upload-icon" style="color:var(--hpe-green)"><i class="fas fa-check-circle"></i></div>
+            <div class="upload-title" style="color:var(--hpe-green)">Merged: \${zoneLabel}</div>
+            <div class="upload-subtitle">
+              \${pRows.length.toLocaleString()} unique param rows &nbsp;|&nbsp;
+              \${rRows.length.toLocaleString()} unique recruiter rows across \${allRecords.length} file(s) &mdash;
+              drop another file to add more data
+            </div>
+          \`;
+
+          _updateDataStatusPanel(result, file, totalPRows, totalRRows, allRecords);
+          _renderHistoryList(allRecords);
+
+          const now = new Date();
+          var rt = document.getElementById('refreshTime');
+          if (rt) rt.textContent = 'Last refreshed: ' + now.toLocaleTimeString();
+          var dlr = document.getElementById('dataLastRefresh');
+          if (dlr) dlr.textContent = now.toLocaleString();
+
+          var msg = allRecords.length > 1
+            ? 'Merged ' + allRecords.length + ' files — ' + pRows.length.toLocaleString() + ' unique param rows'
+            : 'Dashboard updated — ' + pRows.length.toLocaleString() + ' param rows, ' + rRows.length.toLocaleString() + ' recruiter rows';
+          showToast(msg, 'success');
+        });
+      });
 
     } catch(err) {
       _uploadError(zone, 'Parse error: ' + err.message);
@@ -8128,7 +8443,7 @@ function _updateHireTypeSection() {
   \`;
 }
 
-function _updateDataStatusPanel(result, file, paramRowCount, recRowCount) {
+function _updateDataStatusPanel(result, file, paramRowCount, recRowCount, historyRecords) {
   var panel = document.getElementById('dataStatusPanel');
   if (!panel) return;
   var months = result.month_stats.map(function(m){ return m.Month; }).join(', ');
@@ -8138,18 +8453,25 @@ function _updateDataStatusPanel(result, file, paramRowCount, recRowCount) {
   var expCol = getAccColor(expAcc), urCol = getAccColor(urAcc);
   var pRows = (paramRowCount != null ? paramRowCount : (result.rawParamRows != null ? result.rawParamRows : 0));
   var rRows = (recRowCount   != null ? recRowCount   : (result.rawRecRows   != null ? result.rawRecRows   : 0));
+
+  var histCount = historyRecords ? historyRecords.length : 0;
+  var histLine = histCount > 1
+    ? '<div class="validation-item"><span class="val-icon" style="color:var(--hpe-blue)">&#128190;</span>'
+      + '<div class="val-text"><strong>Historical merge:</strong> '
+      + histCount + ' files combined &nbsp;|&nbsp; '
+      + pRows.toLocaleString() + ' total param rows &nbsp;|&nbsp; '
+      + rRows.toLocaleString() + ' total recruiter rows (before dedup)</div></div>'
+    : '';
+
   panel.innerHTML = \`
     <div class="validation-item">
       <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
-      <div class="val-text"><strong>File loaded:</strong> \${file.name} (\${(file.size/1024).toFixed(1)} KB)</div>
+      <div class="val-text"><strong>Latest file:</strong> \${file.name}\${file.size ? ' (' + (file.size/1024).toFixed(1) + ' KB)' : ''}</div>
     </div>
+    \${histLine}
     <div class="validation-item">
       <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
-      <div class="val-text"><strong>Parameter audit count sheet:</strong> \${pRows.toLocaleString()} rows processed</div>
-    </div>
-    <div class="validation-item">
-      <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
-      <div class="val-text"><strong>Recruiter audit count sheet:</strong> \${rRows.toLocaleString()} rows processed</div>
+      <div class="val-text"><strong>Unique param rows after merge:</strong> \${result.rawParamRows != null ? result.rawParamRows.toLocaleString() : pRows.toLocaleString()}</div>
     </div>
     <div class="validation-item">
       <span class="val-icon" style="color:var(--hpe-green)">&#9989;</span>
@@ -11021,6 +11343,8 @@ document.addEventListener('DOMContentLoaded', function() {
   recomputeCAPAKPIs(DASHBOARD_DATA.capa_data);
   rebuildCAPAAIInsights(DASHBOARD_DATA.capa_data);
   // Charts for other tabs rendered when tab is first activated (need canvas visible)
+  // Restore any previously uploaded data from IndexedDB and merge into dashboard
+  _initHistoryOnLoad();
 });
 
 // ==================== SLA PERFORMANCE DASHBOARD ====================
