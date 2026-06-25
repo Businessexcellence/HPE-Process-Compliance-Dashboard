@@ -2075,24 +2075,24 @@ function getDashboardHTML(): string {
     <!-- Insights Panel -->
     <div class="ai-insights">
       <div class="ai-insights-header">
-        <div class="ai-insights-title">Audit Intelligence Snapshot — FY2026</div>
+        <div class="ai-insights-title" id="aiInsightsTitle">Audit Intelligence Snapshot — FY2026</div>
       </div>
-      <div class="insight-list">
+      <div class="insight-list" id="aiInsightsList">
         <div class="insight-item">
           <div class="insight-icon green"><i class="fas fa-trending-up"></i></div>
-          <div class="insight-text"><strong>Accuracy Dip in April — Action Required:</strong> Accuracy declined from 99.43% in February to 97.25% in April (−2.18%), marking the lowest point in FY2026. This downward trajectory from Feb → Mar (98.49%) → Apr (97.25%) signals a worsening trend. Root cause analysis and corrective action are recommended to reverse the decline before it breaches the 95% target.</div>
+          <div class="insight-text"><strong>Accuracy Dip in April — Action Required:</strong> Accuracy declined from 99.43% in February to 97.25% in April (−2.18%), marking the lowest point in FY2026. Root cause analysis and corrective action are recommended.</div>
         </div>
         <div class="insight-item alert">
           <div class="insight-icon alert"><i class="fas fa-exclamation-circle"></i></div>
-          <div class="insight-text"><strong>Target Start Date — Critical Anomaly:</strong> "Target start date" parameter has an alarming 89.83% failure rate (53 failures out of 59 audits). This single parameter accounts for 41.4% of all errors and requires immediate corrective action.</div>
+          <div class="insight-text"><strong>Target Start Date — Critical Anomaly:</strong> "Target start date" parameter has an alarming 89.83% failure rate (53 failures out of 59 audits). This single parameter accounts for 41.4% of all errors.</div>
         </div>
         <div class="insight-item warning">
           <div class="insight-icon warning"><i class="fas fa-user-times"></i></div>
-          <div class="insight-text"><strong>Recruiter Performance Gap:</strong> Recruiter Kusuma K has the lowest accuracy at 88.04% across 276 audits. Noor Mohammed M (90.91%) and Divya S (91.67%) also underperform significantly vs team average of ~98.5%. Targeted coaching recommended.</div>
+          <div class="insight-text"><strong>Recruiter Performance Gap:</strong> Recruiter Kusuma K has the lowest accuracy at 88.04% across 276 audits. Targeted coaching recommended.</div>
         </div>
         <div class="insight-item info">
           <div class="insight-icon info"><i class="fas fa-chart-bar"></i></div>
-          <div class="insight-text"><strong>Apr W3 Spike Detected:</strong> Week 3 of April saw accuracy drop to 93.62% — the lowest point in FY. "Target start date" errors (43 failures that week) drove this anomaly. The pattern resolved by W4 (97.87%), confirming it was an isolated event.</div>
+          <div class="insight-text"><strong>Upload data to refresh:</strong> Upload your Excel file in the Data Management tab to auto-generate insights from your latest data.</div>
         </div>
       </div>
     </div>
@@ -6480,6 +6480,207 @@ function syncImproveBtns() {
   });
 }
 
+// ==================== AUDIT INTELLIGENCE SNAPSHOT ====================
+// Generates data-driven insight bullets for the Executive Summary panel.
+// Called at end of updateExecutiveKPIs so it refreshes on every filter/hire-type/upload change.
+function _buildAuditIntelligenceSnapshot() {
+  var titleEl = document.getElementById('aiInsightsTitle');
+  var listEl  = document.getElementById('aiInsightsList');
+  if (!listEl) return;
+
+  var ov        = DASHBOARD_DATA.overall        || {};
+  var topErrs   = (DASHBOARD_DATA.top_errors    || []).filter(function(e){ return e.Opportunity_Fail > 0; });
+  var botRec    = DASHBOARD_DATA.recruiter_bottom || [];
+  var pmStats   = DASHBOARD_DATA.pm_stats        || [];
+  var stgStats  = DASHBOARD_DATA.stage_stats     || [];
+  var htExp     = DASHBOARD_DATA.hireTypeStats && DASHBOARD_DATA.hireTypeStats.HPE_Experienced;
+  var htUR      = DASHBOARD_DATA.hireTypeStats && DASHBOARD_DATA.hireTypeStats.HPE_UR;
+
+  var totalCount  = ov.Opportunity_Count || 0;
+  var overallAcc  = ov.Accuracy          || 0;
+  var totalFail   = ov.Opportunity_Fail  || 0;
+  var totalErrors = topErrs.reduce(function(s,e){ return s + e.Opportunity_Fail; }, 0);
+
+  // Use hire-type filtered month & week stats
+  var sortedMonths = [...getHireTypeMonthStats()].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  var srcWeeks     = [...getHireTypeWeekStats()].sort(function(a,b){
+    return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
+  });
+
+  var firstMon = sortedMonths[0];
+  var lastMon  = sortedMonths[sortedMonths.length - 1];
+  var worstMon = sortedMonths.length > 1 ? [...sortedMonths].sort(function(a,b){ return a.Accuracy - b.Accuracy; })[0] : null;
+  var bestMon  = sortedMonths.length > 1 ? [...sortedMonths].sort(function(a,b){ return b.Accuracy - a.Accuracy; })[0] : null;
+
+  var worstWeek = srcWeeks.length > 0 ? [...srcWeeks].sort(function(a,b){ return a.Accuracy - b.Accuracy; })[0] : null;
+  var bestWeek  = srcWeeks.length > 0 ? [...srcWeeks].sort(function(a,b){ return b.Accuracy - a.Accuracy; })[0] : null;
+
+  var topErr1   = topErrs[0] || null;
+  var topErr2   = topErrs[1] || null;
+  var worstRec  = botRec.length > 0 ? botRec[botRec.length - 1] : null;
+  var botRec3   = botRec.slice(0, 3).filter(function(r){ return r.Avg_Accuracy < 97; });
+  var worstStg  = stgStats.length > 0 ? [...stgStats].sort(function(a,b){ return a.Accuracy - b.Accuracy; })[0] : null;
+  var worstPM   = pmStats.length > 0  ? [...pmStats].sort(function(a,b){ return a.Avg_Accuracy - b.Avg_Accuracy; })[0] : null;
+
+  // Trend direction: compare last month vs first month
+  var trendUp   = lastMon && firstMon && lastMon.Accuracy > firstMon.Accuracy;
+  var trendFlat = lastMon && firstMon && lastMon.Accuracy === firstMon.Accuracy;
+  var fyRange   = (firstMon && lastMon && firstMon.Month !== lastMon.Month)
+    ? firstMon.Month + '\u2013' + lastMon.Month : (firstMon ? firstMon.Month : 'YTD');
+  var htLabel   = getHireTypeLabel();
+
+  // Update title
+  if (titleEl) {
+    titleEl.textContent = 'Audit Intelligence Snapshot'
+      + (ACTIVE_HIRE_TYPE !== 'all' ? ' \u2014 ' + htLabel : ' \u2014 FY YTD')
+      + (fyRange ? ' (' + fyRange + ')' : '');
+  }
+
+  // Helper to build one insight item HTML
+  function insightItem(type, icon, boldText, bodyText) {
+    // type: 'green'|'alert'|'warning'|'info'
+    var iconMap = { green:'trending-up', alert:'exclamation-circle', warning:'user-times', info:'chart-bar', blue:'info-circle', orange:'fire' };
+    var ic = iconMap[type] || 'info-circle';
+    return '<div class="insight-item ' + (type !== 'green' ? type : '') + '">'
+      + '<div class="insight-icon ' + type + '"><i class="fas fa-' + ic + '"></i></div>'
+      + '<div class="insight-text"><strong>' + boldText + '</strong> ' + bodyText + '</div>'
+      + '</div>';
+  }
+
+  var items = [];
+
+  // ── 1. Overall accuracy status ──
+  var aboveTarget = +(overallAcc - 95).toFixed(2);
+  if (aboveTarget >= 0) {
+    items.push(insightItem('green', 'trending-up',
+      'Overall Accuracy ' + overallAcc + '% \u2014 ' + aboveTarget + 'pp Above Target:',
+      totalCount.toLocaleString() + ' audits processed' + (fyRange ? ' (' + fyRange + ')' : '') + '.'
+      + (totalFail > 0 ? ' ' + totalFail + ' total errors recorded across all parameters.' : ' Zero errors recorded — perfect compliance.')
+    ));
+  } else {
+    items.push(insightItem('alert', 'exclamation-circle',
+      'Overall Accuracy ' + overallAcc + '% \u2014 ' + Math.abs(aboveTarget) + 'pp Below Target:',
+      totalCount.toLocaleString() + ' audits. Immediate corrective action required to reach 95% target.'
+    ));
+  }
+
+  // ── 2. Month trajectory ──
+  if (sortedMonths.length >= 2 && lastMon && firstMon) {
+    var momDiff = +(lastMon.Accuracy - firstMon.Accuracy).toFixed(2);
+    if (!trendUp && !trendFlat && worstMon) {
+      // Declining — show dip detail
+      items.push(insightItem('warning', 'user-times',
+        'Accuracy Dip in ' + lastMon.Month + ' \u2014 Action Required:',
+        'Accuracy moved from ' + firstMon.Accuracy + '% in ' + firstMon.Month
+        + ' to ' + lastMon.Accuracy + '% in ' + lastMon.Month
+        + ' (' + (momDiff >= 0 ? '+' : '') + momDiff + '%).'
+        + (worstMon && worstMon.Accuracy === lastMon.Accuracy
+          ? ' This is the lowest month in the period.'
+          : ' Lowest point: ' + worstMon.Month + ' at ' + worstMon.Accuracy + '%.')
+        + ' Root cause analysis recommended.'
+      ));
+    } else {
+      // Improving or flat
+      items.push(insightItem('green', 'trending-up',
+        (trendFlat ? 'Accuracy Stable' : 'Positive Accuracy Trend') + ' (' + firstMon.Month + '\u2192' + lastMon.Month + '):',
+        firstMon.Accuracy + '% \u2192 ' + lastMon.Accuracy + '% ('
+        + (momDiff >= 0 ? '+' : '') + momDiff + '%).'
+        + (bestMon ? ' Best month: ' + bestMon.Month + ' at ' + bestMon.Accuracy + '%.' : '')
+      ));
+    }
+  }
+
+  // ── 3. Top error parameter ──
+  if (topErr1) {
+    var errShare = totalErrors > 0 ? ((topErr1.Opportunity_Fail / totalErrors) * 100).toFixed(1) : '0';
+    var errRate  = topErr1.Opportunity_Count > 0
+      ? ((topErr1.Opportunity_Fail / topErr1.Opportunity_Count) * 100).toFixed(1) : '0';
+    items.push(insightItem('alert', 'exclamation-circle',
+      '"' + topErr1.Parameter + '" \u2014 Critical Error Parameter:',
+      topErr1.Opportunity_Fail + ' failures'
+      + (topErr1.Opportunity_Count > 0 ? ' (' + errRate + '% error rate on ' + topErr1.Opportunity_Count + ' audits)' : '')
+      + '. Accounts for ' + errShare + '% of all errors.'
+      + (topErr2 ? ' 2nd highest: "' + topErr2.Parameter + '" with ' + topErr2.Opportunity_Fail + ' failures.' : '')
+      + ' Immediate validation fix recommended.'
+    ));
+  }
+
+  // ── 4. Worst week spike ──
+  if (worstWeek && worstWeek.Accuracy < 97) {
+    items.push(insightItem('warning', 'fire',
+      worstWeek.Week_Label + ' Accuracy Spike Detected:',
+      'Accuracy dropped to ' + worstWeek.Accuracy + '% \u2014 the lowest week in the selected period.'
+      + ' ' + worstWeek.Opportunity_Fail + ' errors across ' + worstWeek.Opportunity_Count + ' audits.'
+      + (bestWeek && bestWeek.Week_Label !== worstWeek.Week_Label
+        ? ' Best week: ' + bestWeek.Week_Label + ' at ' + bestWeek.Accuracy + '%.' : '')
+    ));
+  }
+
+  // ── 5. Recruiter performance gap ──
+  if (botRec3.length > 0) {
+    var names = botRec3.map(function(r){ return r.Recruiter + ' (' + r.Avg_Accuracy + '%)'; }).join(', ');
+    var avgTeam = totalCount > 0 ? overallAcc : 0;
+    items.push(insightItem('warning', 'user-times',
+      'Recruiter Performance Gap:',
+      botRec3.length + ' recruiter' + (botRec3.length > 1 ? 's' : '') + ' significantly below team average of ' + avgTeam + '%: '
+      + names + '.'
+      + (botRec3[0].Audit_Count ? ' ' + botRec3[0].Recruiter + ' has ' + (botRec3[0].Audit_Count||0).toLocaleString() + ' audits at ' + botRec3[0].Avg_Accuracy + '%.' : '')
+      + ' Targeted coaching recommended.'
+    ));
+  }
+
+  // ── 6. Stage accuracy gap ──
+  if (stgStats.length >= 2 && worstStg) {
+    var bestStg2 = [...stgStats].sort(function(a,b){ return b.Accuracy - a.Accuracy; })[0];
+    var stgGap   = +(bestStg2.Accuracy - worstStg.Accuracy).toFixed(2);
+    if (stgGap > 0.5) {
+      items.push(insightItem('info', 'chart-bar',
+        'Stage Accuracy Gap (' + stgGap + 'pp):',
+        worstStg.Stage + ' at ' + worstStg.Accuracy + '% (' + worstStg.Opportunity_Count.toLocaleString() + ' audits, '
+        + worstStg.Opportunity_Fail + ' errors) vs '
+        + bestStg2.Stage + ' at ' + bestStg2.Accuracy + '%.'
+        + ' Focus process improvements on ' + worstStg.Stage + '.'
+      ));
+    }
+  }
+
+  // ── 7. Hire type gap ──
+  if (htExp && htUR) {
+    var htGap2 = +(Math.abs(htExp.totals.accuracy - htUR.totals.accuracy)).toFixed(2);
+    if (htGap2 > 0.3) {
+      var lower2  = htExp.totals.accuracy < htUR.totals.accuracy ? 'HPE Experienced' : 'HPE UR';
+      var higher2 = htExp.totals.accuracy > htUR.totals.accuracy ? 'HPE Experienced' : 'HPE UR';
+      var lowerA  = Math.min(htExp.totals.accuracy, htUR.totals.accuracy);
+      var higherA = Math.max(htExp.totals.accuracy, htUR.totals.accuracy);
+      items.push(insightItem('info', 'info-circle',
+        'Hire Type Gap \u2014 ' + htGap2 + 'pp Difference:',
+        higher2 + ' leads at ' + higherA + '% vs ' + lower2 + ' at ' + lowerA + '%.'
+        + (htGap2 > 1 ? ' Targeted process alignment for ' + lower2 + ' is recommended.' : '')
+      ));
+    }
+  }
+
+  // ── 8. PM team ──
+  if (worstPM && worstPM.Avg_Accuracy < 99) {
+    items.push(insightItem('info', 'chart-bar',
+      worstPM.PM + ' PM Team \u2014 Below Average:',
+      worstPM.Avg_Accuracy + '% accuracy'
+      + (worstPM.Audit_Count ? ' across ' + worstPM.Audit_Count.toLocaleString() + ' audits' : '')
+      + '. Consider a team process review to close the gap.'
+    ));
+  }
+
+  // Fallback if data is empty
+  if (items.length === 0) {
+    items.push(insightItem('info', 'info-circle',
+      'No data loaded yet.',
+      'Upload your Excel audit file in the Data Management tab to auto-generate insights.'
+    ));
+  }
+
+  listEl.innerHTML = items.join('');
+}
+
 // ---- UPDATE EXECUTIVE KPI CARDS ----
 function updateExecutiveKPIs() {
   var weeks  = getFilteredWeeks();
@@ -6640,6 +6841,9 @@ function updateExecutiveKPIs() {
   // Section subtitle
   var subEl = document.querySelector('#tab-executive .section-subtitle');
   if (subEl) subEl.textContent = periodLabel + ' | HPE Talent Acquisition Audit Performance Overview';
+
+  // Rebuild the Audit Intelligence Snapshot panel from live data
+  _buildAuditIntelligenceSnapshot();
 }
 
 function getPeriodLabel() {
