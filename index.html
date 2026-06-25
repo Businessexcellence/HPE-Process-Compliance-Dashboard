@@ -2174,18 +2174,28 @@
         </div>
         <div class="section-subtitle">Deep-dive into accuracy patterns across time periods, stages, and criticality</div>
       </div>
-      <div class="period-filter" id="trendsPeriodFilter">
-        <button class="filter-btn active" id="trendsAllBtn" onclick="applyGlobalFilter('fy','all',this,'trends')">All Months</button>
-        <select class="filter-select" id="trendsMonthSelect" onchange="applyGlobalFilter('month',this.value,null,'trends')">
-          <option value="all">Month</option>
-          <option value="Jan">January</option>
-          <option value="Feb">February</option>
-          <option value="Mar">March</option>
-          <option value="Apr">April</option>
-        </select>
-        <select class="filter-select" id="trendsWeekSelect" onchange="applyGlobalFilter('week',this.value,null,'trends')">
-          <option value="all">Week</option>
-        </select>
+      <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+        <!-- Hire-type filter — local to this tab -->
+        <div style="display:flex;align-items:center;gap:6px">
+          <span style="font-size:11px;font-weight:600;color:var(--text-muted);white-space:nowrap"><i class="fas fa-users" style="margin-right:3px"></i>Hire Type:</span>
+          <button id="trendHtAll" class="filter-btn active" style="font-size:12px;padding:5px 13px" onclick="applyTrendsHireType('all',this)">All</button>
+          <button id="trendHtExp" class="filter-btn" style="font-size:12px;padding:5px 13px;background:#e8f0fb;color:#0D5DBF;border-color:#0D5DBF" onclick="applyTrendsHireType('HPE_Experienced',this)">Experienced</button>
+          <button id="trendHtUR"  class="filter-btn" style="font-size:12px;padding:5px 13px;background:#fff3e6;color:#FF8300;border-color:#FF8300"  onclick="applyTrendsHireType('HPE_UR',this)">UR</button>
+        </div>
+        <!-- Period filter -->
+        <div class="period-filter" id="trendsPeriodFilter">
+          <button class="filter-btn active" id="trendsAllBtn" onclick="applyGlobalFilter('fy','all',this,'trends')">All Months</button>
+          <select class="filter-select" id="trendsMonthSelect" onchange="applyGlobalFilter('month',this.value,null,'trends')">
+            <option value="all">Month</option>
+            <option value="Jan">January</option>
+            <option value="Feb">February</option>
+            <option value="Mar">March</option>
+            <option value="Apr">April</option>
+          </select>
+          <select class="filter-select" id="trendsWeekSelect" onchange="applyGlobalFilter('week',this.value,null,'trends')">
+            <option value="all">Week</option>
+          </select>
+        </div>
       </div>
     </div>
 
@@ -2250,8 +2260,12 @@
 
     <!-- Drill-down table -->
     <div class="card card-full">
-      <div class="card-title"><i class="fas fa-search-plus"></i> Weekly Drill-Down Table</div>
-      <div class="card-subtitle">Click any row to see parameter breakdown</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px">
+        <div>
+          <div class="card-title"><i class="fas fa-search-plus"></i> Weekly Drill-Down Table</div>
+          <div class="card-subtitle">Click any row to see parameter breakdown — <span id="trendsDrillHtLabel" style="font-weight:600;color:var(--hpe-green)">All Hire Types</span></div>
+        </div>
+      </div>
       <div class="table-container">
         <table>
           <thead>
@@ -4998,10 +5012,10 @@ function switchMonthTab(tab, btn) {
 function initTrendCharts() {
   // Filter-aware charts: monthly trend + weekly error + weekly drill table
   // (updateTrendCharts checks _trendDone so we bypass it here by calling directly)
-  var months = getFilteredMonths().sort(function(a,b){ return a.Month_Number - b.Month_Number; });
-  var weeks  = getFilteredWeeks();
+  // Populate the Trends week dropdown from TRENDS_HIRE_TYPE data
+  populateTrendsWeekOptions();
 
-  // Monthly trend line — delegate to updateTrendCharts for unified dual-series logic
+  // Monthly trend line, weekly error chart, drill table — all via updateTrendCharts
   updateTrendCharts();
   
   // Heatmap
@@ -5052,42 +5066,15 @@ function initTrendCharts() {
     `).join('');
   }
   
-  // Critical vs Non-Critical bar chart — delegated to reusable helper (also called from updateTrendCharts)
-  rebuildCriticalBarChart();
-  
-  // Weekly error chart (filter-aware — uses weeks from getFilteredWeeks())
-  destroyChart('weeklyErrorChart');
-  const weCtx = document.getElementById('weeklyErrorChart').getContext('2d');
-  charts['weeklyErrorChart'] = new Chart(weCtx, {
-    type: 'bar',
-    data: {
-      labels: weeks.map(w => w.Week_Label),
-      datasets: [{
-        label: 'Errors',
-        data: weeks.map(w => w.Opportunity_Fail),
-        backgroundColor: weeks.map(w => w.Opportunity_Fail > 20 ? '#C54E4B' : w.Opportunity_Fail > 10 ? '#FF8300' : '#01A982'),
-        borderRadius: 4
-      }]
-    },
-    options: {
-      responsive: true, maintainAspectRatio: false,
-      plugins: { legend: {display:false} },
-      scales: {
-        y: { ticks: {font:{size:11}}, title: {display:true, text:'Error Count', font:{size:11}} },
-        x: { ticks: {font:{size:10}, maxRotation: 45}, grid: {display:false} }
-      }
-    }
-  });
-  
-  // Weekly drill table
-  buildWeeklyTable();
+  // Critical vs Non-Critical bar chart, Weekly Error chart, and Drill table
+  // are all handled by updateTrendCharts() called above — no need to duplicate here.
 }
 
 function buildHeatmap() {
   const container = document.getElementById('heatmapContainer');
   if (!container) return;
-  // Use hire-type-aware week source so heatmap reflects current ACTIVE_HIRE_TYPE
-  const weekData = getHireTypeWeekStats();
+  // Use trends-tab-local hire type so heatmap reflects the Trends tab filter
+  const weekData = getTrendsWeekStats();
   // Derive the month columns that are present in the current data
   const allMonths = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
   const presentMonths = allMonths.filter(function(m){ return weekData.some(function(w){ return w.Month === m; }); });
@@ -5116,9 +5103,11 @@ function buildHeatmap() {
     });
   }
   html += '</div>';
-  // Add hire type label if filtered
-  if (ACTIVE_HIRE_TYPE !== 'all') {
-    html += '<div style="margin-top:8px;font-size:11px;color:var(--text-muted);text-align:right"><i class="fas fa-filter"></i> Showing: ' + getHireTypeLabel() + '</div>';
+  // Show active hire-type label beneath heatmap when filtered
+  if (TRENDS_HIRE_TYPE !== 'all') {
+    var htColor = TRENDS_HIRE_TYPE === 'HPE_Experienced' ? '#0D5DBF' : '#FF8300';
+    html += '<div style="margin-top:8px;font-size:11px;font-weight:600;color:' + htColor + ';text-align:right">'
+      + '<i class="fas fa-filter" style="margin-right:4px"></i>Showing: ' + getTrendsHireTypeLabel() + '</div>';
   }
   container.innerHTML = html;
 }
@@ -5146,15 +5135,22 @@ const WEEKLY_PARAM_ERRORS = {
 function buildWeeklyTable() {
   const tbody = document.getElementById('weeklyDrillTable');
   if (!tbody) return;
-  // Use filtered weeks so filter changes are reflected in the drill table too
-  const weeks = getFilteredWeeks();
-  // Use hire-type-aware source for WoW baseline comparisons
-  const allSorted = [...getHireTypeWeekStats()].sort(function(a,b){
+  // Update the hire-type label shown in the drill table subtitle
+  var drillLbl = document.getElementById('trendsDrillHtLabel');
+  if (drillLbl) {
+    drillLbl.textContent = getTrendsHireTypeLabel();
+    drillLbl.style.color = TRENDS_HIRE_TYPE === 'HPE_Experienced' ? '#0D5DBF'
+                         : TRENDS_HIRE_TYPE === 'HPE_UR'          ? '#FF8300'
+                         : 'var(--hpe-green)';
+  }
+  // Use Trends-tab-local filtered weeks for rows
+  const weeks = getTrendsFilteredWeeks();
+  // Use Trends-tab-local full sorted list for WoW baseline (cross-filter accurate)
+  const allSorted = [...getTrendsWeekStats()].sort(function(a,b){
     return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
   });
-  let prevAcc = null;
   tbody.innerHTML = weeks.map(function(w) {
-    // Look up previous week from the full sorted list for accurate cross-filter WoW
+    // Look up previous week from the full sorted list for accurate WoW
     var wIdx = allSorted.findIndex(function(x){ return x.Week_Label === w.Week_Label; });
     var prevW = wIdx > 0 ? allSorted[wIdx - 1] : null;
     const wow = prevW !== null ? (w.Accuracy - prevW.Accuracy).toFixed(2) : null;
@@ -5163,7 +5159,6 @@ function buildWeeklyTable() {
         : parseFloat(wow) < 0 ? '<span style="color:var(--hpe-red);font-weight:600">▼ ' + wow + '%</span>'
         : '<span style="color:var(--text-muted)">—</span>'
       : '<span style="color:var(--text-muted)">—</span>';
-    prevAcc = w.Accuracy;
     const hasErrors = w.Opportunity_Fail > 0;
     const clickHint = hasErrors ? ' <span style="font-size:10px;color:var(--hpe-green)">🔍</span>' : '';
     const rowClass = hasErrors ? 'drill-row drill-row-clickable' : 'drill-row';
@@ -6380,7 +6375,106 @@ function getHireTypeLabel() {
   return 'All Hire Types';
 }
 
-// Apply hire type filter and refresh all charts
+// ── Trends-tab-local hire type filter ──────────────────────────────────────
+// Independent of the global ACTIVE_HIRE_TYPE so toggling it does NOT
+// affect the Executive, Improvement, or Insights tabs.
+var TRENDS_HIRE_TYPE = 'all'; // 'all' | 'HPE_Experienced' | 'HPE_UR'
+
+function getTrendsMonthStats() {
+  if (TRENDS_HIRE_TYPE === 'HPE_Experienced') return DASHBOARD_DATA.hireTypeStats.HPE_Experienced.month_stats;
+  if (TRENDS_HIRE_TYPE === 'HPE_UR')          return DASHBOARD_DATA.hireTypeStats.HPE_UR.month_stats;
+  return DASHBOARD_DATA.month_stats;
+}
+function getTrendsWeekStats() {
+  if (TRENDS_HIRE_TYPE === 'HPE_Experienced') return DASHBOARD_DATA.hireTypeStats.HPE_Experienced.week_stats;
+  if (TRENDS_HIRE_TYPE === 'HPE_UR')          return DASHBOARD_DATA.hireTypeStats.HPE_UR.week_stats;
+  return DASHBOARD_DATA.week_stats;
+}
+function getTrendsHireTypeLabel() {
+  if (TRENDS_HIRE_TYPE === 'HPE_Experienced') return 'HPE Experienced';
+  if (TRENDS_HIRE_TYPE === 'HPE_UR')          return 'HPE UR';
+  return 'All Hire Types';
+}
+
+// Helper: get filtered weeks using TRENDS_HIRE_TYPE + current period filter
+function getTrendsFilteredWeeks() {
+  var all = [...getTrendsWeekStats()].sort(function(a,b){
+    return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
+  });
+  if (ACTIVE_FILTER.mode === 'fy' || ACTIVE_FILTER.value === 'all') return all;
+  if (ACTIVE_FILTER.mode === 'month') return all.filter(function(w){ return w.Month === ACTIVE_FILTER.value; });
+  if (ACTIVE_FILTER.mode === 'week')  return all.filter(function(w){ return w.Week_Label === ACTIVE_FILTER.value; });
+  return all;
+}
+// Helper: get filtered months using TRENDS_HIRE_TYPE + current period filter
+function getTrendsFilteredMonths() {
+  var all = [...getTrendsMonthStats()].sort(function(a,b){ return a.Month_Number - b.Month_Number; });
+  if (ACTIVE_FILTER.mode === 'fy' || ACTIVE_FILTER.value === 'all') return all;
+  if (ACTIVE_FILTER.mode === 'month') return all.filter(function(m){ return m.Month === ACTIVE_FILTER.value; });
+  if (ACTIVE_FILTER.mode === 'week') {
+    var ws2 = getTrendsWeekStats();
+    var wf  = ws2.find(function(x){ return x.Week_Label === ACTIVE_FILTER.value; });
+    return wf ? all.filter(function(m){ return m.Month === wf.Month; }) : all;
+  }
+  return all;
+}
+
+// Apply trends-tab-local hire type and rebuild all Trends tab visuals
+function applyTrendsHireType(ht, btn) {
+  TRENDS_HIRE_TYPE = ht;
+  // Update button active states (Hire Type pill row in Trends tab)
+  ['trendHtAll','trendHtExp','trendHtUR'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    // Reset to neutral style
+    el.classList.remove('active');
+    el.style.background = '';
+    el.style.color = '';
+    el.style.borderColor = '';
+  });
+  if (btn) {
+    btn.classList.add('active');
+    if (ht === 'HPE_Experienced') {
+      btn.style.background = '#0D5DBF';
+      btn.style.color      = 'white';
+      btn.style.borderColor= '#0D5DBF';
+    } else if (ht === 'HPE_UR') {
+      btn.style.background = '#FF8300';
+      btn.style.color      = 'white';
+      btn.style.borderColor= '#FF8300';
+    } else {
+      // All — falls back to default .filter-btn.active CSS
+      btn.style.background = '';
+      btn.style.color      = '';
+      btn.style.borderColor= '';
+    }
+  }
+  // Repopulate the Trends week dropdown with hire-type-correct week labels
+  populateTrendsWeekOptions();
+  // Rebuild all Trends tab visualisations
+  if (_trendDone) {
+    updateTrendCharts();
+    buildHeatmap();
+    buildWeeklyTable();
+  }
+}
+
+// Populate the trendsWeekSelect dropdown using TRENDS_HIRE_TYPE data
+function populateTrendsWeekOptions() {
+  var sel = document.getElementById('trendsWeekSelect');
+  if (!sel) return;
+  var weeks = [...getTrendsWeekStats()].sort(function(a,b){
+    return a.Month_Number !== b.Month_Number ? a.Month_Number - b.Month_Number : a.Week - b.Week;
+  });
+  var cur = sel.value;
+  var html = '<option value="all">Week</option>';
+  weeks.forEach(function(w){
+    html += '<option value="' + w.Week_Label + '"' + (w.Week_Label === cur ? ' selected' : '') + '>' + w.Week_Label + '</option>';
+  });
+  sel.innerHTML = html;
+}
+
+// Apply global hire type filter and refresh all charts across all tabs
 function applyHireTypeFilter(ht) {
   ACTIVE_HIRE_TYPE = ht;
   // Update button active states
@@ -6393,7 +6487,7 @@ function applyHireTypeFilter(ht) {
   if (activeEl) activeEl.classList.add('active');
   // Repopulate week dropdowns with hire-type-specific week labels
   populateWeekOptions('execWeekSelect');
-  populateWeekOptions('trendsWeekSelect');
+  populateTrendsWeekOptions();              // Uses TRENDS_HIRE_TYPE, independent of global HT
   populateWeekOptions('improveWeekSelect');
   // Rebuild all visualisations
   updateExecutiveKPIs();
@@ -7079,17 +7173,21 @@ function updateExecutiveCharts() {
 
 // ---- UPDATE ACCURACY TRENDS CHARTS ----
 function updateTrendCharts() {
-  // Called both from initTrendCharts (first build) and from filter changes
-  var weeks  = getFilteredWeeks();
-  var months = getFilteredMonths();
+  // Called from initTrendCharts, filter changes, and applyTrendsHireType
+  // All data sourced from TRENDS_HIRE_TYPE-aware helpers so this tab
+  // is independent of the global ACTIVE_HIRE_TYPE.
+  var weeks  = getTrendsFilteredWeeks();
+  var months = getTrendsFilteredMonths();
 
-  // Monthly trend chart — dual-series when "All" hire type, single-series when filtered
+  // ── Monthly trend chart ───────────────────────────────────────────────
+  // When TRENDS_HIRE_TYPE === 'all': show Experienced + UR as separate lines
+  // When filtered to one type: show single line for that type
   destroyChart('monthlyTrendChart');
   var mtEl = document.getElementById('monthlyTrendChart');
   if (mtEl && months.length > 0) {
     var mtDatasets;
-    if (ACTIVE_HIRE_TYPE === 'all') {
-      // Show Experienced + UR as separate lines
+    if (TRENDS_HIRE_TYPE === 'all') {
+      // Dual-series: Experienced (blue) + UR (orange) + Combined error rate bar + target
       var expMonths = [...DASHBOARD_DATA.hireTypeStats.HPE_Experienced.month_stats]
         .sort(function(a,b){return a.Month_Number-b.Month_Number;})
         .filter(function(m){ return months.some(function(fm){return fm.Month===m.Month;}); });
@@ -7110,20 +7208,22 @@ function updateTrendCharts() {
           borderColor:'#94a3b8', borderDash:[8,4], borderWidth:1.5, pointRadius:0, fill:false, yAxisID:'y', order:0 }
       ];
     } else {
+      // Single-series: one hire type line
+      var htColor = TRENDS_HIRE_TYPE === 'HPE_Experienced' ? '#0D5DBF' : '#FF8300';
+      var htBg    = TRENDS_HIRE_TYPE === 'HPE_Experienced' ? 'rgba(13,93,191,0.12)' : 'rgba(255,131,0,0.12)';
       mtDatasets = [
-        { label: getHireTypeLabel() + ' Accuracy %', data: months.map(function(m){return m.Accuracy;}),
-          borderColor: ACTIVE_HIRE_TYPE==='HPE_Experienced' ? '#0D5DBF' : '#FF8300',
-          backgroundColor: ACTIVE_HIRE_TYPE==='HPE_Experienced' ? 'rgba(13,93,191,0.12)' : 'rgba(255,131,0,0.12)',
-          tension:0.4, fill:true,
-          pointRadius:6, pointBackgroundColor: ACTIVE_HIRE_TYPE==='HPE_Experienced' ? '#0D5DBF' : '#FF8300',
-          pointBorderColor:'white', pointBorderWidth:2, yAxisID:'y', order:1 },
+        { label: getTrendsHireTypeLabel() + ' Accuracy %', data: months.map(function(m){return m.Accuracy;}),
+          borderColor: htColor, backgroundColor: htBg, tension:0.4, fill:true,
+          pointRadius:6, pointBackgroundColor: htColor, pointBorderColor:'white', pointBorderWidth:2, yAxisID:'y', order:1 },
         { label: 'Error Rate %', data: months.map(function(m){return m.Error_Rate;}),
           borderColor:'#C54E4B', backgroundColor:'rgba(197,78,75,0.08)', tension:0.4,
           type:'bar', yAxisID:'y2', order:2 },
         { label: '95% Target', data: months.map(function(){return 95;}),
-          borderColor:'#FF8300', borderDash:[8,4], borderWidth:2, pointRadius:0, fill:false, yAxisID:'y', order:0 }
+          borderColor:'#94a3b8', borderDash:[8,4], borderWidth:2, pointRadius:0, fill:false, yAxisID:'y', order:0 }
       ];
     }
+    var allAccVals = months.map(function(m){return m.Accuracy;});
+    var yMin = Math.max(85, Math.floor(Math.min.apply(null, allAccVals)) - 2);
     charts['monthlyTrendChart'] = new Chart(mtEl.getContext('2d'), {
       type: 'line',
       data: {
@@ -7135,15 +7235,15 @@ function updateTrendCharts() {
         interaction: {mode:'index', intersect:false},
         plugins: { legend: {position:'top', labels:{font:{size:12},padding:16,boxWidth:14}} },
         scales: {
-          y:  { min: 88, max: 100, position:'left', ticks:{callback:function(v){return v+'%';}, font:{size:11}} },
-          y2: { min: 0,  max: 5,   position:'right', ticks:{callback:function(v){return v+'%';}, font:{size:11}}, grid:{display:false} },
+          y:  { min: yMin, max: 100, position:'left',  ticks:{callback:function(v){return v+'%';}, font:{size:11}} },
+          y2: { min: 0,    max: 5,   position:'right', ticks:{callback:function(v){return v+'%';}, font:{size:11}}, grid:{display:false} },
           x:  { ticks:{font:{size:12}}, grid:{display:false} }
         }
       }
     });
   }
 
-  // Weekly error chart
+  // ── Weekly Error Volume chart ─────────────────────────────────────────
   destroyChart('weeklyErrorChart');
   var weEl = document.getElementById('weeklyErrorChart');
   if (weEl && weeks.length > 0) {
@@ -7157,7 +7257,12 @@ function updateTrendCharts() {
       },
       options: {
         responsive: true, maintainAspectRatio: false,
-        plugins: {legend:{display:false}},
+        plugins: { legend:{display:false},
+          title: TRENDS_HIRE_TYPE !== 'all' ? {
+            display: true, text: getTrendsHireTypeLabel(),
+            font:{size:11}, color: TRENDS_HIRE_TYPE === 'HPE_Experienced' ? '#0D5DBF' : '#FF8300', padding:{bottom:4}
+          } : {display:false}
+        },
         scales: {
           y: { ticks:{font:{size:11}}, title:{display:true, text:'Error Count', font:{size:11}} },
           x: { ticks:{font:{size:10}, maxRotation:45}, grid:{display:false} }
@@ -7166,9 +7271,8 @@ function updateTrendCharts() {
     });
   }
 
-  // Rebuild drill table with filter
+  // ── Drill table + Critical bar chart ─────────────────────────────────
   buildWeeklyTable();
-  // Rebuild critical bar chart with current filter delta
   rebuildCriticalBarChart();
 }
 
@@ -7178,7 +7282,8 @@ function rebuildCriticalBarChart() {
   var cbEl = document.getElementById('criticalBarChart');
   if (!cbEl) return;
   var fyBaseline2 = 98.50;
-  var fw = getFilteredWeeks();
+  // Use trends-local filtered weeks for delta computation
+  var fw = getTrendsFilteredWeeks();
   var tc = fw.reduce(function(s,w){ return s + w.Opportunity_Count; }, 0);
   var tp = fw.reduce(function(s,w){ return s + w.Opportunity_Pass;  }, 0);
   var filtAcc = tc > 0 ? +((tp / tc) * 100).toFixed(2) : fyBaseline2;
@@ -7892,7 +7997,7 @@ function _injectDashboardData(result) {
 function _fullDashboardRebuild() {
   // Reset init guards and hire type filter so all tabs fully re-render
   _execDone = false; _trendDone = false; _improveDone = false; _insightsDone = false; _perfDone = false;
-  // Reset hire type toggle to All on new upload
+  // Reset global hire type toggle to All on new upload
   ACTIVE_HIRE_TYPE = 'all';
   ['htBtnAll','htBtnExp','htBtnUR'].forEach(function(id){
     var el = document.getElementById(id);
@@ -7900,6 +8005,16 @@ function _fullDashboardRebuild() {
   });
   var htAll = document.getElementById('htBtnAll');
   if (htAll) htAll.classList.add('active');
+  // Reset Trends-tab-local hire type to All on new upload
+  TRENDS_HIRE_TYPE = 'all';
+  ['trendHtAll','trendHtExp','trendHtUR'].forEach(function(id){
+    var el = document.getElementById(id);
+    if (!el) return;
+    el.classList.remove('active');
+    el.style.background = ''; el.style.color = ''; el.style.borderColor = '';
+  });
+  var tAll = document.getElementById('trendHtAll');
+  if (tAll) tAll.classList.add('active');
 
   // Rebuild Executive tab immediately
   updateExecutiveKPIs();
